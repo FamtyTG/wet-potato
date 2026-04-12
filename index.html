@@ -1,409 +1,599 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Wet Potato</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0a0a0c;
-            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #a855f7 100%);
-            --death-color: #ff2e2e;
-            --potato-shadow: 0 0 50px rgba(168, 85, 247, 0.3);
+            --bg: #111111;
+            --surface: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #8b5cf6;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --text: #ffffff;
+            --text-muted: #a3a3a3;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            height: 100vh;
-            width: 100vw;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background-color 0.3s ease;
+            width: 100vw;
+            height: 100vh;
+            touch-action: none; /* Предотвращает скролл и pull-to-refresh */
         }
 
         #app {
+            position: relative;
             width: 100%;
             height: 100%;
-            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* The Wet Potato */
-        .potato-container {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-            z-index: 10;
-        }
-
-        .potato {
-            width: 100%;
-            height: 100%;
-            background: var(--accent-gradient);
-            box-shadow: var(--potato-shadow);
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            animation: 
-                morph 8s ease-in-out infinite alternate,
-                pulse var(--pulse-speed, 2s) ease-in-out infinite;
-            transition: border-radius 1s ease-in-out;
-        }
-
-        @keyframes morph {
-            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        /* Screens */
         .screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            pointer-events: none;
+            justify-content: center;
             opacity: 0;
-            transition: opacity 0.5s ease;
-            text-align: center;
-            padding: 20px;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 24px;
         }
-
         .screen.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            letter-spacing: -2px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* Typography */
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            text-align: center;
         }
 
-        .status {
-            position: absolute;
-            bottom: 40px;
-            opacity: 0.5;
-            font-size: 0.9rem;
+        /* Buttons */
+        button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 100px;
+            cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 2px;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+        button:active {
+            background: rgba(255,255,255,0.15);
+            transform: scale(0.95);
         }
 
-        /* "YOU DIED" screen */
-        #death-screen {
-            background-color: rgba(255, 0, 0, 0.1);
-            z-index: 100;
+        /* Lobby */
+        .players-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+        .player-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        .player-card.you {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.1);
+        }
+        .player-card .avatar {
+            font-size: 2rem;
+            background: rgba(255,255,255,0.1);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+        }
+        .player-card .name { font-weight: 600; font-size: 0.9rem; }
+
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1); }
         }
 
-        #death-screen h1 {
-            color: var(--death-color);
-            -webkit-text-fill-color: var(--death-color);
-            font-size: 4rem;
-            animation: shake 0.5s infinite;
+        /* Game Elements */
+        #bot-turn-indicator {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            width: 100%;
+        }
+        .bot-turn-text { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
+        .bot-turn-name { font-size: 2rem; font-weight: 800; color: #fff; margin-top: 4px;}
+
+        .task-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 340px;
+            text-align: center;
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: opacity 0.3s ease, margin-top 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        .task-box.hidden {
+            opacity: 0;
+            margin-top: -20px;
+            pointer-events: none;
         }
 
-        @keyframes shake {
-            0% { transform: translate(0,0); }
-            25% { transform: translate(-5px, 5px); }
-            50% { transform: translate(5px, -5px); }
-            75% { transform: translate(-5px, -5px); }
-            100% { transform: translate(5px, 5px); }
+        .task-timer-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .task-timer-fill {
+            height: 100%;
+            background: var(--danger);
+            width: 100%;
+            transform-origin: left;
+        }
+        .task-timer-text {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--danger);
+            font-variant-numeric: tabular-nums;
+        }
+        .task-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.4;
         }
 
-        /* Explosion Flash */
-        .flash {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Potato Area */
+        .potato-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #potato-container {
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 50;
+        }
+        .potato-wrapper {
+            animation: pulse 1.5s infinite ease-in-out;
             width: 100%;
             height: 100%;
-            background-color: var(--death-color);
-            opacity: 0;
-            z-index: 99;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             pointer-events: none;
         }
-
-        .flash.active {
-            animation: flash-anim 0.5s ease-out;
+        .potato {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+            animation: morph 6s ease-in-out infinite, rotate 12s linear infinite;
+            box-shadow: 0 0 50px rgba(168, 85, 247, 0.4), inset 20px 0 40px rgba(59, 130, 246, 0.5);
+            transition: all 0.3s ease;
         }
 
-        @keyframes flash-anim {
+        .swipe-hint {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: opacity 0.3s ease;
+        }
+        .swipe-hint.hidden { opacity: 0; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Flash */
+        .flash {
+            position: fixed;
+            inset: 0;
+            background: var(--danger);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .flash.active {
+            animation: flashAnim 0.5s ease-out forwards;
+        }
+        @keyframes flashAnim {
             0% { opacity: 1; }
             100% { opacity: 0; }
-        }
-
-        /* Particles on explosion */
-        .particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: var(--accent-gradient);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .btn-restart {
-            margin-top: 30px;
-            padding: 15px 40px;
-            border-radius: 30px;
-            border: 2px solid white;
-            background: transparent;
-            color: white;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-restart:active {
-            transform: scale(0.95);
-            background: white;
-            color: black;
         }
     </style>
 </head>
 <body>
 
     <div id="app">
-        <div class="flash" id="flash"></div>
+        <div id="flash" class="flash"></div>
 
-        <div id="game-screen" class="screen active">
-            <div class="potato-container" id="potato-container">
-                <div class="potato" id="potato"></div>
-            </div>
-            <div class="status" id="game-status">SWIPE TO PASS</div>
+        <!-- LOBBY SCREEN -->
+        <div id="screen-lobby" class="screen active">
+            <h1 class="title">WET POTATO</h1>
+            <p class="subtitle">Локальный мультиплеер</p>
+            <div id="players-grid" class="players-grid"></div>
+            <button id="btn-create">Создать Лобби</button>
+            <button id="btn-start" style="display:none;">Начать Игру</button>
         </div>
 
-        <div id="death-screen" class="screen">
-            <h1>YOU DIED</h1>
-            <button class="btn-restart" onclick="resetGame()">RESPAWN</button>
+        <!-- PLAYING SCREEN -->
+        <div id="screen-play" class="screen">
+            <div id="bot-turn-indicator">
+                <div class="bot-turn-text">Ходит</div>
+                <div id="current-bot-name" class="bot-turn-name">Bot 1</div>
+            </div>
+            
+            <div id="task-box" class="task-box hidden">
+                <div class="task-timer-bar">
+                    <div id="task-timer-fill" class="task-timer-fill"></div>
+                </div>
+                <div id="task-timer-text" class="task-timer-text">10.0s</div>
+                <div id="task-text" class="task-text">Назови 3 марки машин</div>
+            </div>
+            
+            <div id="potato-area" class="potato-area">
+                <div id="potato-container">
+                    <div class="potato-wrapper">
+                        <div class="potato"></div>
+                    </div>
+                </div>
+                <div id="swipe-hint" class="swipe-hint hidden">Свайп чтобы передать</div>
+            </div>
+        </div>
+
+        <!-- EXPLOSION SCREEN -->
+        <div id="screen-explosion" class="screen">
+            <h1 id="explosion-title" class="title" style="color: var(--danger)">YOU DIED</h1>
+            <p id="explosion-text" class="subtitle">Картошка взорвалась в ваших руках!</p>
+            <button id="btn-restart">В ЛОББИ</button>
         </div>
     </div>
 
     <script>
+        // Предотвращение скролла
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
 
+        // UI Elements
+        const ui = {
+            screens: {
+                lobby: document.getElementById('screen-lobby'),
+                play: document.getElementById('screen-play'),
+                end: document.getElementById('screen-explosion')
+            },
+            grid: document.getElementById('players-grid'),
+            btnCreate: document.getElementById('btn-create'),
+            btnStart: document.getElementById('btn-start'),
+            btnRestart: document.getElementById('btn-restart'),
+            
+            botIndicator: document.getElementById('bot-turn-indicator'),
+            botName: document.getElementById('current-bot-name'),
+            
+            taskBox: document.getElementById('task-box'),
+            taskFill: document.getElementById('task-timer-fill'),
+            taskTimeRaw: document.getElementById('task-timer-text'),
+            taskText: document.getElementById('task-text'),
+            
+            potatoContainer: document.getElementById('potato-container'),
+            swipeHint: document.getElementById('swipe-hint'),
+            
+            extTitle: document.getElementById('explosion-title'),
+            extText: document.getElementById('explosion-text'),
+            flash: document.getElementById('flash')
+        };
+
         // Game State
-        let isDead = false;
-        let isPotatoOnScreen = true;
-        let timer = null;
-        let pulseInterval = null;
-        let gameStartTime = 0;
-        let bombDelay = 0; // Random 15-40s
-        let currentPulseSpeed = 2; // in seconds
+        let gameState = 'IDLE'; // IDLE, PLAYING, END
+        let bombTimeLeft = 0;
+        let taskTimeLeft = 0;
+        let hasPotato = false;
+        let lastFrameTime = 0;
+        let botTimeout = null;
 
-        const potatoContainer = document.getElementById('potato-container');
-        const potatoElement = document.getElementById('potato');
-        const flash = document.getElementById('flash');
-        const deathScreen = document.getElementById('death-screen');
-        const gameStatus = document.getElementById('game-status');
+        // Tasks Bank
+        const tasks = [
+            "Назови 3 марки машин", "Сделай 5 приседаний", "Назови 3 фильма с Томом Крузом", "Изобрази звук чайника", "Скажи 'Привет' наоборот",
+            "Назови 3 круглых фрукта", "Дотронься до носа языком", "Назови 5 цветов", "Назови 3 столицы Европы", "Подпрыгни 3 раза",
+            "Назови 3 породы собак", "Прокукарекай", "Сделай смешное лицо", "Назови 3 вида сыра", "Хрюкни 2 раза",
+            "Назови 3 реки", "Назови 3 песни Beatles", "Сделай колесо (виртуально)", "Мяукни как котенок", "Гавкни как большая собака",
+            "Посчитай от 10 до 1 вслух", "Назови 3 красных предмета вокруг", "Изобрази обезьяну", "Скажи скороговорку", "Назови 3 планеты",
+            "Назови 3 языка программирования", "Назови 3 птицы", "Сделай волну руками", "Изобрази игру на гитаре", "Назови 3 овоща",
+            "Покажи воздушный поцелуй", "Назови 3 вида спорта", "Изобрази зомби", "Назови 3 марки телефонов", "Покрутись вокруг себя",
+            "Назови 3 горячих напитка", "Изобрази пингвина", "Назови 3 супергероя", "Назови 3 предмета мебели", "Сделай 'Дай пять' воздуху",
+            "Назови 3 музыкальных инструмента", "Изобрази плавание", "Назови 3 ягоды", "Назови 3 станции метро", "Шепни секрет",
+            "Назови 3 вида транспорта", "Изобрази робота", "Назови 3 настольные игры", "Сделай глубокий вдох и выдох", "Улыбнись до ушей"
+        ];
 
-        // Touch handling
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        potatoContainer.addEventListener('touchstart', (e) => {
-            if (isDead) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        potatoContainer.addEventListener('touchend', (e) => {
-            if (isDead || !isPotatoOnScreen) return;
+        // LOBBY LOGIC
+        ui.btnCreate.addEventListener('click', () => {
+            ui.btnCreate.style.display = 'none';
+            tg.HapticFeedback.impactOccurred('light');
             
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
+            ui.grid.innerHTML = '';
+            addPlayer('Вы', '👤', true);
             
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance > 50) {
-                passPotato(dx, dy);
-            }
+            setTimeout(() => { addPlayer('Bot 1', '🤖'); tg.HapticFeedback.impactOccurred('light'); }, 1500);
+            setTimeout(() => { addPlayer('Bot 2', '👾'); tg.HapticFeedback.impactOccurred('light'); }, 3000);
+            setTimeout(() => { 
+                addPlayer('Bot 3', '👽'); 
+                tg.HapticFeedback.impactOccurred('light');
+                ui.btnStart.style.display = 'block';
+            }, 4500);
         });
 
-        function startGame() {
-            isDead = false;
-            isPotatoOnScreen = true;
-            deathScreen.classList.remove('active');
-            potatoContainer.style.opacity = '1';
-            potatoContainer.style.transform = 'translate(0, 0) scale(1)';
-            gameStatus.innerText = 'PASS THE POTATO';
-            
-            gameStartTime = Date.now();
-            bombDelay = 15000 + Math.random() * 25000; // 15-40s
-            
-            startPulsing();
-            gameLoop();
+        function addPlayer(name, emoji, isYou = false) {
+            const p = document.createElement('div');
+            p.className = 'player-card' + (isYou ? ' you' : '');
+            p.innerHTML = `<div class="avatar">${emoji}</div><div class="name">${name}</div>`;
+            ui.grid.appendChild(p);
         }
 
-        function gameLoop() {
-            if (isDead) return;
-
-            const elapsed = Date.now() - gameStartTime;
+        // START GAME
+        ui.btnStart.addEventListener('click', () => {
+            tg.HapticFeedback.impactOccurred('heavy');
+            gameState = 'PLAYING';
+            switchScreen(ui.screens.play);
             
-            // Adjust pulse speed based on time remaining
-            const progress = elapsed / bombDelay;
-            currentPulseSpeed = Math.max(0.4, 2 - progress * 1.6);
-            potatoElement.style.setProperty('--pulse-speed', `${currentPulseSpeed}s`);
+            bombTimeLeft = 15 + Math.random() * 30; // Таймер 15-45 сек
+            receivePotato();
+            
+            lastFrameTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        });
 
-            // Check if exploded
-            if (elapsed >= bombDelay) {
-                if (isPotatoOnScreen) {
-                    explode();
-                } else {
-                    // If away, reset timer for next "incoming"
-                    gameStartTime = Date.now();
+        // CORE LOOP
+        function gameLoop(time) {
+            if (gameState !== 'PLAYING') return;
+            
+            let dt = (time - lastFrameTime) / 1000;
+            if (dt > 0.1) dt = 0.1; // Limit delta for lags
+            lastFrameTime = time;
+            
+            bombTimeLeft -= dt;
+            
+            if (hasPotato) {
+                taskTimeLeft -= dt;
+                
+                ui.taskTimeRaw.innerText = Math.max(0, taskTimeLeft).toFixed(1) + 's';
+                ui.taskFill.style.width = `${Math.max(0, (taskTimeLeft / 10) * 100)}%`;
+                
+                if (taskTimeLeft <= 0 || bombTimeLeft <= 0) {
+                    triggerExplosion(true);
+                    return;
                 }
             } else {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function startPulsing() {
-            if (pulseInterval) clearInterval(pulseInterval);
-            
-            const triggerHaptic = () => {
-                if (isDead || !isPotatoOnScreen) return;
-                
-                // Strength depends on pulse speed
-                if (currentPulseSpeed < 0.6) {
-                    tg.HapticFeedback.impactOccurred('heavy');
-                } else if (currentPulseSpeed < 1.2) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                } else {
-                    tg.HapticFeedback.impactOccurred('light');
+                if (bombTimeLeft <= 0) {
+                    triggerExplosion(false);
+                    return;
                 }
-
-                // Schedule next haptic based on current pulse
-                setTimeout(triggerHaptic, (currentPulseSpeed * 1000) / 2);
-            };
-
-            triggerHaptic();
+            }
+            
+            requestAnimationFrame(gameLoop);
         }
 
-        function passPotato(dx, dy) {
-            isPotatoOnScreen = false;
+        // SWIPE LOGIC
+        let isDragging = false;
+        let startX=0, startY=0, currentX=0, currentY=0;
+
+        ui.potatoContainer.addEventListener('touchstart', (e) => {
+            if (gameState !== 'PLAYING' || !hasPotato) return;
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            currentX = startX;
+            currentY = startY;
+            ui.potatoContainer.style.transition = 'none';
+        });
+
+        ui.potatoContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging || !hasPotato) return;
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+            
+            let dx = currentX - startX;
+            let dy = currentY - startY;
+            ui.potatoContainer.style.transform = `translate(${dx * 0.4}px, ${dy * 0.4}px) scale(0.95)`;
+        });
+
+        ui.potatoContainer.addEventListener('touchend', (e) => {
+            if (!isDragging || !hasPotato) return;
+            isDragging = false;
+            
+            let dx = currentX - startX;
+            let dy = currentY - startY;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist < 40) {
+                // Если не свайп, а просто тап - возвращаем на место
+                ui.potatoContainer.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                ui.potatoContainer.style.transform = `translate(0px, 0px) scale(1)`;
+                setTimeout(() => ui.potatoContainer.style.transition='none', 400);
+                return;
+            }
+            
+            // Вычисляем траекторию вылета
+            let angle = Math.atan2(dy, dx);
+            let flyDist = window.innerWidth * 1.5;
+            let tgtX = Math.cos(angle) * flyDist;
+            let tgtY = Math.sin(angle) * flyDist;
+            
+            passPotato(tgtX, tgtY);
+        });
+
+        function passPotato(x, y) {
+            hasPotato = false;
             tg.HapticFeedback.impactOccurred('medium');
             
-            // Fly away
-            const flyX = dx * 5;
-            const flyY = dy * 5;
-            potatoContainer.style.transform = `translate(${flyX}px, ${flyY}px) scale(0.2)`;
-            potatoContainer.style.opacity = '0';
-            gameStatus.innerText = 'POTATO PASSED...';
-
-            // Wait 2-3 seconds
-            setTimeout(() => {
-                if (isDead) return;
-                returnPotato();
-            }, 2000 + Math.random() * 1000);
+            ui.taskBox.classList.add('hidden');
+            ui.swipeHint.classList.add('hidden');
+            
+            ui.potatoContainer.style.transition = 'transform 0.4s ease-out, opacity 0.3s ease';
+            ui.potatoContainer.style.transform = `translate(${x}px, ${y}px) scale(0.2)`;
+            ui.potatoContainer.style.opacity = '0';
+            
+            // Симуляция хода бота
+            let botIndex = Math.floor(Math.random() * 3) + 1;
+            ui.botName.innerText = 'Bot ' + botIndex;
+            ui.botIndicator.style.opacity = '1';
+            ui.botIndicator.style.transform = 'translateY(0)';
+            
+            botTimeout = setTimeout(() => {
+                if (gameState === 'PLAYING') {
+                    ui.botIndicator.style.opacity = '0';
+                    ui.botIndicator.style.transform = 'translateY(-20px)';
+                    receivePotato();
+                }
+            }, 2000);
         }
 
-        function returnPotato() {
-            // Pick a random side to enter from
-            const sides = [
-                {x: -300, y: 0},
-                {x: 300, y: 0},
-                {x: 0, y: -400},
-                {x: 0, y: 400}
-            ];
-            const side = sides[Math.floor(Math.random() * sides.length)];
+        function receivePotato() {
+            hasPotato = true;
+            taskTimeLeft = 10;
             
-            potatoContainer.style.transition = 'none';
-            potatoContainer.style.transform = `translate(${side.x}px, ${side.y}px) scale(0.2)`;
+            ui.taskText.innerText = tasks[Math.floor(Math.random() * tasks.length)];
+            ui.taskBox.classList.remove('hidden');
+            ui.swipeHint.classList.remove('hidden');
             
-            setTimeout(() => {
-                potatoContainer.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
-                potatoContainer.style.transform = 'translate(0, 0) scale(1)';
-                potatoContainer.style.opacity = '1';
-                isPotatoOnScreen = true;
-                gameStatus.innerText = 'IT\'S BACK!';
-                tg.HapticFeedback.notificationOccurred('warning');
-            }, 50);
+            tg.HapticFeedback.notificationOccurred('warning');
+            
+            ui.potatoContainer.style.transition = 'none';
+            ui.potatoContainer.style.transform = 'translate(0px, -50px) scale(0.5)';
+            ui.potatoContainer.style.opacity = '0';
+            
+            // Force reflow
+            void ui.potatoContainer.offsetWidth;
+            
+            ui.potatoContainer.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
+            ui.potatoContainer.style.transform = 'translate(0px, 0px) scale(1)';
+            ui.potatoContainer.style.opacity = '1';
         }
 
-        function explode() {
-            isDead = true;
-            tg.HapticFeedback.notificationOccurred('error');
-            tg.HapticFeedback.impactOccurred('heavy');
-            
-            flash.classList.add('active');
-            potatoContainer.style.opacity = '0';
-            
-            // Create particles
-            createParticles();
-            
-            setTimeout(() => {
-                flash.classList.remove('active');
-                deathScreen.classList.add('active');
-            }, 500);
-        }
-
-        function createParticles() {
-            for (let i = 0; i < 20; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = '50%';
-                p.style.top = '50%';
+        // EXPLOSION / GAME OVER
+        function triggerExplosion(playerDied) {
+            gameState = 'END';
+            if (playerDied) {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.HapticFeedback.impactOccurred('heavy');
+                ui.extTitle.innerText = "YOU DIED";
+                ui.extTitle.style.color = "var(--danger)";
+                ui.extText.innerText = bombTimeLeft <= 0 ? "Скрытый таймер истек! Картошка взорвалась." : "Вы не успели выполнить задание!";
                 
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 50 + Math.random() * 150;
-                const tx = Math.cos(angle) * dist;
-                const ty = Math.sin(angle) * dist;
-                
-                document.getElementById('app').appendChild(p);
-                
-                p.animate([
-                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-                    { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
-                ], {
-                    duration: 1000,
-                    easing: 'cubic-bezier(0, .9, .57, 1)'
-                }).onfinish = () => p.remove();
+                ui.flash.classList.add('active');
+                setTimeout(() => ui.flash.classList.remove('active'), 500);
+            } else {
+                tg.HapticFeedback.notificationOccurred('success');
+                ui.extTitle.innerText = "YOU SURVIVED";
+                ui.extTitle.style.color = "var(--success)";
+                ui.extText.innerText = "Картошка взорвалась в руках бота!";
             }
+            switchScreen(ui.screens.end);
         }
 
-        function resetGame() {
-            startGame();
+        // UTILS
+        function switchScreen(screen) {
+            Object.values(ui.screens).forEach(s => s.classList.remove('active'));
+            screen.classList.add('active');
         }
 
-        // Init
-        startGame();
-
+        ui.btnRestart.addEventListener('click', () => {
+            gameState = 'IDLE';
+            ui.grid.innerHTML = '';
+            ui.btnStart.style.display = 'none';
+            ui.btnCreate.style.display = 'block';
+            if (botTimeout) clearTimeout(botTimeout);
+            switchScreen(ui.screens.lobby);
+        });
     </script>
 </body>
 </html>

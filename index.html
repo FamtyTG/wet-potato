@@ -9,23 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Claymorphism Color Palette */
-            --bg-color: #2a2726; /* Темный теплый фон */
-            --clay-dark: #353130; /* Более светлый тон для подложек */
-            --clay-peach: #fbece0; /* Пастельный персиковый */
-            --clay-purple: #cdb4db; /* Пастельный фиолетовый */
-            --clay-blue: #a7cbf2; /* Пастельный синий */
-            --text-light: #fdf6e3;
-            --text-dark: #2a2726;
-            --text-muted: #a09794;
+            /* Full Clay UI Redesign Palette */
+            --bg-color: #2a2726;       /* Глубокий серо-коричневый (теплый) */
+            --card-bg: #373331;        /* Чуть светлее для карточек/лобби */
+            --btn-peach: #f5bca9;      /* Пастельно-персиковый */
+            --btn-mint: #b2dfdb;       /* Пастельно-зеленоватый для начала игры */
+            --btn-purple: #c3b4d4;     /* Пастельно-фиолетовый */
+            --text-light: #fbece0;     /* Очень мягкий бежево-белый для текста */
+            --text-dark: #2a2726;      /* Контрастный темный для кнопок */
+            --text-muted: #a49692;     /* Приглушенный текст */
             --danger: #ff6b6b;
-            
-            /* Clay Shadows */
-            --clay-shadow-out: 10px 10px 20px rgba(0,0,0,0.3), -10px -10px 20px rgba(255,255,255,0.03);
-            --clay-shadow-in: inset 4px 4px 10px rgba(255,255,255,0.05), inset -4px -4px 10px rgba(0,0,0,0.4);
-            
-            --btn-shadow-out: 6px 6px 14px rgba(0,0,0,0.3), -6px -6px 14px rgba(255,255,255,0.05);
-            --btn-shadow-in: inset 3px 3px 6px rgba(255,255,255,0.7), inset -3px -3px 6px rgba(0,0,0,0.15);
         }
 
         * {
@@ -75,63 +68,100 @@
         
         #screen-game {
             justify-content: flex-start;
-            padding-top: 40px;
+            padding-top: 50px;
         }
 
-        /* Clay Components */
+        /* 
+         * Soft Clay UI Components
+         * Мягкая глина: пухлые радиусы, правильные тени для объема (блик сверху-слева, тень снизу-справа). 
+         */
         .clay-card {
-            background-color: var(--clay-dark);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: var(--clay-shadow-out), var(--clay-shadow-in);
+            background-color: var(--card-bg);
+            border-radius: 35px;
+            padding: 35px 25px;
+            box-shadow: 
+                5px 5px 15px rgba(0, 0, 0, 0.3),                 /* Внешняя тень */
+                inset 2px 2px 5px rgba(255, 255, 255, 0.05),     /* Внутренний блик для объема */
+                inset -2px -2px 5px rgba(0, 0, 0, 0.15);         /* Внутреннее затенение */
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .clay-btn {
-            background-color: var(--clay-peach);
-            color: var(--text-dark);
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 16px 24px;
             font-size: 1.1rem;
             font-weight: 800;
+            color: var(--text-dark);
+            cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: var(--btn-shadow-out), var(--btn-shadow-in);
-            cursor: pointer;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
+            /* Эффект матового пластилина */
+            box-shadow: 
+                5px 5px 15px rgba(0,0,0,0.3),
+                inset 3px 3px 6px rgba(255,255,255,0.4),
+                inset -3px -3px 6px rgba(0,0,0,0.1);
         }
         .clay-btn:active {
-            transform: scale(0.96) translateY(2px);
+            transform: scale(0.95) translateY(2px);
             box-shadow: 
-                2px 2px 5px rgba(0,0,0,0.3), -2px -2px 5px rgba(255,255,255,0.03),
-                inset 3px 3px 8px rgba(0,0,0,0.1), inset -3px -3px 8px rgba(255,255,255,0.5);
+                2px 2px 8px rgba(0,0,0,0.3),
+                inset 4px 4px 8px rgba(0,0,0,0.15),
+                inset -2px -2px 4px rgba(255,255,255,0.2);
         }
 
-        /* Lobby specific */
-        .logo-title {
-            font-size: 3rem;
+        .input-code {
+            background-color: #2e2a29;
+            border: none;
+            outline: none;
+            border-radius: 20px;
+            padding: 16px;
+            font-size: 1.5rem;
             font-weight: 800;
-            color: var(--clay-peach);
-            text-shadow: 4px 4px 8px rgba(0,0,0,0.4);
-            margin-bottom: 40px;
+            color: var(--text-light);
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            width: 100%;
+            margin-bottom: 5px;
+            /* Внутренний объем (вдавленность) */
+            box-shadow: 
+                inset 4px 4px 10px rgba(0,0,0,0.4), 
+                inset -2px -2px 5px rgba(255,255,255,0.03);
+            font-family: 'Inter', sans-serif;
+        }
+        .input-code::placeholder {
+            color: rgba(255,255,255,0.1);
+        }
+
+        /* typography / UI blocks */
+        .logo-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--btn-peach);
+            text-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.1;
         }
 
         .player-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(0,0,0,0.15);
-            border-radius: 16px;
-            margin-bottom: 8px;
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.03);
+            gap: 15px;
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            margin-bottom: 10px;
+            box-shadow: 
+                inset 2px 2px 6px rgba(0,0,0,0.3), 
+                inset -1px -1px 3px rgba(255,255,255,0.02);
             animation: showPlayer 0.3s ease-out;
         }
         @keyframes showPlayer {
@@ -139,49 +169,54 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .player-avatar {
-            width: 44px;
-            height: 44px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
-            background: var(--clay-purple);
+            background: var(--btn-purple);
             color: var(--text-dark);
             font-weight: 800;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.1rem;
-            box-shadow: inset 2px 2px 4px rgba(255,255,255,0.7), inset -2px -2px 4px rgba(0,0,0,0.2);
+            font-size: 1.2rem;
+            box-shadow: 
+                inset 2px 2px 5px rgba(255,255,255,0.6), 
+                inset -2px -2px 5px rgba(0,0,0,0.2);
         }
         .player-name {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
         }
 
-        /* Game specific */
+        /* Game UI */
         .status-text {
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-align: center;
+            margin-bottom: 15px;
         }
         .task-card {
-            color: var(--clay-peach);
-            font-size: 1.25rem;
+            color: var(--btn-peach);
+            font-size: 1.3rem;
             font-weight: 600;
             transition: opacity 0.3s;
-            margin-top: 20px;
-            min-height: 100px;
+            min-height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1.4;
+            margin-bottom: 15px;
         }
         .personal-timer {
-            font-size: 5rem;
+            font-size: 6rem;
             font-weight: 800;
-            color: var(--clay-purple);
-            text-shadow: 4px 4px 8px rgba(0,0,0,0.4), -2px -2px 4px rgba(255,255,255,0.05);
-            margin: 20px 0;
+            color: var(--btn-purple);
+            text-shadow: 5px 5px 12px rgba(0,0,0,0.4);
+            margin: 10px 0 20px 0;
             font-variant-numeric: tabular-nums;
             transition: opacity 0.3s;
         }
@@ -194,8 +229,8 @@
             align-items: center;
         }
         #potato-container {
-            width: 240px;
-            height: 240px;
+            width: 260px;
+            height: 260px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -208,52 +243,73 @@
             justify-content: center;
             align-items: center;
             will-change: transform;
+            cursor: grab;
         }
+        #potato-pulse-wrapper:active {
+            cursor: grabbing;
+        }
+
+        /* 
+         * Potato Dynamics 
+         * Бугристая, живая капля через сложный border-radius
+         */
         .potato {
-            width: 180px;
-            height: 180px;
-            background: linear-gradient(135deg, var(--clay-blue), var(--clay-purple));
-            border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
-            animation: morph 6s ease-in-out infinite;
+            width: 210px;
+            height: 210px;
+            background: linear-gradient(135deg, var(--btn-purple), var(--btn-peach));
             box-shadow: 
                 15px 15px 30px rgba(0, 0, 0, 0.4), 
-                -10px -10px 25px rgba(255, 255, 255, 0.02),
-                inset -10px -10px 20px rgba(0, 0, 0, 0.2), 
-                inset 10px 10px 20px rgba(255, 255, 255, 0.7);
+                inset 5px 5px 15px rgba(255, 255, 255, 0.4),
+                inset -5px -5px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morphPotato 5s ease-in-out infinite, rotatePotato 15s linear infinite;
         }
 
-        @keyframes morph {
-            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        @keyframes morphPotato {
+            0%   { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            25%  { border-radius: 60% 40% 50% 50% / 50% 70% 40% 60%; }
+            50%  { border-radius: 50% 50% 30% 70% / 60% 40% 50% 40%; }
+            75%  { border-radius: 30% 70% 60% 40% / 40% 60% 70% 50%; }
+            100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
         }
-
+        @keyframes rotatePotato {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
     <div id="app">
-        <!-- START SCREEN -->
+        <!-- СТАРТОВЫЙ ЭКРАН -->
         <div id="screen-start" class="screen active">
-            <h1 class="logo-title">WET POTATO</h1>
-            <button class="clay-btn" id="btn-create-lobby">Создать игру</button>
-        </div>
-
-        <!-- LOBBY SCREEN -->
-        <div id="screen-lobby" class="screen">
-            <h1 class="logo-title" style="font-size: 2rem; margin-bottom: 20px;">Лобби</h1>
+            <h1 class="logo-title">WET<br>POTATO</h1>
+            <button class="clay-btn" id="btn-create-lobby" style="background-color: var(--btn-peach); width: 100%; max-width: 320px; font-size: 1.15rem; padding: 20px; margin-bottom: 40px;">Создать лобби</button>
+            
             <div class="clay-card">
-                <div id="lobby-players">
-                    <!-- Заполняется JS -->
-                </div>
-                
-                <button class="clay-btn" id="btn-invite" style="background-color: var(--clay-purple); font-size: 0.9rem; padding: 12px;">Пригласить друзей</button>
-                <button class="clay-btn" id="btn-start-game" style="display:none; background-color: #22c55e; color: white;">Начать</button>
-                <div id="wait-host-msg" style="display:none; color: var(--text-muted); font-size: 0.9rem; margin-top: -10px;">Ожидание создателя...</div>
+                <p style="margin-bottom: 5px; font-weight: 600; font-size: 0.95rem; color: var(--text-muted);">Или введите код комнаты</p>
+                <input type="text" id="join-code-input" class="input-code" placeholder="----" maxlength="5">
+                <button class="clay-btn" id="btn-join-code" style="background-color: var(--btn-purple); width: 100%;">Войти по коду</button>
             </div>
         </div>
 
-        <!-- GAME SCREEN -->
+        <!-- ЭКРАН ЛОББИ -->
+        <div id="screen-lobby" class="screen">
+            <div class="clay-card">
+                <h2 style="color: var(--btn-peach); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;">Код лобби</h2>
+                <h1 id="lobby-id-display" style="font-size: 4rem; letter-spacing: 8px; margin: 0 0 20px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);"></h1>
+                
+                <div id="lobby-players" style="margin-bottom: 15px;">
+                    <!-- Заполняется JS -->
+                </div>
+                
+                <button class="clay-btn" id="btn-invite" style="background-color: var(--btn-purple); width: 100%;">Пригласить друзей</button>
+                <button class="clay-btn" id="btn-start-game" style="display:none; background-color: var(--btn-mint); width: 100%; color: var(--text-dark);">Начать игру</button>
+                <div id="wait-host-msg" style="display:none; color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Ожидание создателя...</div>
+            </div>
+        </div>
+
+        <!-- ГЛАВНЫЙ ИГРОВОЙ ЭКРАН -->
         <div id="screen-game" class="screen">
             <div id="status-text" class="status-text">Ожидание первого хода...</div>
             <div id="task-display" class="clay-card task-card" style="opacity: 0;">Задание появится здесь</div>
@@ -268,12 +324,12 @@
             </div>
         </div>
 
-        <!-- GAMEOVER SCREEN -->
+        <!-- ЭКРАН GAMEOVER -->
         <div id="screen-gameover" class="screen">
             <div class="clay-card">
-                <h1 style="color: var(--danger); font-size: 3rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">BOOM!</h1>
-                <h2 id="loser-name" style="margin: 10px 0 20px 0;">ИМЯ ВЗОРВАЛСЯ!</h2>
-                <button class="clay-btn" id="btn-to-lobby">В лобби</button>
+                <h1 style="color: var(--danger); font-size: 3.5rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">BOOM!</h1>
+                <h2 id="loser-name" style="margin: 10px 0 25px 0; color: var(--text-light); font-size: 1.4rem;">ИМЯ ВЗОРВАЛСЯ!</h2>
+                <button class="clay-btn" id="btn-to-lobby" style="background-color: var(--btn-peach); width: 100%;">В меню</button>
             </div>
         </div>
     </div>
@@ -290,11 +346,19 @@
             tg.enableClosingConfirmation();
         }
 
-        // Parse Init Data Unsafe
+        // Utils
+        function generateCode() {
+            let res = '';
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            for (let i = 0; i < 5; i++) {
+                res += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return res;
+        }
+
+        // Parse Init Data
         let initData = tg.initDataUnsafe || {};
         let startParam = initData.start_param || null;
-        
-        // Fallback for browser direct URL testing
         if (!startParam && window.location.search.includes('startapp=')) {
             startParam = new URLSearchParams(window.location.search).get('startapp');
         }
@@ -304,7 +368,7 @@
             first_name: "Игрок " + Math.floor(Math.random() * 100)
         };
 
-        // --- Tasks Bank (50) ---
+        // Tasks Bank (50 коротких веселых заданий)
         const tasks = [
             "Назови 3 марки авто", "Покажи язык всем", "Скажи алфавит наоборот", "Назови 3 фильма ужасов", "Мычи мелодию",
             "Придумай рифму к слову Картошка", "Потрогай уши соседа", "Скажи 5 слов на букву П", "Зажмурься и посчитай до 10", "Назови 3 круглых фрукта",
@@ -318,67 +382,57 @@
             "Назови 3 ягоды", "Назови 3 станции метро", "Расскажи секрет шепотом", "Назови 3 вида транспорта", "Изобрази робота"
         ];
 
-        // --- Simulated Network Manager ---
+        // --- Mock Network Manager ---
         class NetworkManager {
             constructor() {
                 this.lobbyId = null;
                 this.players = [];
                 this.isHost = false;
-                
                 this.onPlayerJoined = null;
                 this.onGameStarted = null;
                 this.onPotatoReceived = null;
-                
                 this.botTimers = [];
                 this.botPassBack = null;
             }
 
             connect(lobbyId, isHost = false) {
-                this.lobbyId = lobbyId;
+                this.lobbyId = lobbyId.toUpperCase();
                 this.isHost = isHost;
                 
-                // Добавляем себя
                 this.players.push({ id: currentUser.id, name: currentUser.first_name, isHost });
                 if (this.onPlayerJoined) this.onPlayerJoined(this.players);
 
-                // Если мы хост - симулируем подключение других
                 if (isHost) {
                     this.botTimers.push(setTimeout(() => {
-                        this.players.push({ id: 2, name: "bot_Alex" });
+                        this.players.push({ id: 2, name: "Bot 1" });
                         if (this.onPlayerJoined) this.onPlayerJoined(this.players);
                         if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
                     }, 1500));
-
                     this.botTimers.push(setTimeout(() => {
-                        this.players.push({ id: 3, name: "bot_Maria" });
+                        this.players.push({ id: 3, name: "Bot 2" });
                         if (this.onPlayerJoined) this.onPlayerJoined(this.players);
                         if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
                     }, 3500));
                 } else {
-                    // Симулируем, что лобби уже существует
                     this.players.push({ id: 1, name: "Лобби Хост", isHost: true });
                     if (this.onPlayerJoined) this.onPlayerJoined(this.players);
                     
-                    // Хост автоматически стартует через 4 сек
                     this.botTimers.push(setTimeout(() => {
-                        if (this.onGameStarted) this.onGameStarted();
+                        if (currentScreen === 'LOBBY' && this.onGameStarted) this.onGameStarted();
                     }, 4000));
                 }
             }
 
             startGame() {
                 if (this.onGameStarted) this.onGameStarted();
-                // Хост берет картошку себе для старта
                 setTimeout(() => {
                     if (this.onPotatoReceived) this.onPotatoReceived();
                 }, 1000);
             }
 
             sendPotato(targetUserId) {
-                // Симуляция задержки бота (от 1.5 до 3 сек), затем он перекидывает обратно нам
                 let delay = 1500 + Math.random() * 1500;
                 this.botPassBack = setTimeout(() => {
-                    // Бот отдает картошку обратно (если игра еще идет)
                     if (currentScreen === 'GAME' && !isGameOver) {
                         if (this.onPotatoReceived) this.onPotatoReceived();
                     }
@@ -391,20 +445,19 @@
             }
         }
 
-        // --- Game Core State ---
+        // --- Core State ---
         let network = new NetworkManager();
         let currentScreen = 'START';
         let isGameOver = false;
         
-        let globalTimer = 0; // Скрытый глобальный 20-45
-        let personalTimer = 0; // 10
+        let globalTimer = 0; 
+        let personalTimer = 0; 
         let hasPotato = false;
         
         let pulsePhase = 0;
         let lastTime = performance.now();
         let lastTimeStrDisplay = "10.0";
 
-        // UI Links
         const ui = {
             statusText: document.getElementById('status-text'),
             taskDisplay: document.getElementById('task-display'),
@@ -413,7 +466,6 @@
             container: document.getElementById('potato-container')
         };
 
-        // --- App Initialization ---
         function initApp() {
             if (startParam) {
                 joinLobby(startParam, false);
@@ -428,23 +480,26 @@
             currentScreen = name;
         }
 
-        // 1. Создать новую игру (Lobby)
+        // 1. СТАРТ
         document.getElementById('btn-create-lobby').addEventListener('click', () => {
-            let newLobbyId = "lobby_" + Math.random().toString(36).substring(2, 8);
-            joinLobby(newLobbyId, true);
+            joinLobby(generateCode(), true);
         });
 
-        // 2. Логика Лобби
+        const codeInput = document.getElementById('join-code-input');
+        codeInput.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+        
+        document.getElementById('btn-join-code').addEventListener('click', () => {
+            let val = codeInput.value.trim();
+            if(val.length > 0) joinLobby(val, false);
+        });
+
+        // 2. ЛОББИ
         function joinLobby(lobbyId, isHost = false) {
             showScreen('LOBBY');
+            document.getElementById('lobby-id-display').innerText = lobbyId;
             
-            if (isHost) {
-                document.getElementById('btn-start-game').style.display = 'block';
-                document.getElementById('wait-host-msg').style.display = 'none';
-            } else {
-                document.getElementById('btn-start-game').style.display = 'none';
-                document.getElementById('wait-host-msg').style.display = 'block';
-            }
+            document.getElementById('btn-start-game').style.display = isHost ? 'block' : 'none';
+            document.getElementById('wait-host-msg').style.display = isHost ? 'none' : 'block';
 
             network.onPlayerJoined = (players) => {
                 let list = document.getElementById('lobby-players');
@@ -465,25 +520,21 @@
             network.connect(lobbyId, isHost);
         }
 
-        // Inline Invite
         document.getElementById('btn-invite').addEventListener('click', () => {
              if (tg.switchInlineQuery) {
                  tg.switchInlineQuery(network.lobbyId, ["users", "groups"]);
              } else {
-                 alert("Ссылка: https://t.me/варин_бот?startapp=" + network.lobbyId);
+                 alert("Ссылка: https://t.me/your_bot?startapp=" + network.lobbyId);
              }
         });
 
-        document.getElementById('btn-start-game').addEventListener('click', () => {
-            network.startGame();
-        });
+        document.getElementById('btn-start-game').addEventListener('click', () => network.startGame());
 
-        // 3. Начало раунда
+        // 3. ИГРА
         function startRound() {
             isGameOver = false;
             hasPotato = false;
-            // Рандомный глобальный таймер: от 20 до 45 сек
-            globalTimer = 20 + Math.random() * 25;
+            globalTimer = 20 + Math.random() * 25; // Скрытый 20-45 сек
             
             ui.statusText.innerText = "Ожидание первого хода...";
             ui.taskDisplay.style.opacity = '0';
@@ -498,7 +549,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // 4. Главный Игровой Цикл
         function gameLoop(time) {
             if (currentScreen !== 'GAME' || isGameOver) {
                 lastTime = time;
@@ -507,7 +557,7 @@
             }
 
             let dt = (time - lastTime) / 1000;
-            if (dt > 0.1) dt = 0.1; // защита от лагов
+            if (dt > 0.1) dt = 0.1;
             lastTime = time;
 
             globalTimer -= dt;
@@ -522,15 +572,13 @@
                     lastTimeStrDisplay = tStr;
                 }
 
-                // Условия смерти (если у меня картошка)
                 if (personalTimer <= 0 || globalTimer <= 0) {
                     triggerGameOver(currentUser.first_name);
                     return;
                 }
             } else {
-                // Если не у меня, но глобальный вышел -> взорвался кто-то из ботов
                 if (globalTimer <= 0) {
-                    triggerGameOver("Кто-то из игроков");
+                    triggerGameOver("Бот");
                     return;
                 }
             }
@@ -538,35 +586,26 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Функция Пульса и Отдачи (Haptic)
         function updatePulse(dt) {
-            // Множитель скорости зависит от оставшегося времени (чем меньше - тем больше множитель 1x -> 4x)
             let speedMult = 1 + (10 - Math.max(0, personalTimer)) * 0.3;
-            let pulseRate = Math.PI * 2 * speedMult; // 1 пульс в секунду базово
+            let pulseRate = Math.PI * 2 * speedMult;
             
             let oldPhase = pulsePhase;
             pulsePhase += dt * pulseRate;
             
-            // Визуальный скейл на враппер картошки
             let scale = 1 + Math.sin(pulsePhase) * 0.08;
             ui.wrapper.style.transform = `scale(${scale})`;
             
-            // Проверка завершения полного цикла для Haptic
             let oldCycle = Math.floor(oldPhase / (Math.PI * 2));
             let newCycle = Math.floor(pulsePhase / (Math.PI * 2));
             
             if (newCycle > oldCycle && window.Telegram?.WebApp?.HapticFeedback) {
-                if (personalTimer > 6) {
-                    tg.HapticFeedback.impactOccurred('light');
-                } else if (personalTimer > 3) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                } else {
-                    tg.HapticFeedback.impactOccurred('heavy');
-                }
+                if (personalTimer > 6) tg.HapticFeedback.impactOccurred('light');
+                else if (personalTimer > 3) tg.HapticFeedback.impactOccurred('medium');
+                else tg.HapticFeedback.impactOccurred('heavy');
             }
         }
 
-        // 5. Обработка Получения картошки
         function localReceivePotato() {
             hasPotato = true;
             personalTimer = 10;
@@ -584,35 +623,35 @@
             ui.container.style.transform = `translate(0, -${window.innerHeight/2}px) scale(0.5)`;
             ui.container.style.opacity = '0';
             
-            void ui.container.offsetWidth; // flush CSS
+            void ui.container.offsetWidth;
             
             ui.container.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
             ui.container.style.transform = `translate(0px, 0px) scale(1)`;
             ui.container.style.opacity = '1';
         }
 
-        // 6. Свайпы и передача (Touch Events)
+        // 4. Свайп (Touch & Mouse/Десктоп)
         let isDragging = false;
         let startX=0, startY=0, curX=0, curY=0;
 
-        ui.container.addEventListener('touchstart', e => {
+        function handleDragStart(clientX, clientY) {
             if (currentScreen !== 'GAME' || !hasPotato || isGameOver) return;
             isDragging = true;
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
+            startX = clientX;
+            startY = clientY;
             curX = startX;
             curY = startY;
             ui.container.style.transition = 'none';
-        });
+        }
 
-        ui.container.addEventListener('touchmove', e => {
+        function handleDragMove(clientX, clientY) {
             if (!isDragging || !hasPotato) return;
-            curX = e.touches[0].clientX;
-            curY = e.touches[0].clientY;
+            curX = clientX;
+            curY = clientY;
             ui.container.style.transform = `translate(${(curX - startX) * 0.5}px, ${(curY - startY) * 0.5}px)`;
-        });
+        }
 
-        ui.container.addEventListener('touchend', e => {
+        function handleDragEnd() {
             if (!isDragging || !hasPotato) return;
             isDragging = false;
             
@@ -621,23 +660,30 @@
             let dist = Math.hypot(dx, dy);
             
             if (dist > 40) {
-                // Свайп засчитан
                 let angle = Math.atan2(dy, dx);
                 localPassPotato(angle);
             } else {
-                // Возврат
                 ui.container.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                 ui.container.style.transform = 'translate(0px, 0px)';
                 setTimeout(() => ui.container.style.transition = 'none', 300);
             }
-        });
+        }
+
+        // Подключаем Touch
+        ui.container.addEventListener('touchstart', e => handleDragStart(e.touches[0].clientX, e.touches[0].clientY), {passive:false});
+        window.addEventListener('touchmove', e => { if(isDragging) handleDragMove(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+        window.addEventListener('touchend', e => handleDragEnd());
+        
+        // Подключаем Mouse (для игры на десктопном клиенте)
+        ui.container.addEventListener('mousedown', e => handleDragStart(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => { if (isDragging) handleDragMove(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', e => handleDragEnd());
 
         function localPassPotato(angle) {
             hasPotato = false;
-            
             ui.taskDisplay.style.opacity = '0';
             ui.personalTimer.style.opacity = '0';
-            ui.statusText.innerText = "Идет передача...";
+            ui.statusText.innerText = "Летит к другому...";
             
             if (window.Telegram?.WebApp?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             
@@ -646,30 +692,27 @@
             ui.container.style.transform = `translate(${Math.cos(angle)*flyDist}px, ${Math.sin(angle)*flyDist}px) scale(0.3)`;
             ui.container.style.opacity = '0';
             
-            network.sendPotato('random_bot_or_user');
+            network.sendPotato('someone');
         }
 
-        // 7. ВЗРЫВ / Конец игры
+        // 5. GAMEOVER
         function triggerGameOver(loserName) {
             isGameOver = true;
-            
             if (window.Telegram?.WebApp?.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('rigid');
                 tg.HapticFeedback.notificationOccurred('error');
             }
-            
             document.getElementById('loser-name').innerText = `${loserName} ВЗОРВАЛСЯ!`;
             showScreen('GAMEOVER');
         }
 
         document.getElementById('btn-to-lobby').addEventListener('click', () => {
-            network.cleanup(); // Останавливаем таймеры ботов на всякий случай
-            // Простейший возврат в главное меню
+            network.cleanup(); 
             network = new NetworkManager();
             initApp();
         });
 
-        // Start
+        // Запуск
         initApp();
 
     </script>

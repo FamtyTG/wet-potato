@@ -376,6 +376,7 @@
 
         <!-- ИГРА -->
         <div id="screen-game" class="screen">
+            <button class="clay-btn" id="btn-leave-spectate" style="display:none; position: absolute; top: 20px; right: 20px; padding: 10px 15px; background: rgba(0,0,0,0.4); font-size: 0.85rem; border-radius: 15px; color: var(--text-muted); box-shadow: none;">В меню</button>
             <div id="players-bar" class="players-bar"></div>
             
             <div id="status-text" class="status-text">Ожидание...</div>
@@ -518,29 +519,26 @@
                 }
             }
 
+            startBotTimer(botId) {
+                let delay = 2000 + Math.random() * 2000;
+                this.botPassBack = setTimeout(() => {
+                    if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === botId) {
+                        this.sendPotato();
+                    }
+                }, delay);
+            }
+
             sendPotato() {
                 let aliveBots = this.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId);
                 if (aliveBots.length === 0) return; 
                 
-                if (!currentUser.isDead) { // Если я жив, боты кидают только мне
-                    let meObj = this.players.find(p => p.id === currentUser.id);
-                    if (meObj) aliveBots = [meObj];
-                }
-                
-                let bot = aliveBots[Math.floor(Math.random() * aliveBots.length)];
+                let target = aliveBots[Math.floor(Math.random() * aliveBots.length)];
                 
                 triggerCurtain(() => {
-                    setTurn(bot.id);
-                    let delay = 2000 + Math.random() * 2000;
-                    this.botPassBack = setTimeout(() => {
-                        if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === bot.id) {
-                            if (!currentUser.isDead) {
-                                triggerCurtain(() => setTurn(currentUser.id)); 
-                            } else {
-                                this.sendPotato();
-                            }
-                        }
-                    }, delay);
+                    setTurn(target.id);
+                    if (target.id !== currentUser.id) {
+                        this.startBotTimer(target.id);
+                    }
                 });
             }
 
@@ -792,15 +790,13 @@
                 } else {
                     setTimeout(() => {
                         globalTimer = 20 + Math.random() * 25; 
-                        if (!currentUser.isDead) {
-                            triggerCurtain(() => setTurn(currentUser.id));
-                        } else {
-                            let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-                            triggerCurtain(() => {
-                                setTurn(randomAlive.id);
-                                network.sendPotato();
-                            });
-                        }
+                        let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                        triggerCurtain(() => {
+                            setTurn(randomAlive.id);
+                            if (randomAlive.id !== currentUser.id) {
+                                network.startBotTimer(randomAlive.id);
+                            }
+                        });
                     }, 2500);
                 }
             }
@@ -887,9 +883,15 @@
             let aliveCount = network.players.filter(p => !p.isDead).length;
 
             if (loserName === "LAST_SURVIVOR" || aliveCount <= 1) {
-                document.getElementById('go-title').innerText = "ПОБЕДА";
-                document.getElementById('go-title').style.color = "var(--btn-mint)";
-                document.getElementById('loser-name').innerText = "Остался только 1 выживший!";
+                if (currentUser.isDead) {
+                    document.getElementById('go-title').innerText = "ИГРА ОКОНЧЕНА";
+                    document.getElementById('go-title').style.color = "var(--btn-purple)";
+                    document.getElementById('loser-name').innerText = "Победитель определен!";
+                } else {
+                    document.getElementById('go-title').innerText = "ПОБЕДА";
+                    document.getElementById('go-title').style.color = "var(--btn-mint)";
+                    document.getElementById('loser-name').innerText = "Остался только ты!";
+                }
                 document.getElementById('btn-spectate').style.display = 'none';
             } else {
                 document.getElementById('go-title').innerText = "BOOM!";
@@ -904,6 +906,7 @@
         document.getElementById('btn-spectate').addEventListener('click', () => {
             isGameOver = false;
             showScreen('GAME');
+            document.getElementById('btn-leave-spectate').style.display = 'block';
             let alivePlayers = network.players.filter(p => !p.isDead);
             if (alivePlayers.length > 0) {
                 lastTime = performance.now();
@@ -911,9 +914,19 @@
                 let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                 triggerCurtain(() => {
                     setTurn(randomAlive.id);
-                    network.sendPotato();
+                    if (randomAlive.id !== currentUser.id) {
+                        network.startBotTimer(randomAlive.id);
+                    }
                 });
             }
+        });
+
+        document.getElementById('btn-leave-spectate').addEventListener('click', () => {
+            document.getElementById('btn-leave-spectate').style.display = 'none';
+            network.clearBotTimers(); 
+            network = new NetworkManager();
+            document.getElementById('join-code-input').value = '';
+            showScreen('START');
         });
 
         document.getElementById('btn-to-lobby').addEventListener('click', () => {

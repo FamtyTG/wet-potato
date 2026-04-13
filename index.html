@@ -43,9 +43,26 @@
             touch-action: none;
         }
 
-        /* ─── Curtain ─── */
-        .curtain { position:fixed; inset:0; background:rgba(223, 197, 183, 0.8); backdrop-filter: blur(5px); z-index:1000; pointer-events:none; opacity:0; transition:opacity .3s ease; }
-        .curtain.active { opacity:1; }
+        /* ─── Soft Wave Curtain ─── */
+        .curtain { 
+            position:fixed; inset:0; z-index:1000; pointer-events:none; 
+            background: #dfc5b7;
+            transform: translateY(-100%);
+            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .curtain::before {
+            content:''; position:absolute; top:-49px; left:0; width:100vw; height:50px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%23dfc5b7' fill-opacity='1' d='M0,160L80,181.3C160,203,320,245,480,240C640,235,800,181,960,170.7C1120,160,1280,192,1360,208L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z'/%3E%3C/svg%3E") no-repeat top;
+            background-size: 100% 100%;
+        }
+        .curtain::after {
+            content:''; position:absolute; bottom:-49px; left:0; width:100vw; height:50px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%23dfc5b7' fill-opacity='1' d='M0,160L80,181.3C160,203,320,245,480,240C640,235,800,181,960,170.7C1120,160,1280,192,1360,208L1440,224L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: 100% 100%;
+        }
+        .curtain.active { transform: translateY(0%); }
+        .curtain.exit { transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1); }
 
         /* ─── App Layout ─── */
         #app { position:relative; width:100%; height:100%; display:flex; justify-content:center; align-items:center; }
@@ -671,8 +688,15 @@ function showScreen(name) {
     currentScreen = name;
 }
 function triggerCurtain(cb) {
-    if (isCurtainActive) return; isCurtainActive = true; ui.curtain.classList.add('active');
-    setTimeout(() => { cb(); ui.curtain.classList.remove('active'); isCurtainActive = false; }, 300);
+    if (isCurtainActive) return; isCurtainActive = true; 
+    ui.curtain.classList.remove('exit');
+    ui.curtain.classList.add('active');
+    setTimeout(() => { 
+        cb(); 
+        ui.curtain.classList.remove('active'); 
+        ui.curtain.classList.add('exit');
+        setTimeout(() => { ui.curtain.classList.remove('exit'); isCurtainActive = false; }, 650);
+    }, 650);
 }
 
 if (startParam) joinLobby(startParam, false); else showScreen('START');
@@ -725,6 +749,8 @@ function passPotato(playerId) {
     currentTaskObj = pool[Math.floor(Math.random() * pool.length)] || { q: "Давай!", a: "", type: "answer" };
 
     updatePlayersBar();
+
+    ui.img.style.transition = 'filter .4s ease'; ui.img.style.transform = 'scale(1)'; ui.img.style.opacity = '1';
 
     if (playerId === currentUser.id) {
         // MY TURN
@@ -812,12 +838,22 @@ function validateAnswer() {
         return (nums && nums.includes(expected));
     }
     
-    // Match partial keywords
-    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 1);
-    if (expWords.length === 0) return given.includes(expected);
+    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
+    if (expWords.length === 0) return given === expected || given.includes(expected);
     
-    let match = expWords.some(w => given.includes(w) || w.includes(given.substring(0,4)));
-    if (match || given === expected) return true;
+    // given must contain a word that matches an expected word
+    let givenWords = given.split(/\s+/);
+    let match = expWords.some(ew => {
+        return givenWords.some(gw => {
+            if (gw.length < 3 && ew.length >= 3) return false;
+            if (gw === ew) return true;
+            if (gw.length >= 4 && ew.length >= 4) {
+               return ew.includes(gw.substring(0, 4)) || gw.includes(ew.substring(0, 4));
+            }
+            return false;
+        });
+    });
+    if (match || given === expected || given.includes(expected)) return true;
     return false;
 }
 
@@ -880,6 +916,29 @@ function gameLoop(time) {
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
+function createExplosionParticles() {
+    const rect = ui.container.getBoundingClientRect();
+    const cX = rect.left + rect.width / 2;
+    const cY = rect.top + rect.height / 2;
+    for(let i=0; i<35; i++){
+        let p = document.createElement('div');
+        p.style.position = 'fixed';
+        p.style.left = cX + 'px'; p.style.top = cY + 'px';
+        p.style.width = (10 + Math.random()*20) + 'px'; p.style.height = p.style.width;
+        p.style.background = ['#e86b62', '#f5a87f', '#4a3424', '#fff9f0', '#9dbdf2'][Math.floor(Math.random()*5)];
+        p.style.borderRadius = Math.random()>0.5 ? '50%' : '10%';
+        p.style.pointerEvents = 'none'; p.style.zIndex = '9999';
+        document.body.appendChild(p);
+        let ang = Math.random() * Math.PI*2, vel = 150 + Math.random()*300;
+        let tx = Math.cos(ang)*vel, ty = Math.sin(ang)*vel;
+        p.animate([
+            { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity:1 },
+            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${Math.random()*720}deg)`, opacity:0 }
+        ], { duration: 600 + Math.random()*600, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
+        setTimeout(()=>p.remove(), 1200);
+    }
+}
+
 function handleExplosion() {
     if (isExploding) return; isExploding = true;
     if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
@@ -887,21 +946,30 @@ function handleExplosion() {
     let dead = network.players.find(p => p.id === currentTurnPlayerId);
     if (dead) dead.isDead = true;
 
-    if (!dead || (dead.id === currentUser.id && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
-    else {
-        haptic('rigid');
-        ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
-        ui.task.style.color = 'var(--warm-red)'; ui.timer.style.opacity = '0'; ui.container.style.opacity = '0';
-        ui.curtain.style.background = 'rgba(255, 137, 132, 0.5)'; ui.curtain.classList.add('active');
-        setTimeout(() => { ui.curtain.classList.remove('active'); ui.curtain.style.background = 'var(--bg-color)'; }, 180);
-        updatePlayersBar();
-        let alive = network.players.filter(p => !p.isDead);
-        if (alive.length <= 1) setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
-        else setTimeout(() => {
-            globalTimer = 25 + Math.random() * 20; let next = alive[Math.floor(Math.random() * alive.length)];
-            triggerCurtain(() => { passPotato(next.id); if(next.id !== currentUser.id) network.startBotTimer(next.id); });
-        }, 2600);
-    }
+    haptic('rigid');
+    createExplosionParticles();
+    ui.img.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-out';
+    ui.img.style.transform = 'scale(2.5)';
+    ui.img.style.opacity = '0';
+    ui.task.style.opacity = '0';
+    ui.timer.style.opacity = '0';
+    ui.status.innerText = "BOOM!";
+    ui.status.style.color = "var(--warm-red)";
+
+    setTimeout(() => {
+        if (!dead || (dead.id === currentUser.id && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
+        else {
+            ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
+            ui.task.style.opacity = '1'; ui.task.style.color = 'var(--warm-red)'; ui.container.style.opacity = '0';
+            updatePlayersBar();
+            let alive = network.players.filter(p => !p.isDead);
+            if (alive.length <= 1) setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
+            else setTimeout(() => {
+                globalTimer = 25 + Math.random() * 20; let next = alive[Math.floor(Math.random() * alive.length)];
+                triggerCurtain(() => { passPotato(next.id); if(next.id !== currentUser.id) network.startBotTimer(next.id); });
+            }, 2600);
+        }
+    }, 1100);
 }
 
 // ── SWIPE ──
@@ -928,9 +996,34 @@ ui.container.addEventListener('mousedown', e=>startDrag(e.clientX,e.clientY));
 window.addEventListener('mousemove', e=>{ if(isDragging) moveDrag(e.clientX,e.clientY); });
 window.addEventListener('mouseup', endDrag);
 
-window.voteKick = function(b) { if(isGameOver || isExploding) return; currentVotes++;
-    if(currentVotes < requiredVotes) { b.innerText = T('votesNeeded', currentVotes, requiredVotes); b.style.transform = `scale(${1+currentVotes*.05})`; haptic('light'); }
-    else { b.innerText = T('voteAccepted'); b.style.opacity = '.5'; haptic('heavy'); personalTimer = 0; handleExplosion(); } };
+window.voteKick = function(b) { 
+    if(isGameOver || isExploding) return; 
+    
+    if (b.dataset.voted === 'true') return; // Prevent double vote from local player
+    b.dataset.voted = 'true';
+    b.style.pointerEvents = 'none';
+    currentVotes++;
+    
+    let check = () => {
+        if(currentVotes < requiredVotes) { 
+            b.innerText = T('votesNeeded', currentVotes, requiredVotes); 
+            b.style.transform = `scale(${1+currentVotes*.05})`; haptic('light'); 
+        } else { 
+            b.innerText = T('voteAccepted'); b.style.opacity = '.5'; haptic('heavy'); 
+            personalTimer = 0; handleExplosion(); 
+        } 
+    };
+    check();
+    
+    // Simulate bots voting if available
+    let bots = network.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId && p.id !== currentUser.id);
+    bots.forEach((bObj, idx) => {
+        setTimeout(() => {
+            if(isGameOver || isExploding) return;
+            currentVotes++; check();
+        }, 1000 + idx * 800);
+    });
+};
 
 function triggerGameOver(name) { isGameOver=true; if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} haptic('error');
     const alive = network.players.filter(p=>!p.isDead), go = document.getElementById('go-title'), ls = document.getElementById('loser-name');

@@ -1,264 +1,401 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Wet Potato</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* 3D Clay Palette based on nana banano style */
-            --bg-main: #d0aa9b;       /* Matt warm taupe background */
-            --card-bg: #f9f4ec;       /* Creamy off-white clay */
-            --text-primary: #5a4b46;  /* Deep warm brown */
-            --text-secondary: #907870;/* Lighter brown */
-            --accent-red: #d16b5a;    /* Warning red/pink */
-            --accent-green: #67b86b;  /* Action green */
-            
-            --btn-light: #cfa893;
-            --btn-dark: #bba699;
-            --btn-text: #ffffff;
-            
-            --avatar-1: #c4cae8; /* Soft blue */
-            --avatar-2: #dae8c4; /* Soft green */
-            --avatar-3: #e8c4c4; /* Soft pink */
-            --avatar-4: #e8dbc4; /* Soft yellow */
+            /* Upgraded Premium Dark Clay Palette */
+            --bg-color: #1a1818;       
+            --card-bg: #2b2725;        
+            --btn-peach: #fcb69a;      
+            --btn-mint: #9adbc7;       
+            --btn-purple: #c3addb;     
+            --text-light: #fff6ee;     
+            --text-dark: #1a1818;      
+            --text-muted: #857a76;     
+            --danger: #ff5454;
         }
 
         * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            user-select: none; -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            font-family: 'Quicksand', sans-serif; /* Rounded cute font */
-            overflow: hidden; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 20%, #2f2a28 0%, var(--bg-color) 80%);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
             touch-action: none;
         }
 
+        /* Фона больше нет */
+
+        /* Fade/Curtain Transition */
+        .curtain {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-color);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, background-color 0.2s;
+        }
+        .curtain.active {
+            opacity: 1;
+        }
+
         #app {
-            position: relative; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .screen {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s ease; padding: 20px;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 24px;
         }
-        .screen.active { opacity: 1; pointer-events: auto; }
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        #screen-game {
+            justify-content: flex-start;
+            padding-top: 50px;
+        }
 
-        /* The Thick Clay Frame Container */
-        .frame {
-            background: var(--card-bg);
+        /* 
+         * Soft Clay UI Components
+         */
+        .clay-card {
+            background-color: var(--card-bg);
             border-radius: 40px;
-            padding: 30px 20px;
-            width: 100%; max-width: 360px;
+            padding: 35px 25px;
             box-shadow: 
-                20px 20px 40px rgba(122, 94, 82, 0.4),
-                -10px -10px 20px rgba(255, 255, 255, 0.3),
-                inset 6px 6px 12px rgba(255, 255, 255, 1),
-                inset -6px -6px 12px rgba(0, 0, 0, 0.05);
-            transition: box-shadow 0.3s ease;
-        }
-        /* Glowing frame for YOUR TURN */
-        .frame.glow {
-            box-shadow: 
-                20px 20px 40px rgba(122, 94, 82, 0.4),
-                inset 0 0 50px rgba(245, 218, 157, 0.6),
-                inset 6px 6px 12px rgba(255, 255, 255, 1),
-                inset -6px -6px 12px rgba(0, 0, 0, 0.05);
+                15px 15px 35px rgba(0, 0, 0, 0.5),                 
+                inset 2px 2px 8px rgba(255, 255, 255, 0.06),     
+                inset -3px -3px 10px rgba(0, 0, 0, 0.3);         
+            border: 1px solid rgba(255,255,255,0.03);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        /* Typography */
-        .clay-title { font-size: 1.6rem; font-weight: 800; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
-        .clay-subtitle { font-size: 1rem; font-weight: 700; text-align: center; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Buttons & Inputs */
         .clay-btn {
-            border: none; border-radius: 14px; padding: 14px 10px; font-weight: 800; font-size: 0.95rem; text-transform: uppercase;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.15), inset 2px 2px 5px rgba(255,255,255,0.4), inset -2px -2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.1s; cursor: pointer; color: var(--btn-text); width: 100%;
+            border: none;
+            border-radius: 30px;
+            padding: 18px 26px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            box-shadow: 
+                8px 8px 20px rgba(0,0,0,0.4),
+                inset 3px 3px 8px rgba(255,255,255,0.5),
+                inset -3px -3px 8px rgba(0,0,0,0.15);
         }
-        .clay-btn:active { transform: scale(0.96); box-shadow: 2px 2px 5px rgba(0,0,0,0.15), inset 2px 2px 5px rgba(0,0,0,0.1); }
-        .clay-btn.light { background: var(--btn-light); }
-        .clay-btn.dark { background: var(--btn-dark); color: #fff; }
-        
-        .btn-row { display: flex; gap: 12px; width: 100%; margin-top: 15px; }
-
-        .clay-input {
-            background: #ffffff; border: none; outline: none; border-radius: 14px; padding: 14px;
-            font-size: 1.2rem; font-weight: 800; color: var(--text-primary); text-align: center; letter-spacing: 3px; text-transform: uppercase;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.06), inset -2px -2px 5px rgba(255,255,255,1);
-            width: 100%; margin-top: 10px; font-family: 'Quicksand', sans-serif;
-        }
-
-        /* Player Grid (2x2) */
-        .player-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; }
-        .player-card { display: flex; flex-direction: column; align-items: center; }
-        .avatar-container { position: relative; margin-bottom: 8px; }
-        .clay-coin {
-            width: 65px; height: 65px; border-radius: 50%;
-            color: var(--text-primary); font-weight: 800; font-size: 1.2rem;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.1), -2px -2px 6px rgba(255,255,255,0.7), inset 2px 2px 4px rgba(255,255,255,0.5), inset -2px -2px 4px rgba(0,0,0,0.1);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .clay-coin.dead { opacity: 0.3; filter: grayscale(1); }
-        .avatar-badge {
-            position: absolute; bottom: 0; right: -5px; background: var(--accent-green); color: white;
-            font-size: 0.65rem; font-weight: 800; padding: 3px 6px; border-radius: 10px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        .clay-btn:active {
+            transform: scale(0.95) translateY(2px);
+            box-shadow: 
+                3px 3px 10px rgba(0,0,0,0.3),
+                inset 5px 5px 10px rgba(0,0,0,0.2),
+                inset -2px -2px 5px rgba(255,255,255,0.25);
         }
 
-        .av-1 { background: var(--avatar-1); } .av-2 { background: var(--avatar-2); }
-        .av-3 { background: var(--avatar-3); } .av-4 { background: var(--avatar-4); }
-
-        /* Game Timers */
-        .timers-row { display: flex; justify-content: space-around; width: 100%; margin-top: 15px; }
-        .timer-col { text-align: center; }
-        .timer-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; opacity: 0.8; }
-        .timer-value { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-top: -3px; font-variant-numeric: tabular-nums; }
-
-        /* Task Pill & Pointer */
-        .task-container { position: relative; width: 100%; margin-top: 25px; }
-        .task-pill {
-            background: #ffffff; border-radius: 25px; padding: 14px 20px;
-            font-size: 1.05rem; font-weight: 700; text-align: center; line-height: 1.3;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05), inset 2px 2px 4px rgba(255,255,255,1), inset -1px -1px 4px rgba(0,0,0,0.03);
-            border: 2px solid #f9f0ea; position: relative; z-index: 5; transition: opacity 0.3s;
+        .input-code {
+            background-color: #2e2a29;
+            border: none;
+            outline: none;
+            border-radius: 20px;
+            padding: 16px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-light);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            width: 100%;
+            margin-bottom: 5px;
+            box-shadow: 
+                inset 4px 4px 10px rgba(0,0,0,0.4), 
+                inset -2px -2px 5px rgba(255,255,255,0.03);
+            font-family: 'Inter', sans-serif;
         }
-        .pointer-hand {
-            position: absolute; bottom: -10px; right: -15px;
-            font-size: 2.5rem; animation: bounceHand 1s ease-in-out infinite alternate; z-index: 10;
-        }
-        @keyframes bounceHand {
-            0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(-10px) translateY(-5px); }
+        .input-code::placeholder {
+            color: rgba(255,255,255,0.1);
         }
 
-        /* Generated image wrapper */
+        /* Typography & Layouts */
+        .logo-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--btn-peach);
+            text-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            margin-bottom: 10px;
+            box-shadow: inset 2px 2px 6px rgba(0,0,0,0.3), inset -1px -1px 3px rgba(255,255,255,0.02);
+            animation: showPlayer 0.3s ease-out;
+        }
+        @keyframes showPlayer {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .player-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--btn-purple);
+            color: var(--text-dark);
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.6), inset -2px -2px 5px rgba(0,0,0,0.2);
+        }
+        .player-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Game UI */
+        .players-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .p-avatar-mini {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3), inset -1px -1px 3px rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .p-avatar-mini.active {
+            box-shadow: 0 0 15px rgba(245, 188, 169, 0.4), inset 2px 2px 5px rgba(255,255,255,0.6);
+            background: var(--btn-peach);
+            color: var(--text-dark);
+            transform: scale(1.15);
+            z-index: 5;
+        }
+        .p-avatar-mini.dead {
+            opacity: 0.3;
+            transform: scale(0.9);
+            filter: grayscale(1);
+        }
+        .p-avatar-mini.dead::after {
+            content: "✖";
+            position: absolute;
+            color: var(--danger);
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .status-text {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 5px;
+            height: 20px;
+        }
+        .task-card {
+            color: var(--btn-peach);
+            font-size: 1.35rem; /* чуть крупнее для читабельности */
+            font-weight: 600;
+            transition: opacity 0.3s, color 0.3s;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.3;
+            margin-bottom: 5px;
+            padding: 20px 25px;
+        }
+        .personal-timer {
+            font-size: 5.5rem;
+            font-weight: 800;
+            color: var(--btn-purple);
+            text-shadow: 5px 5px 12px rgba(0,0,0,0.4);
+            margin: 5px 0 15px 0;
+            font-variant-numeric: tabular-nums;
+            transition: opacity 0.3s;
+        }
+
+        #potato-area {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         #potato-container {
-            width: 100%; min-height: 200px; display: flex; justify-content: center; align-items: center; position: relative; z-index: 50; cursor: grab;
+            width: 260px;
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
         }
-        #potato-container:active { cursor: grabbing; }
-        
-        #main-potato {
-            width: 220px; mix-blend-mode: multiply; transform-origin: center center;
-            /* Will be animated via JS */
+        #potato-pulse-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            will-change: transform;
+            cursor: grab;
+        }
+        #potato-pulse-wrapper:active {
+            cursor: grabbing;
         }
 
-        /* Curtain Transition */
-        .curtain {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--card-bg); z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
+        .potato-img {
+            width: 240px;
+            filter: drop-shadow(0px 20px 25px rgba(0, 0, 0, 0.5));
+            animation: floatPotato 4s ease-in-out infinite, slightRotate 8s linear infinite;
         }
-        .curtain.active { opacity: 1; }
+
+        @keyframes floatPotato {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes slightRotate {
+            0% { transform: rotate(-8deg); }
+            50% { transform: rotate(8deg); }
+            100% { transform: rotate(-8deg); }
+        }
     </style>
 </head>
 <body>
 
+    <!-- Общий слой затемнения -->
     <div class="curtain" id="curtain"></div>
 
     <div id="app">
-        <!-- FRAME 0: START -->
+        <!-- СТАРТ -->
         <div id="screen-start" class="screen active">
-            <div class="frame" style="text-align: center;">
-                <h1 class="clay-title">WET POTATO</h1>
-                <h3 class="clay-subtitle">PARTY GAME</h3>
-                
-                <img src="assets/potato.png" alt="Potato" style="width: 160px; mix-blend-mode: multiply; margin: 25px 0;">
-                
-                <button class="clay-btn light" id="btn-create-lobby">CREATE LOBBY</button>
-                <div style="margin: 20px 0;">
-                    <input type="text" id="join-code-input" class="clay-input" placeholder="CODE" maxlength="5">
-                </div>
-                <button class="clay-btn dark" id="btn-join-code">JOIN LOBBY</button>
+            <h1 class="logo-title">WET<br>POTATO</h1>
+            <button class="clay-btn" id="btn-create-lobby" style="background-color: var(--btn-peach); width: 100%; max-width: 320px; font-size: 1.15rem; padding: 20px; margin-bottom: 40px;">Создать лобби</button>
+            
+            <div class="clay-card">
+                <p style="margin-bottom: 5px; font-weight: 600; font-size: 0.95rem; color: var(--text-muted);">Или введите код комнаты</p>
+                <input type="text" id="join-code-input" class="input-code" placeholder="----" maxlength="5">
+                <button class="clay-btn" id="btn-join-code" style="background-color: var(--btn-purple); width: 100%;">Войти по коду</button>
             </div>
         </div>
 
-        <!-- FRAME 1: LOBBY - SETUP -->
+        <!-- ЛОББИ -->
         <div id="screen-lobby" class="screen">
-            <div class="frame">
-                <h1 class="clay-title" style="font-size: 1.3rem;">WET POTATO:</h1>
-                <h3 class="clay-subtitle" style="margin-bottom: 5px;">FRIENDLY GATHERING</h3>
-                <h3 class="clay-subtitle" style="font-size: 0.8rem; color: var(--accent-red);">ROOM: <span id="lobby-id-display"></span></h3>
+            <div class="clay-card">
+                <h2 style="color: var(--btn-peach); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;">Код лобби</h2>
+                <h1 id="lobby-id-display" style="font-size: 4rem; letter-spacing: 8px; margin: 0 0 20px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);"></h1>
                 
-                <div id="lobby-players" class="player-grid">
-                    <!-- Loaded dynamically -->
-                </div>
+                <div id="lobby-players" style="margin-bottom: 15px;"></div>
                 
-                <div class="clay-subtitle" id="players-count" style="font-size: 0.85rem;">PLAYERS: 1/4</div>
-                
-                <div class="btn-row">
-                    <button class="clay-btn light" id="btn-invite">[INVITE]</button>
-                    <button class="clay-btn dark" id="btn-start-game" style="display:none;">[START]</button>
-                </div>
-                <div id="wait-host-msg" class="clay-subtitle" style="display:none; margin-top: 15px; font-size: 0.8rem;">WAITING FOR OWNER...</div>
+                <button class="clay-btn" id="btn-invite" style="background-color: var(--btn-purple); width: 100%;">Пригласить друзей</button>
+                <button class="clay-btn" id="btn-start-game" style="display:none; background-color: var(--btn-mint); width: 100%; color: var(--text-dark); margin-top: 15px;">Начать игру</button>
+                <div id="wait-host-msg" style="display:none; color: var(--text-muted); font-size: 0.9rem; margin-top: 15px;">Ожидание создателя...</div>
             </div>
         </div>
 
-        <!-- FRAME 2 & 3: GAME / SPECTATE -->
+        <!-- ИГРА -->
         <div id="screen-game" class="screen">
-            <div id="game-frame" class="frame glow" style="display: flex; flex-direction: column; align-items: center;">
-                <!-- Header -->
-                <h1 id="game-title" class="clay-title">YOUR TURN</h1>
-                <h3 id="game-subtitle" class="clay-subtitle" style="margin-bottom: 20px;">Name, P1</h3>
-                
-                <!-- Potato Physics Area -->
-                <div id="potato-container">
-                    <img src="assets/potato.png" id="main-potato" alt="Wet Potato">
-                </div>
-                
-                <!-- Timers -->
-                <div class="timers-row">
-                    <div class="timer-col">
-                        <div class="timer-label">GAME TIMER:</div>
-                        <div class="timer-value" id="global-timer-display">00:00</div>
+            <div id="players-bar" class="players-bar"></div>
+            
+            <div id="status-text" class="status-text">Ожидание...</div>
+            <div id="task-display" class="clay-card task-card" style="opacity: 0;"></div>
+            <div id="personal-timer" class="personal-timer" style="opacity: 0;">10.0</div>
+            
+            <div id="potato-area">
+                <div id="potato-container" style="opacity: 0; transform: scale(0);">
+                    <div id="potato-pulse-wrapper">
+                        <img src="assets/image-Photoroom.png" class="potato-img" alt="Potato">
                     </div>
-                    <div class="timer-col">
-                        <div class="timer-label" id="personal-label" style="color: var(--accent-red);">PERSONAL TIMER:</div>
-                        <div class="timer-value" id="personal-timer-display" style="color: var(--accent-red);">00:00</div>
-                    </div>
-                </div>
-                
-                <!-- Task Payload -->
-                <div class="task-container">
-                    <div class="task-pill" id="task-display">TASK: ...</div>
-                    <div class="pointer-hand" id="pointer-hand">👈</div>
                 </div>
             </div>
         </div>
 
-        <!-- FRAME 4: ACTION / GAMEOVER -->
+        <!-- GAMEOVER -->
         <div id="screen-gameover" class="screen">
-            <div class="frame" style="text-align: center;">
-                <h1 id="go-title" class="clay-title">POTATO UNSTABLE</h1>
-                
-                <div style="height: 180px; display:flex; justify-content:center; align-items:center; position: relative;">
-                    <!-- Filter makes it look destroyed / white flash -->
-                    <img src="assets/potato.png" style="width: 160px; mix-blend-mode: multiply; filter: contrast(1.5) hue-rotate(90deg);">
-                </div>
-                
-                <h2 id="loser-name" class="clay-title" style="margin: 15px 0 25px 0; font-size: 1.4rem; color: var(--accent-red);">DANA IS WET!</h2>
-                <button class="clay-btn dark" id="btn-to-lobby">BACK TO LOBBY</button>
+            <div class="clay-card">
+                <h1 id="go-title" style="color: var(--danger); font-size: 3.5rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">BOOM!</h1>
+                <h2 id="loser-name" style="margin: 10px 0 25px 0; color: var(--text-light); font-size: 1.4rem;"></h2>
+                <button class="clay-btn" id="btn-to-lobby" style="background-color: var(--btn-peach); width: 100%;">В меню</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Блок нативных свайпов
         document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
+        // Telegram WebApp Setup
         const tg = window.Telegram?.WebApp || {};
-        if(tg.initData) { tg.expand(); tg.enableClosingConfirmation(); }
+        const isTg = !!tg.initData;
+        if(isTg) {
+            tg.expand();
+            tg.enableClosingConfirmation();
+        }
 
-        const AVATAR_COLORS = ['av-1', 'av-2', 'av-3', 'av-4', 'av-1'];
-
+        // Utils
         function generateCode() {
             let res = '';
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -268,57 +405,117 @@
 
         let initData = tg.initDataUnsafe || {};
         let startParam = initData.start_param || null;
-        if (!startParam && window.location.search.includes('startapp=')) startParam = new URLSearchParams(window.location.search).get('startapp');
+        if (!startParam && window.location.search.includes('startapp=')) {
+            startParam = new URLSearchParams(window.location.search).get('startapp');
+        }
 
-        let currentUser = initData.user || { id: Math.floor(Math.random() * 100000), first_name: "User", shortInit: "ME" };
+        let currentUser = initData.user || {
+            id: Math.floor(Math.random() * 100000),
+            first_name: "Вы",
+            shortInit: "ВЫ"
+        };
         currentUser.shortInit = currentUser.first_name.substring(0,2).toUpperCase();
 
+        // --- Adrenaline Task Engine (50 Panic Tasks) ---
         const tasks = [
-            "Реши уравнение: 15 + 18?", "Назови 3 красных фрукта!", "Быстро скажи слово на 'Ц'!", "Назови столицу Японии!", 
-            "Сколько лап у паука?", "Назови 3 бренда кроссовок!", "Умножь 7 на 8?", "Скажи свое имя наоборот!", 
-            "Назови 3 марки телефонов!", "Вспомни 3 имени на 'А'!", "Реши: 45 минус 17?", "Какая планета у Солнца?", 
-            "Быстро 5 нечетных чисел!", "Назови 3 столицы Европы!", "Сколько кг в тонне?", "Назови 3 супергероев!", 
-            "Дней в високосном году?", "Букв в слове 'Картошка'?", "7 плюс 6 умножить на 2?", "Любой женский бренд?", 
-            "Цвет флага по центру РФ?", "12 умножить на 5?", "Назови 3 вида сыра!", "Какой сейчас месяц наоборот?", 
-            "Назови 3 немецких авто!", "Главный герой Фиксиков?", "64 разделить на 8?", "Назови 3 станции метро!", 
-            "50 + 75?", "Валюта в Японии?", "Три слова на 'М'!", "Назови 3 социальных сети!", 
-            "Синий + Желтый?", "100 минус 38?", "Что больше: 1/2 или 0.6?", "Назови 3 реки в России!", 
-            "Отсчет: от 15 до 10!", "Самый быстрый зверь?", "Спутник Земли?", "Назови 3 мебели!", 
-            "13 + 19?", "Цвет лого Telegram?", "Фрукт на 'К'?", "Колес у фуры?", 
-            "Сколько материков?", "Алфавит англ. до 'E'!", "4 умножить на 12?", "3 породы больших собак!", 
-            "Три породы кошек!", "70 - 25?"
+            "Реши уравнение: 15 + 18?",
+            "Назови 3 красных фрукта!",
+            "Быстро скажи любое слово на 'Ц'!",
+            "Назови столицу Японии!",
+            "Сколько лап у паука?",
+            "Назови 3 бренда кроссовок!",
+            "Умножь 7 на 8?",
+            "Скажи свое имя наоборот!",
+            "Назови 3 марки телефонов!",
+            "Вспомни 3 имени на букву 'А'!",
+            "Реши: 45 минус 17?",
+            "Назови планету, ближайшую к Солнцу!",
+            "Быстро скажи 5 нечетных чисел!",
+            "Назови 3 столицы в Европе!",
+            "Сколько кг в одной тонне?",
+            "Быстро назови 3 супергероев!",
+            "Сколько дней в високосном году?",
+            "Сколько букв в слове 'Картошка'?",
+            "7 плюс 6 умножить на 2?",
+            "Скажи любой женский бренд одежды!",
+            "Какого цвета средняя полоса флага РФ?",
+            "Сколько будет 12 умножить на 5?",
+            "Быстро назови 3 вида сыра!",
+            "Какой сейчас месяц наоборот?",
+            "Назови 3 марки немецких авто!",
+            "Как зовут главного героя Фиксиков?",
+            "Быстро: 64 разделить на 8?",
+            "Назови 3 станции метро!",
+            "Сколько будет 50 + 75?",
+            "Какая валюта в Японии?",
+            "Быстро скажи три слова на букву 'М'!",
+            "Назови 3 социальных сети!",
+            "Что получится, если смешать синий и желтый?",
+            "Реши: 100 минус 38?",
+            "Что больше: 1/2 или 0.6?",
+            "Назови 3 реки в России!",
+            "Быстро считай назад: от 15 до 10!",
+            "Назови самого быстрого зверя!",
+            "Как называется спутник Земли?",
+            "Назови 3 предмета мебели!",
+            "Быстро реши: 13 + 19?",
+            "Какого цвета логотип Telegram?",
+            "Назови любой фрукт на букву 'К'!",
+            "Сколько колес у грузовика с прицепом?",
+            "Сколько материков на планете?",
+            "Скажи английский алфавит до 'E'!",
+            "Быстро: 4 умножить на 12?",
+            "Назови 3 породы больших собак!",
+            "Быстро скажи три породы кошек!",
+            "Реши: 70 - 25?"
         ];
 
         class NetworkManager {
             constructor() {
-                this.lobbyId = null; this.players = []; this.isHost = false;
-                this.botTimers = []; this.botPassBack = null;
+                this.lobbyId = null;
+                this.players = [];
+                this.isHost = false;
+                this.botTimers = [];
+                this.botPassBack = null;
             }
 
             connect(lobbyId, isHost = false) {
-                this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
+                this.lobbyId = lobbyId.toUpperCase();
+                this.isHost = isHost;
                 
-                this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost: isHost, isDead: false, localId: 'P1' });
+                this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost: isHost, isDead: false });
                 updateLobbyUI();
 
                 if (isHost) {
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 2, name: "Ксюшка", initials: "КС", isHost: false, isDead: false, localId: 'P2' }); updateLobbyUI(); }, 1200));
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 3, name: "Иван", initials: "ИВ", isHost: false, isDead: false, localId: 'P3' }); updateLobbyUI(); }, 2800));
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 4, name: "Дана", initials: "ДА", isHost: false, isDead: false, localId: 'P4' }); updateLobbyUI(); }, 3800));
+                    this.botTimers.push(setTimeout(() => {
+                        this.players.push({ id: 2, name: "Иван (Bot)", initials: "ИВ", isHost: false, isDead: false });
+                        updateLobbyUI();
+                        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                    }, 1200));
+                    this.botTimers.push(setTimeout(() => {
+                        this.players.push({ id: 3, name: "Ксюша (Bot)", initials: "КС", isHost: false, isDead: false });
+                        updateLobbyUI();
+                        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                    }, 2800));
                 } else {
-                    this.players.push({ id: 999, name: "Host", initials: "H", isHost: true, isDead: false, localId: 'P2' });
+                    this.players.push({ id: 999, name: "Лобби Хост", initials: "ХО", isHost: true, isDead: false });
                     updateLobbyUI();
-                    this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 4000));
+                    
+                    this.botTimers.push(setTimeout(() => {
+                        if (currentScreen === 'LOBBY') startRound();
+                    }, 4000));
                 }
             }
 
             sendPotato() {
                 let aliveBots = this.players.filter(p => !p.isDead && p.id !== currentUser.id);
                 if (aliveBots.length === 0) return; 
+                
                 let bot = aliveBots[Math.floor(Math.random() * aliveBots.length)];
                 
                 triggerCurtain(() => {
                     setTurn(bot.id);
+                    // Бот держит от 2 до 4 секунд
                     let delay = 2000 + Math.random() * 2000;
                     this.botPassBack = setTimeout(() => {
                         if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === bot.id) {
@@ -328,31 +525,35 @@
                 });
             }
 
-            clearBotTimers() { this.botTimers.forEach(t => clearTimeout(t)); if (this.botPassBack) clearTimeout(this.botPassBack); }
+            clearBotTimers() {
+                this.botTimers.forEach(t => clearTimeout(t));
+                if (this.botPassBack) clearTimeout(this.botPassBack);
+            }
         }
 
+        // --- Core State ---
         let network = new NetworkManager();
         let currentScreen = 'START';
-        let isGameOver = false; let isCurtainActive = false;
+        let isGameOver = false;
+        let isCurtainActive = false;
         
-        let globalTimer = 0; let personalTimer = 0; 
-        let currentTurnPlayerId = null; let currentTaskString = "";
+        let globalTimer = 0; 
+        let personalTimer = 0; 
+        let currentTurnPlayerId = null;
+        let currentTaskString = "";
         
-        let pulsePhase = 0; let lastTime = performance.now();
-        let lastTimeStrP = "00:00"; let lastTimeStrG = "00:00";
+        let pulsePhase = 0;
+        let lastTime = performance.now();
+        let lastTimeStrDisplay = "10.0";
 
         const ui = {
             curtain: document.getElementById('curtain'),
-            gTitle: document.getElementById('game-title'),
-            gSubtitle: document.getElementById('game-subtitle'),
-            gFrame: document.getElementById('game-frame'),
+            statusText: document.getElementById('status-text'),
             taskDisplay: document.getElementById('task-display'),
-            pTimer: document.getElementById('personal-timer-display'),
-            gTimer: document.getElementById('global-timer-display'),
-            pLabel: document.getElementById('personal-label'),
-            potatoContainer: document.getElementById('potato-container'),
-            potato: document.getElementById('main-potato'),
-            pointer: document.getElementById('pointer-hand')
+            personalTimer: document.getElementById('personal-timer'),
+            wrapper: document.getElementById('potato-pulse-wrapper'),
+            container: document.getElementById('potato-container'),
+            playersBar: document.getElementById('players-bar')
         };
 
         function showScreen(name) {
@@ -362,21 +563,25 @@
         }
 
         function triggerCurtain(callback) {
-            if(isCurtainActive) return; isCurtainActive = true;
+            if(isCurtainActive) return;
+            isCurtainActive = true;
             ui.curtain.classList.add('active');
-            setTimeout(() => { callback(); ui.curtain.classList.remove('active'); isCurtainActive = false; }, 300);
+            setTimeout(() => {
+                callback();
+                ui.curtain.classList.remove('active');
+                isCurtainActive = false;
+            }, 300);
         }
 
-        function formatTimerStr(secs) {
-            let s = Math.max(0, Math.floor(secs));
-            return `00:${s.toString().padStart(2, '0')}`;
-        }
-
-        if (startParam) joinLobby(startParam, false); else showScreen('START');
+        if (startParam) joinLobby(startParam, false);
+        else showScreen('START');
 
         document.getElementById('btn-create-lobby').addEventListener('click', () => joinLobby(generateCode(), true));
+
+        const codeInput = document.getElementById('join-code-input');
+        codeInput.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
         document.getElementById('btn-join-code').addEventListener('click', () => {
-            let val = document.getElementById('join-code-input').value.trim().toUpperCase();
+            let val = codeInput.value.trim();
             if(val.length > 0) joinLobby(val, false);
         });
 
@@ -389,118 +594,142 @@
         }
 
         function updateLobbyUI() {
-            let list = document.getElementById('lobby-players'); list.innerHTML = '';
-            network.players.forEach((p, idx) => {
-                let badgeTxt = p.localId;
-                if(p.isHost) badgeTxt += ", Host";
+            let list = document.getElementById('lobby-players');
+            list.innerHTML = '';
+            network.players.forEach(p => {
                 list.innerHTML += `
-                    <div class="player-card">
-                        <div class="avatar-container">
-                            <div class="clay-coin ${AVATAR_COLORS[idx%4]}">${p.initials}</div>
-                            <div class="avatar-badge">${badgeTxt}</div>
-                        </div>
-                        <div class="clay-subtitle" style="font-size: 0.8rem; letter-spacing:0.5px;">${p.name}</div>
+                    <div class="player-row">
+                        <div class="player-avatar">${p.initials}</div>
+                        <div class="player-name">${p.name} ${p.isHost ? '(Host)' : ''}</div>
                     </div>`;
             });
-            document.getElementById('players-count').innerText = `PLAYERS: ${network.players.length}/4`;
         }
 
         document.getElementById('btn-invite').addEventListener('click', () => {
              if (tg.switchInlineQuery) tg.switchInlineQuery(network.lobbyId, ["users", "groups"]);
+             else alert("Скопируй ссылку: https://t.me/your_bot?startapp=" + network.lobbyId);
         });
+
         document.getElementById('btn-start-game').addEventListener('click', () => startRound());
+
+        // --- GAME LOGIC ---
+
+        function updatePlayersBar() {
+            ui.playersBar.innerHTML = '';
+            network.players.forEach(p => {
+                let activeClass = p.id === currentTurnPlayerId ? 'active' : '';
+                let deadClass = p.isDead ? 'dead' : '';
+                ui.playersBar.innerHTML += `<div class="p-avatar-mini ${activeClass} ${deadClass}">${p.initials}</div>`;
+            });
+        }
 
         function setTurn(playerId) {
             currentTurnPlayerId = playerId;
-            personalTimer = 10; pulsePhase = 0;
+            personalTimer = 10;
+            pulsePhase = 0;
+            
+            // 2. Отображение задания синхронно
             currentTaskString = tasks[Math.floor(Math.random() * tasks.length)];
             
-            let p = network.players.find(x => x.id === playerId);
-            let pName = p ? p.name : 'Unknown'; let pId = p ? p.localId : 'P?';
+            updatePlayersBar();
             
             if (playerId === currentUser.id) {
-                // MY TURN
-                ui.gFrame.classList.add('glow');
-                ui.gTitle.innerText = "YOUR TURN";
-                ui.gSubtitle.innerText = `${pName}, ${pId}`;
+                // Мой ход
+                ui.taskDisplay.innerHTML = `<span style="font-size:0.95rem; color:var(--text-muted); display:block; margin-bottom:8px; letter-spacing: 2px;">ЗАДАНИЕ:</span><span style="font-size: 1.4rem;">${currentTaskString}</span>`;
+                ui.taskDisplay.style.opacity = '1';
+                ui.taskDisplay.style.color = 'var(--btn-peach)';
                 
-                ui.taskDisplay.innerText = `TASK: ${currentTaskString}`;
-                ui.taskDisplay.style.color = "var(--text-primary)";
-                ui.pointer.style.display = "block";
-                
-                ui.pTimer.style.color = "var(--accent-red)";
-                ui.pLabel.style.color = "var(--accent-red)";
-                
-                // Reset container trans offset, reset potato scale
-                ui.potatoContainer.style.transition = 'none';
-                ui.potatoContainer.style.transform = `translate(0, -${window.innerHeight/2}px)`;
-                void ui.potatoContainer.offsetWidth; // flush
-                
-                ui.potatoContainer.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                ui.potatoContainer.style.transform = `translate(0px, 0px)`;
-                
-                ui.potato.style.transform = `scale(1) rotate(0deg)`;
-                ui.potato.style.opacity = '1';
+                ui.personalTimer.style.opacity = '1';
+                ui.statusText.innerText = "ТВОЙ ХОД!";
+                ui.statusText.style.color = 'var(--btn-mint)'; // Highlight self text
                 
                 if (window.Telegram?.WebApp?.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+                
+                ui.container.style.transition = 'none';
+                ui.container.style.transform = `translate(0, -${window.innerHeight/2}px) scale(0.5)`;
+                ui.container.style.opacity = '0';
+                void ui.container.offsetWidth; 
+                
+                ui.container.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
+                ui.container.style.transform = `translate(0px, 0px) scale(1)`;
+                ui.container.style.opacity = '1';
             } else {
-                // ACTION / SPECTATE
-                ui.gFrame.classList.remove('glow');
-                ui.gTitle.innerText = "ACTION";
-                ui.gSubtitle.innerText = `TRANSFER TO ${pName.toUpperCase()}`;
+                // Чужой ход - Spectator Mode Fix
+                let pName = network.players.find(p => p.id === playerId)?.name || 'Игрок';
+                ui.taskDisplay.innerHTML = `<span style="font-size:0.95rem; color:var(--text-muted); display:block; margin-bottom:8px; letter-spacing: 2px;">РЕШАЕТ ${pName.toUpperCase()}:</span><span style="font-size: 1.25rem;">${currentTaskString}</span>`;
+                ui.taskDisplay.style.opacity = '1';
+                ui.taskDisplay.style.color = 'var(--text-light)';
                 
-                ui.taskDisplay.innerHTML = `<span style="color: var(--accent-green)">TASK: ${currentTaskString}</span>`;
-                ui.pointer.style.display = "none";
+                ui.personalTimer.style.opacity = '0.7';
+                ui.statusText.innerText = "ЧУЖОЙ ХОД";
+                ui.statusText.style.color = 'var(--text-muted)';
                 
-                ui.pTimer.style.color = "var(--text-primary)";
-                ui.pLabel.style.color = "var(--text-secondary)";
-                
-                ui.potatoContainer.style.transition = 'transform 0.4s ease';
-                ui.potatoContainer.style.transform = `translate(0px, 0px)`;
-                
-                ui.potato.style.transform = `scale(0.6) rotate(30deg)`;
-                ui.potato.style.opacity = '0.9';
+                ui.container.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease';
+                ui.container.style.transform = `translate(0px, 0px) scale(0.65)`;
+                ui.container.style.opacity = '0.6';
             }
         }
 
         function startRound() {
-            isGameOver = false; globalTimer = 20 + Math.random() * 25; 
+            isGameOver = false;
+            globalTimer = 20 + Math.random() * 25; 
             network.players.forEach(p => p.isDead = false);
-            showScreen('GAME'); setTurn(currentUser.id);
-            lastTime = performance.now(); requestAnimationFrame(gameLoop);
+            
+            ui.statusText.innerText = "Подготовка...";
+            ui.taskDisplay.style.opacity = '0';
+            ui.personalTimer.style.opacity = '0';
+            ui.container.style.opacity = '0';
+            
+            showScreen('GAME');
+            setTurn(currentUser.id);
+
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
         }
 
         function gameLoop(time) {
-            if (currentScreen !== 'GAME' || isGameOver) { lastTime = time; if(!isGameOver) requestAnimationFrame(gameLoop); return; }
-            let dt = (time - lastTime) / 1000; if (dt > 0.1) dt = 0.1; lastTime = time;
+            if (currentScreen !== 'GAME' || isGameOver) {
+                lastTime = time;
+                if(!isGameOver) requestAnimationFrame(gameLoop);
+                return;
+            }
 
-            globalTimer -= dt; personalTimer -= dt;
+            let dt = (time - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1;
+            lastTime = time;
+
+            globalTimer -= dt;
+            personalTimer -= dt;
             
-            let isMe = currentTurnPlayerId === currentUser.id;
-            updatePulse(dt, isMe);
+            updatePulse(dt, currentTurnPlayerId === currentUser.id);
 
-            let tP = formatTimerStr(personalTimer);
-            let tG = formatTimerStr(globalTimer);
-            if (tP !== lastTimeStrP) { ui.pTimer.innerText = tP; lastTimeStrP = tP; }
-            if (tG !== lastTimeStrG) { ui.gTimer.innerText = tG; lastTimeStrG = tG; }
+            let tStr = Math.max(0, personalTimer).toFixed(1);
+            if (tStr !== lastTimeStrDisplay) {
+                ui.personalTimer.innerText = tStr;
+                lastTimeStrDisplay = tStr;
+            }
 
-            if (personalTimer <= 0 || globalTimer <= 0) { handleExplosion(); return; }
+            if (personalTimer <= 0 || globalTimer <= 0) {
+                handleExplosion();
+                return;
+            }
+
             requestAnimationFrame(gameLoop);
         }
 
         function updatePulse(dt, isMyTurn) {
             let speedMult = 1 + (10 - Math.max(0, personalTimer)) * 0.3;
             let pulseRate = Math.PI * 2 * speedMult;
-            let oldPhase = pulsePhase; pulsePhase += dt * pulseRate;
             
-            let pScale = 1 + Math.sin(pulsePhase) * 0.04;
-            let pRot = Math.cos(pulsePhase * 2) * 3;
+            let oldPhase = pulsePhase;
+            pulsePhase += dt * pulseRate;
             
-            if (isMyTurn) ui.potato.style.transform = `scale(${pScale}) rotate(${pRot}deg)`;
-            else ui.potato.style.transform = `scale(${0.6 * pScale}) rotate(${30 + pRot}deg)`;
+            let scale = 1 + Math.sin(pulsePhase) * 0.08;
+            ui.wrapper.style.transform = `scale(${scale})`;
             
             let oldCycle = Math.floor(oldPhase / (Math.PI * 2));
             let newCycle = Math.floor(pulsePhase / (Math.PI * 2));
+            
             if (isMyTurn && newCycle > oldCycle && window.Telegram?.WebApp?.HapticFeedback) {
                 if (personalTimer > 6) tg.HapticFeedback.impactOccurred('light');
                 else if (personalTimer > 3) tg.HapticFeedback.impactOccurred('medium');
@@ -514,90 +743,126 @@
             if (deadPlayer) deadPlayer.isDead = true;
 
             if (!deadPlayer || deadPlayer.id === currentUser.id) {
-                triggerGameOver(deadPlayer ? deadPlayer.name : "YOU");
+                triggerGameOver(deadPlayer ? deadPlayer.name : "Вы");
             } else {
                 if (window.Telegram?.WebApp?.HapticFeedback) tg.HapticFeedback.impactOccurred('rigid');
                 
-                ui.gTitle.innerText = "POTATO UNSTABLE";
-                ui.gSubtitle.innerText = `${deadPlayer.name.toUpperCase()} HAS EXPLODED!`;
-                ui.gSubtitle.style.color = "var(--accent-red)";
+                ui.taskDisplay.innerHTML = `<span style="font-size: 1.4rem;">${deadPlayer.name} СГОРЕЛ!</span>`;
+                ui.taskDisplay.style.color = 'var(--danger)';
+                ui.taskDisplay.style.opacity = '1';
+                ui.personalTimer.style.opacity = '0';
+                ui.container.style.opacity = '0';
                 
-                ui.potato.style.transform = 'scale(0) rotate(180deg)';
-                ui.taskDisplay.innerText = "EXPLODED!";
-                
+                ui.curtain.style.backgroundColor = 'var(--danger)';
+                ui.curtain.classList.add('active');
                 setTimeout(() => { 
-                    ui.gSubtitle.style.color = "var(--text-secondary)";
-                    let alivePlayers = network.players.filter(p => !p.isDead);
-                    if (alivePlayers.length <= 1) { setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 1000); } 
-                    else { globalTimer = 20 + Math.random() * 25; triggerCurtain(() => setTurn(currentUser.id)); }
-                }, 2000);
+                    ui.curtain.classList.remove('active'); 
+                    ui.curtain.style.backgroundColor = 'var(--bg-color)'; 
+                }, 150);
+                
+                updatePlayersBar();
+                
+                let alivePlayers = network.players.filter(p => !p.isDead);
+                if (alivePlayers.length <= 1) {
+                    setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2000);
+                } else {
+                    setTimeout(() => {
+                        globalTimer = 20 + Math.random() * 25; 
+                        triggerCurtain(() => setTurn(currentUser.id));
+                    }, 2500);
+                }
             }
         }
 
-        /* --- Input Physics --- */
-        let isDragging = false; let startX=0, startY=0, curX=0, curY=0;
+        // --- Движение и Свайпы (Touch + Desktop) ---
+        let isDragging = false;
+        let startX=0, startY=0, curX=0, curY=0;
 
-        function handleDragStart(cx, cy) {
+        function handleDragStart(clientX, clientY) {
             if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return false;
-            isDragging = true; startX = cx; startY = cy; curX = cx; curY = cy;
-            ui.potatoContainer.style.transition = 'none';
+            isDragging = true;
+            startX = clientX;
+            startY = clientY;
+            curX = startX;
+            curY = startY;
+            ui.container.style.transition = 'none';
         }
 
-        function handleDragMove(cx, cy) {
+        function handleDragMove(clientX, clientY) {
             if (!isDragging) return;
-            curX = cx; curY = cy;
-            ui.potatoContainer.style.transform = `translate(${(curX - startX)}px, ${(curY - startY)}px)`;
+            curX = clientX;
+            curY = clientY;
+            ui.container.style.transform = `translate(${(curX - startX) * 0.5}px, ${(curY - startY) * 0.5}px)`;
         }
 
         function handleDragEnd() {
-            if (!isDragging) return; isDragging = false;
-            let dx = curX - startX; let dy = curY - startY; let dist = Math.hypot(dx, dy);
+            if (!isDragging) return;
+            isDragging = false;
             
-            if (dist > 50) localPassPotato(Math.atan2(dy, dx));
-            else {
-                ui.potatoContainer.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                ui.potatoContainer.style.transform = 'translate(0px, 0px)';
-                setTimeout(() => ui.potatoContainer.style.transition = 'none', 400);
+            let dx = curX - startX;
+            let dy = curY - startY;
+            let dist = Math.hypot(dx, dy);
+            
+            if (dist > 40) {
+                localPassPotato(Math.atan2(dy, dx));
+            } else {
+                ui.container.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                ui.container.style.transform = 'translate(0px, 0px)';
+                setTimeout(() => ui.container.style.transition = 'none', 400);
             }
         }
 
-        ui.potatoContainer.addEventListener('touchstart', e => handleDragStart(e.touches[0].clientX, e.touches[0].clientY), {passive:false});
+        ui.container.addEventListener('touchstart', e => handleDragStart(e.touches[0].clientX, e.touches[0].clientY), {passive:false});
         window.addEventListener('touchmove', e => { if(isDragging) handleDragMove(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
         window.addEventListener('touchend', e => handleDragEnd());
-        ui.potatoContainer.addEventListener('mousedown', e => handleDragStart(e.clientX, e.clientY));
+        
+        ui.container.addEventListener('mousedown', e => handleDragStart(e.clientX, e.clientY));
         window.addEventListener('mousemove', e => { if (isDragging) handleDragMove(e.clientX, e.clientY); });
         window.addEventListener('mouseup', e => handleDragEnd());
 
         function localPassPotato(angle) {
             if (currentTurnPlayerId !== currentUser.id) return;
-            ui.taskDisplay.innerText = "THROWING...";
+            
+            ui.taskDisplay.style.opacity = '0';
+            ui.personalTimer.style.opacity = '0';
+            ui.statusText.innerText = "Улетает...";
+            
             if (window.Telegram?.WebApp?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             
             let flyDist = window.innerWidth * 1.5;
-            ui.potatoContainer.style.transition = 'transform 0.4s ease-out';
-            ui.potatoContainer.style.transform = `translate(${Math.cos(angle)*flyDist}px, ${Math.sin(angle)*flyDist}px)`;
+            ui.container.style.transition = 'transform 0.4s ease-out, opacity 0.3s ease';
+            ui.container.style.transform = `translate(${Math.cos(angle)*flyDist}px, ${Math.sin(angle)*flyDist}px) scale(0.3)`;
+            ui.container.style.opacity = '0';
             
             network.sendPotato();
         }
 
+        // --- GAMEOVER ---
         function triggerGameOver(loserName) {
             isGameOver = true;
-            if (window.Telegram?.WebApp?.HapticFeedback) { tg.HapticFeedback.impactOccurred('rigid'); tg.HapticFeedback.notificationOccurred('error'); }
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('rigid');
+                tg.HapticFeedback.notificationOccurred('error');
+            }
             
             if (loserName === "LAST_SURVIVOR") {
-                document.getElementById('go-title').innerText = "VICTORY";
-                document.getElementById('loser-name').innerText = "YOU SURVIVED!";
-                document.getElementById('loser-name').style.color = "var(--accent-green)";
+                document.getElementById('go-title').innerText = "ПОБЕДА";
+                document.getElementById('go-title').style.color = "var(--btn-mint)";
+                document.getElementById('loser-name').innerText = "Остался только ты!";
             } else {
-                document.getElementById('go-title').innerText = "POTATO UNSTABLE";
-                document.getElementById('loser-name').innerText = `${loserName.toUpperCase()} IS WET!`;
-                document.getElementById('loser-name').style.color = "var(--accent-red)";
+                document.getElementById('go-title').innerText = "BOOM!";
+                document.getElementById('go-title').style.color = "var(--danger)";
+                document.getElementById('loser-name').innerText = `${loserName} ВЗОРВАЛСЯ!`;
             }
+
             showScreen('GAMEOVER');
         }
 
-        document.getElementById('btn-to-lobby').addEventListener('click', () => { network.clearBotTimers(); network = new NetworkManager(); initApp(); });
-        function initApp() { if (startParam) joinLobby(startParam, false); else showScreen('START'); }
+        document.getElementById('btn-to-lobby').addEventListener('click', () => {
+            network.clearBotTimers(); 
+            network = new NetworkManager();
+            initApp();
+        });
 
     </script>
 </body>

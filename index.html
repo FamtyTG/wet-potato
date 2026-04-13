@@ -545,10 +545,15 @@
                 let target = aliveBots[Math.floor(Math.random() * aliveBots.length)];
                 
                 triggerCurtain(() => {
+                    isProcessingTurn = false;
                     setTurn(target.id);
                     if (target.id !== currentUser.id) {
                         this.startBotTimer(target.id);
                     }
+                    
+                    lastTime = performance.now();
+                    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                    gameLoopId = requestAnimationFrame(gameLoop);
                 });
             }
 
@@ -654,6 +659,7 @@
 
         let currentTaskAnswer = "";
         let isExploding = false;
+        let isProcessingTurn = false;
         let currentVotes = 0;
         let requiredVotes = 1;
 
@@ -671,8 +677,8 @@
             // 2. Отображение задания синхронно
             let pool = cfg.tasks;
             let currentTask = pool[Math.floor(Math.random() * pool.length)];
-            currentTaskString = currentTask.q;
-            currentTaskAnswer = currentTask.a;
+            currentTaskString = currentTask?.q || "БЫСТРЕЙ! ДУМАЙ!";
+            currentTaskAnswer = currentTask?.a || "СДЕЛАЙ ЭТО!";
             
             updatePlayersBar();
             
@@ -784,6 +790,7 @@
         function handleExplosion() {
             if (isExploding) return;
             isExploding = true;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
             
             network.clearBotTimers();
             let deadPlayer = network.players.find(p => p.id === currentTurnPlayerId);
@@ -817,10 +824,15 @@
                         globalTimer = 20 + Math.random() * 25; 
                         let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                         triggerCurtain(() => {
+                            isProcessingTurn = false;
                             setTurn(randomAlive.id);
                             if (randomAlive.id !== currentUser.id) {
                                 network.startBotTimer(randomAlive.id);
                             }
+                            
+                            lastTime = performance.now();
+                            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                            gameLoopId = requestAnimationFrame(gameLoop);
                         });
                     }, 2500);
                 }
@@ -874,7 +886,9 @@
         window.addEventListener('mouseup', e => handleDragEnd());
 
         function localPassPotato(angle) {
-            if (currentTurnPlayerId !== currentUser.id) return;
+            if (currentTurnPlayerId !== currentUser.id || isProcessingTurn) return;
+            isProcessingTurn = true;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
             
             ui.taskDisplay.style.opacity = '0';
             ui.personalTimer.style.opacity = '0';

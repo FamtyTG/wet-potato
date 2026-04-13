@@ -10,22 +10,23 @@
     <style>
         :root {
             /* ── Clay & Warm Palette ── */
-            --bg-color:         #ecd6c5;
-            --card-base:        #fffdf5;
-            --card-text:        #5c4a3f;
-            --card-muted:       #a79386;
+            --bg-color:         #dfc5b7;
+            --card-base:        #fff9f0;
+            --card-rim:         #f0e5da;
+            --card-text:        #4a3424;
+            --card-muted:       #8a7060;
             
-            --peach:            #ffb28b;
-            --peach-dark:       #e8936a;
-            --mint:             #9ae8b9;
-            --mint-dark:        #7ac899;
-            --blue:             #9dbdf2;
-            --warm-red:         #ff8984;
+            --peach:            #f5a87f;
+            --peach-dark:       #db875e;
+            --mint:             #8fd5b8;
+            --mint-dark:        #6bb896;
+            --blue:             #8db4ef;
+            --warm-red:         #e86b62;
             --lilac:            #d0bcf2;
             
-            --shadow-light:     rgba(255, 255, 255, 0.8);
-            --shadow-dark:      rgba(150, 130, 115, 0.25);
-            --shadow-darker:    rgba(150, 130, 115, 0.4);
+            --shadow-light:     rgba(255, 255, 255, 0.6);
+            --shadow-dark:      rgba(110, 80, 70, 0.35);
+            --shadow-darker:    rgba(110, 80, 70, 0.5);
         }
 
         * { margin:0; padding:0; box-sizing:border-box; 
@@ -45,7 +46,7 @@
         }
 
         /* ─── Curtain ─── */
-        .curtain { position:fixed; inset:0; background:var(--bg-color); z-index:1000; pointer-events:none; opacity:0; transition:opacity .3s ease; }
+        .curtain { position:fixed; inset:0; background:rgba(223, 197, 183, 0.8); backdrop-filter: blur(5px); z-index:1000; pointer-events:none; opacity:0; transition:opacity .3s ease; }
         .curtain.active { opacity:1; }
 
         /* ─── App Layout ─── */
@@ -61,18 +62,19 @@
         }
         .screen.active { opacity:1; pointer-events:auto; }
 
-        /* ─── Clay Card - Irregular Low Poly Style ─── */
+        /* ─── Clay Card - Authentic 3D Frame Style ─── */
         .clay-card {
             background: var(--card-base);
-            /* Slightly irregular border-radius */
-            border-radius: 28px 24px 30px 22px / 22px 28px 24px 30px;
-            padding:28px 24px;
-            box-shadow:
-                12px 14px 24px var(--shadow-dark),
-                -8px -10px 20px var(--shadow-light),
-                inset 2px 2px 6px rgba(255,255,255,1),
-                inset -2px -4px 8px rgba(150,130,115,0.1);
-            border: 2px solid #fffdf5;
+            border: 12px solid var(--card-rim);
+            /* Very organic border radius */
+            border-radius: 35px 25px 30px 20px / 25px 35px 20px 30px;
+            padding: 24px;
+            box-shadow: 
+                15px 20px 35px var(--shadow-dark),         /* Outward dark shadow */
+                -10px -15px 25px var(--shadow-light),      /* Outward highlight */
+                inset 8px 8px 15px rgba(255,255,255,1),    /* Inner highlight on border */
+                inset -6px -8px 20px rgba(180,160,150,0.5),/* Inner shadow on frame */
+                inset 0 0 60px rgba(255,210,130,0.25);     /* Big warm center glow */
             width:100%; max-width:350px;
             text-align:center;
             display:flex; flex-direction:column; gap:14px;
@@ -82,32 +84,34 @@
         /* ─── Clay Button ─── */
         .clay-btn {
             border:none; 
-            background: var(--bg-color);
-            border-radius: 20px 24px 18px 26px / 24px 18px 26px 20px;
-            padding:16px 20px;
+            background: #d6b8a6;
+            border: 6px solid #ecdbcf;
+            border-radius: 20px 25px 18px 24px / 25px 18px 24px 20px;
+            padding:12px 18px;
             font-size:1.05rem; font-weight:700;
-            color:var(--card-text); cursor:pointer;
+            color: #4a3424; cursor:pointer;
             text-transform:uppercase; letter-spacing:1px;
             font-family:'Fredoka',sans-serif;
             transition:transform .12s ease, box-shadow .12s ease;
             box-shadow:
-                6px 8px 14px var(--shadow-dark),
-                -4px -6px 12px var(--shadow-light),
-                inset 2px 2px 4px rgba(255,255,255,1),
-                inset -2px -2px 5px rgba(150,130,115,0.1);
+                8px 10px 20px var(--shadow-dark),
+                -5px -8px 15px var(--shadow-light),
+                inset 3px 4px 8px rgba(255,255,255,0.8),
+                inset -2px -4px 8px rgba(110,80,70,0.2);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
         }
         .clay-btn:active {
-            transform:scale(0.96) translateY(2px);
+            transform:scale(0.95) translateY(2px);
             box-shadow:
                 2px 4px 8px var(--shadow-dark),
                 -2px -3px 6px var(--shadow-light),
-                inset 4px 6px 8px rgba(150,130,115,0.18),
-                inset -2px -2px 4px rgba(255,255,255,1);
+                inset 4px 6px 12px rgba(110,80,70,0.3),
+                inset -2px -2px 4px rgba(255,255,255,0.8);
         }
 
-        /* ─── Segmented selector (lang / mode / diff) ─── */
-        .seg-group { display:flex; gap:8px; background: rgba(150, 130, 115, 0.08); border-radius: 18px; padding:6px; 
-            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light); }
+        /* ─── Segmented selector ─── */
+        .seg-group { display:flex; gap:8px; background: rgba(180, 150, 140, 0.2); border-radius: 18px; padding:6px; 
+            box-shadow: inset 4px 4px 8px rgba(110,80,70,0.2), inset -2px -2px 5px rgba(255,255,255,0.6); }
         .seg-btn {
             flex:1; border:none; border-radius:14px;
             padding:10px 4px; background:transparent;
@@ -116,8 +120,8 @@
             text-transform:uppercase; font-family:'Fredoka',sans-serif;
         }
         .seg-btn.active {
-            background:var(--card-base); color:var(--card-text);
-            box-shadow: 2px 4px 8px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
+            background:#fdf9f4; color:var(--card-text);
+            box-shadow: 2px 4px 10px rgba(110,80,70,0.2), -2px -2px 6px rgba(255,255,255,0.6);
         }
         .seg-label {
             font-size:0.85rem; font-weight:700; color:var(--card-muted);
@@ -126,41 +130,41 @@
 
         /* ─── Input ─── */
         .input-code {
-            background:#f0e3da; border:none; outline:none;
+            background:#ebe0d7; border:none; outline:none;
             border-radius:18px 16px 20px 18px; padding:16px;
             font-size:1.6rem; font-weight:700;
             color:var(--card-text); text-align:center;
             text-transform:uppercase; letter-spacing:5px; width:100%;
-            box-shadow:inset 4px 6px 10px var(--shadow-dark), inset -2px -4px 6px var(--shadow-light);
+            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -4px 6px rgba(255,255,255,0.8);
             font-family:'Fredoka',sans-serif;
         }
-        .input-code::placeholder { color: rgba(150,130,115,0.4); }
+        .input-code::placeholder { color: rgba(150,130,115,0.5); }
 
         .answer-input {
-            background:#f0e3da; border:none;
+            background:#ebe0d7; border:none;
             outline:none; border-radius:18px 16px 20px 18px; padding:15px;
             font-size:1.1rem; font-weight:600; color:var(--card-text);
             width:100%;
-            box-shadow:inset 4px 6px 10px var(--shadow-dark), inset -2px -2px 6px var(--shadow-light);
+            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -2px 6px rgba(255,255,255,0.8);
             font-family:'Fredoka',sans-serif;
             transition: box-shadow .25s;
             -webkit-user-select:text; user-select:text;
         }
         .answer-input:focus {
-            box-shadow:inset 6px 8px 12px var(--shadow-darker), 0 0 0 3px rgba(154, 232, 185, 0.5);
+            box-shadow:inset 6px 8px 16px rgba(110,80,70,0.4), 0 0 0 3px rgba(143, 213, 184, 0.6);
         }
         .answer-input.error {
-            box-shadow:inset 6px 8px 12px var(--shadow-darker), 0 0 0 3px rgba(255, 137, 132, 0.6);
+            box-shadow:inset 6px 8px 16px rgba(110,80,70,0.4), 0 0 0 3px rgba(232, 107, 98, 0.7);
             animation: shakeInput 0.4s;
         }
         @keyframes shakeInput { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
 
         /* ─── Typography ─── */
         .logo-title {
-            font-size:3.6rem; font-weight:700; color:var(--card-text);
-            text-shadow: 2px 4px 0px rgba(255,255,255,0.6), -2px -2px 0px rgba(150,130,115,0.2);
+            font-size:3.6rem; font-weight:700; color:#5c4033;
+            text-shadow: 2px 4px 0px rgba(255,255,255,0.5), -2px -2px 0px rgba(110,80,70,0.3);
             line-height:1; letter-spacing:2px; text-align:center;
-            margin-bottom:24px;
+            margin-bottom:20px;
         }
 
         /* ─── Lobby Players ─── */

@@ -396,6 +396,7 @@
             <div class="clay-card">
                 <h1 id="go-title" style="color: var(--danger); font-size: 3.5rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">BOOM!</h1>
                 <h2 id="loser-name" style="margin: 10px 0 25px 0; color: var(--text-light); font-size: 1.4rem;"></h2>
+                <button class="clay-btn" id="btn-spectate" style="background-color: var(--btn-purple); width: 100%; margin-bottom: 12px; display: none;">Следить за игрой</button>
                 <button class="clay-btn" id="btn-to-lobby" style="background-color: var(--btn-peach); width: 100%;">В меню</button>
             </div>
         </div>
@@ -518,18 +519,26 @@
             }
 
             sendPotato() {
-                let aliveBots = this.players.filter(p => !p.isDead && p.id !== currentUser.id);
+                let aliveBots = this.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId);
                 if (aliveBots.length === 0) return; 
+                
+                if (!currentUser.isDead) { // Если я жив, боты кидают только мне
+                    let meObj = this.players.find(p => p.id === currentUser.id);
+                    if (meObj) aliveBots = [meObj];
+                }
                 
                 let bot = aliveBots[Math.floor(Math.random() * aliveBots.length)];
                 
                 triggerCurtain(() => {
                     setTurn(bot.id);
-                    // Бот держит от 2 до 4 секунд
                     let delay = 2000 + Math.random() * 2000;
                     this.botPassBack = setTimeout(() => {
                         if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === bot.id) {
-                            triggerCurtain(() => setTurn(currentUser.id)); 
+                            if (!currentUser.isDead) {
+                                triggerCurtain(() => setTurn(currentUser.id)); 
+                            } else {
+                                this.sendPotato();
+                            }
                         }
                     }, delay);
                 });
@@ -669,7 +678,7 @@
             } else {
                 // Чужой ход - Spectator Mode Fix
                 let pName = network.players.find(p => p.id === playerId)?.name || 'Игрок';
-                ui.taskDisplay.innerHTML = `<span style="font-size:0.95rem; color:var(--text-muted); display:block; margin-bottom:8px; letter-spacing: 2px;">РЕШАЕТ ${pName.toUpperCase()}:</span><span style="font-size: 1.25rem;">${currentTaskString}</span>`;
+                ui.taskDisplay.innerHTML = `<span style="font-size:0.95rem; color:var(--text-muted); display:block; margin-bottom:8px; letter-spacing: 2px;">РЕШАЕТ ${pName.toUpperCase()}:</span><span style="font-size: 1.25rem;">${currentTaskString}</span><div style="margin-top: 15px; font-size: 0.95rem; color: var(--text-muted); background: rgba(0,0,0,0.25); border-radius: 12px; padding: 10px;">Ответ: <span style="font-weight: 800; color: var(--btn-purple)">${currentTaskAnswer}</span></div>`;
                 ui.taskDisplay.style.opacity = '1';
                 ui.taskDisplay.style.color = 'var(--text-light)';
                 
@@ -781,7 +790,15 @@
                 } else {
                     setTimeout(() => {
                         globalTimer = 20 + Math.random() * 25; 
-                        triggerCurtain(() => setTurn(currentUser.id));
+                        if (!currentUser.isDead) {
+                            triggerCurtain(() => setTurn(currentUser.id));
+                        } else {
+                            let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                            triggerCurtain(() => {
+                                setTurn(randomAlive.id);
+                                network.sendPotato();
+                            });
+                        }
                     }, 2500);
                 }
             }
@@ -858,23 +875,43 @@
                 tg.HapticFeedback.notificationOccurred('error');
             }
             
-            if (loserName === "LAST_SURVIVOR") {
+            let aliveCount = network.players.filter(p => !p.isDead).length;
+
+            if (loserName === "LAST_SURVIVOR" || aliveCount <= 1) {
                 document.getElementById('go-title').innerText = "ПОБЕДА";
                 document.getElementById('go-title').style.color = "var(--btn-mint)";
-                document.getElementById('loser-name').innerText = "Остался только ты!";
+                document.getElementById('loser-name').innerText = "Остался только 1 выживший!";
+                document.getElementById('btn-spectate').style.display = 'none';
             } else {
                 document.getElementById('go-title').innerText = "BOOM!";
                 document.getElementById('go-title').style.color = "var(--danger)";
                 document.getElementById('loser-name').innerText = `${loserName} ВЗОРВАЛСЯ!`;
+                document.getElementById('btn-spectate').style.display = 'block';
             }
 
             showScreen('GAMEOVER');
         }
 
+        document.getElementById('btn-spectate').addEventListener('click', () => {
+            isGameOver = false;
+            showScreen('GAME');
+            let alivePlayers = network.players.filter(p => !p.isDead);
+            if (alivePlayers.length > 0) {
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+                let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                triggerCurtain(() => {
+                    setTurn(randomAlive.id);
+                    network.sendPotato();
+                });
+            }
+        });
+
         document.getElementById('btn-to-lobby').addEventListener('click', () => {
             network.clearBotTimers(); 
             network = new NetworkManager();
-            initApp();
+            document.getElementById('join-code-input').value = '';
+            showScreen('START');
         });
 
     </script>

@@ -40,7 +40,16 @@
             touch-action: none;
         }
 
-        /* Фона больше нет */
+        /* Soft Clay Blobs Background */
+        .bg-blobs {
+            position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; z-index: -1; overflow: hidden; pointer-events: none;
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.15; animation: drift 20s infinite alternate ease-in-out;
+        }
+        .blob.b1 { width: 50vh; height: 50vh; background: var(--btn-peach); top: -10vh; left: -10vh; }
+        .blob.b2 { width: 60vh; height: 60vh; background: var(--btn-purple); bottom: -15vh; right: -10vh; animation-duration: 25s; animation-direction: alternate-reverse; }
+        @keyframes drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(15vw, 15vh) scale(1.3); } }
 
         /* Fade/Curtain Transition */
         .curtain {
@@ -333,6 +342,7 @@
     </style>
 </head>
 <body>
+    <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div></div>
 
     <!-- Общий слой затемнения -->
     <div class="curtain" id="curtain"></div>
@@ -395,7 +405,7 @@
         <!-- GAMEOVER -->
         <div id="screen-gameover" class="screen">
             <div class="clay-card">
-                <h1 id="go-title" style="color: var(--danger); font-size: 3.5rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.4);">BOOM!</h1>
+                <h1 id="go-title" style="color: var(--danger); font-size: 4rem; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 0 rgba(255,255,255,0.05), -2px -2px 0 rgba(0,0,0,0.4), 0 10px 15px rgba(0,0,0,0.6);">BOOM!</h1>
                 <h2 id="loser-name" style="margin: 10px 0 25px 0; color: var(--text-light); font-size: 1.4rem;"></h2>
                 <button class="clay-btn" id="btn-spectate" style="background-color: var(--btn-purple); width: 100%; margin-bottom: 12px; display: none;">Следить за игрой</button>
                 <button class="clay-btn" id="btn-to-lobby" style="background-color: var(--btn-peach); width: 100%;">В меню</button>
@@ -562,6 +572,7 @@
         let pulsePhase = 0;
         let lastTime = performance.now();
         let lastTimeStrDisplay = "10.0";
+        let gameLoopId = null;
 
         const ui = {
             curtain: document.getElementById('curtain'),
@@ -659,7 +670,9 @@
             
             // 2. Отображение задания синхронно
             let pool = cfg.tasks;
-            currentTaskString = pool[Math.floor(Math.random() * pool.length)];
+            let currentTask = pool[Math.floor(Math.random() * pool.length)];
+            currentTaskString = currentTask.q;
+            currentTaskAnswer = currentTask.a;
             
             updatePlayersBar();
             
@@ -714,13 +727,14 @@
             setTurn(currentUser.id);
 
             lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         function gameLoop(time) {
             if (currentScreen !== 'GAME' || isGameOver) {
                 lastTime = time;
-                if(!isGameOver) requestAnimationFrame(gameLoop);
+                if(!isGameOver) gameLoopId = requestAnimationFrame(gameLoop);
                 return;
             }
 
@@ -744,7 +758,7 @@
                 return;
             }
 
-            requestAnimationFrame(gameLoop);
+            gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         function updatePulse(dt, isMyTurn) {
@@ -933,7 +947,8 @@
             let alivePlayers = network.players.filter(p => !p.isDead);
             if (alivePlayers.length > 0) {
                 lastTime = performance.now();
-                requestAnimationFrame(gameLoop);
+                if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                gameLoopId = requestAnimationFrame(gameLoop);
                 let randomAlive = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                 triggerCurtain(() => {
                     setTurn(randomAlive.id);

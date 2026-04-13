@@ -45,29 +45,38 @@
             touch-action: none;
         }
 
-        /* ─── Soft Wave Curtain ─── */
-        .curtain { 
-            position:fixed; inset:0; z-index:1000; pointer-events:none; 
-            background: #dfc5b7;
-            transform: translateY(-100%);
-            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
-            display: flex; flex-direction: column; justify-content: flex-end;
+        /* ─── Page Transition (Wave Wipe) ─── */
+        .curtain {
+            position: fixed; inset: 0; z-index: 2000; pointer-events: none;
+            background: linear-gradient(180deg, #dfc5b7 0%, #e8d0c2 100%);
+            /* clip from top: 0% invisible, 100% fully covering */
+            clip-path: inset(0 0 100% 0);
+            transition: clip-path 0.55s cubic-bezier(0.76, 0, 0.24, 1);
         }
-        .curtain::before {
-            content:''; position:absolute; top:-49px; left:0; width:100vw; height:50px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%23dfc5b7' fill-opacity='1' d='M0,160L80,181.3C160,203,320,245,480,240C640,235,800,181,960,170.7C1120,160,1280,192,1360,208L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z'/%3E%3C/svg%3E") no-repeat top;
-            background-size: 100% 100%;
-        }
+        /* wave shape at the reveal edge */
         .curtain::after {
-            content:''; position:absolute; bottom:-49px; left:0; width:100vw; height:50px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%23dfc5b7' fill-opacity='1' d='M0,160L80,181.3C160,203,320,245,480,240C640,235,800,181,960,170.7C1120,160,1280,192,1360,208L1440,224L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z'/%3E%3C/svg%3E") no-repeat bottom;
+            content: '';
+            position: absolute; bottom: -28px; left: 0; width: 100%; height: 30px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 30' preserveAspectRatio='none'%3E%3Cpath fill='%23dfc5b7' d='M0,15 C240,30 480,0 720,15 C960,30 1200,0 1440,15 L1440,30 L0,30 Z'/%3E%3C/svg%3E") no-repeat center bottom;
             background-size: 100% 100%;
+            pointer-events: none;
         }
-        .curtain.active { transform: translateY(0%); }
-        .curtain.exit { transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1); }
+        /* State: covering screen (sweeping in from top) */
+        .curtain.covering { clip-path: inset(0 0 0% 0); }
+        /* State: revealing (sweeping out to bottom) */
+        .curtain.revealing { clip-path: inset(100% 0 0% 0); transition: clip-path 0.5s cubic-bezier(0.76, 0, 0.24, 1); }
 
         /* ─── App Layout ─── */
-        #app { position:relative; width:100%; height:100%; display:flex; justify-content:center; align-items:center; }
+        #app { 
+            position:relative; width:100%; height:100%; 
+            display:flex; justify-content:center; align-items:center; 
+        }
+        /* On desktop, constrain to phone-like width */
+        @media (min-width: 600px) {
+            body { display: flex; justify-content: center; align-items: center; }
+            #app { max-width: 420px; height: 100vh; box-shadow: 0 0 60px rgba(100,70,60,0.4); }
+            .curtain { left: 50%; transform: translateX(-50%); width: 420px; }
+        }
         .screen {
             position:absolute; inset:0;
             display:flex; flex-direction:column;
@@ -83,19 +92,31 @@
         .clay-card {
             background: var(--card-base);
             border: 12px solid var(--card-rim);
-            /* Very organic border radius */
             border-radius: 35px 25px 30px 20px / 25px 35px 20px 30px;
             padding: 24px;
             box-shadow: 
-                15px 20px 35px var(--shadow-dark),         /* Outward dark shadow */
-                -10px -15px 25px var(--shadow-light),      /* Outward highlight */
-                inset 8px 8px 15px rgba(255,255,255,1),    /* Inner highlight on border */
-                inset -6px -8px 20px rgba(180,160,150,0.5),/* Inner shadow on frame */
-                inset 0 0 60px rgba(255,210,130,0.25);     /* Big warm center glow */
+                15px 20px 35px var(--shadow-dark),
+                -10px -15px 25px var(--shadow-light),
+                inset 8px 8px 15px rgba(255,255,255,1),
+                inset -6px -8px 20px rgba(180,160,150,0.5),
+                inset 0 0 60px rgba(255,210,130,0.25);
             width:100%; max-width:350px;
             text-align:center;
             display:flex; flex-direction:column; gap:14px;
             position: relative;
+        }
+
+        /* ─── Explosion Flash Overlay ─── */
+        .explosion-flash {
+            position: fixed; inset: 0; z-index: 1999;
+            background: radial-gradient(circle at center, rgba(255,220,150,0.9) 0%, rgba(255,100,80,0.6) 40%, transparent 75%);
+            pointer-events: none;
+            animation: flashBoom 0.7s ease-out forwards;
+        }
+        @keyframes flashBoom {
+            0%   { opacity: 0; transform: scale(0.3); }
+            20%  { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0; transform: scale(1.5); }
         }
 
         /* ─── Clay Button ─── */
@@ -726,15 +747,27 @@ function showScreen(name) {
     currentScreen = name;
 }
 function triggerCurtain(cb) {
-    if (isCurtainActive) return; isCurtainActive = true; 
-    ui.curtain.classList.remove('exit');
-    ui.curtain.classList.add('active');
-    setTimeout(() => { 
-        cb(); 
-        ui.curtain.classList.remove('active'); 
-        ui.curtain.classList.add('exit');
-        setTimeout(() => { ui.curtain.classList.remove('exit'); isCurtainActive = false; }, 650);
-    }, 650);
+    if (isCurtainActive) return;
+    isCurtainActive = true;
+    const c = ui.curtain;
+    // Phase 1: sweep in from top (cover)
+    c.classList.add('covering');
+    c.classList.remove('revealing');
+    setTimeout(() => {
+        // Execute callback while hidden
+        cb();
+        // Phase 2: sweep out to bottom (reveal)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                c.classList.remove('covering');
+                c.classList.add('revealing');
+                setTimeout(() => {
+                    c.classList.remove('revealing');
+                    isCurtainActive = false;
+                }, 550);
+            });
+        });
+    }, 560);
 }
 
 if (startParam) joinLobby(startParam, false); else showScreen('START');
@@ -955,25 +988,35 @@ function gameLoop(time) {
 }
 
 function createExplosionParticles() {
+    // Full-screen flash
+    const flash = document.createElement('div');
+    flash.className = 'explosion-flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 750);
+
     const rect = ui.container.getBoundingClientRect();
-    const cX = rect.left + rect.width / 2;
-    const cY = rect.top + rect.height / 2;
-    for(let i=0; i<35; i++){
-        let p = document.createElement('div');
-        p.style.position = 'fixed';
-        p.style.left = cX + 'px'; p.style.top = cY + 'px';
-        p.style.width = (10 + Math.random()*20) + 'px'; p.style.height = p.style.width;
-        p.style.background = ['#e86b62', '#f5a87f', '#4a3424', '#fff9f0', '#9dbdf2'][Math.floor(Math.random()*5)];
-        p.style.borderRadius = Math.random()>0.5 ? '50%' : '10%';
-        p.style.pointerEvents = 'none'; p.style.zIndex = '9999';
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ['#e86b62','#f5a87f','#ffde88','#fff9f0','#9dbdf2','#8fd5b8','#d0bcf2'];
+
+    for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        const size = 8 + Math.random() * 22;
+        p.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;`
+            + `background:${colors[Math.floor(Math.random()*colors.length)]};`
+            + `border-radius:${Math.random()>0.4?'50%':'20%'};pointer-events:none;z-index:1998;`;
         document.body.appendChild(p);
-        let ang = Math.random() * Math.PI*2, vel = 150 + Math.random()*300;
-        let tx = Math.cos(ang)*vel, ty = Math.sin(ang)*vel;
+        const ang = Math.random() * Math.PI * 2;
+        const vel = 120 + Math.random() * 320;
+        const tx = Math.cos(ang) * vel;
+        const ty = Math.sin(ang) * vel - 60; // slight upward bias
+        const rot = (Math.random() - 0.5) * 720;
+        const dur = 700 + Math.random() * 600;
         p.animate([
-            { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity:1 },
-            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${Math.random()*720}deg)`, opacity:0 }
-        ], { duration: 600 + Math.random()*600, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
-        setTimeout(()=>p.remove(), 1200);
+            { transform: `translate(-50%,-50%) scale(1.2) rotate(0deg)`, opacity: 1 },
+            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${rot}deg)`, opacity: 0 }
+        ], { duration: dur, easing: 'cubic-bezier(0.2, 1, 0.3, 1)', fill: 'forwards' });
+        setTimeout(() => p.remove(), dur + 50);
     }
 }
 

@@ -35,9 +35,7 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: url('assets/bg.png');
-            background-size: cover;
-            background-position: center;
+            background: radial-gradient(circle at 40% 40%, #edd8cb 0%, #dbbfae 60%, #c4a491 100%);
             color: var(--card-text);
             /* Fredoka font for a soft, low poly/claymorphism feel */
             font-family: 'Fredoka', sans-serif; 
@@ -808,15 +806,16 @@ function validateAnswer() {
     if (given.length < 1) return false;
     if (expected.includes('любо') || expected.includes('any')) return true;
     
-    // Match numbers
+    // Match numbers exactly
     if (/^\d+$/.test(expected)) {
         let nums = given.match(/\d+/g);
-        if (nums && nums.includes(expected)) return true;
+        return (nums && nums.includes(expected));
     }
     
     // Match partial keywords
-    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
-    if (expWords.length === 0) return true;
+    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 1);
+    if (expWords.length === 0) return given.includes(expected);
+    
     let match = expWords.some(w => given.includes(w) || w.includes(given.substring(0,4)));
     if (match || given === expected) return true;
     return false;
@@ -827,7 +826,18 @@ function markDone() {
     
     if (currentTaskObj.type === 'answer') {
         if (!validateAnswer()) {
-            ui.input.classList.add('error'); ui.err.style.display = 'block'; haptic('error'); return;
+            ui.input.classList.add('error'); ui.err.style.display = 'block'; haptic('error'); 
+            
+            // Penalty
+            personalTimer -= 2.5;
+            ui.timer.style.color = 'var(--warm-red)'; ui.timer.style.transform = 'scale(1.3)';
+            setTimeout(() => { ui.timer.style.color='var(--card-text)'; ui.timer.style.transform='scale(1)'; }, 350);
+            
+            if (personalTimer <= 0) {
+                personalTimer = 0;
+                handleExplosion();
+            }
+            return;
         }
     }
     

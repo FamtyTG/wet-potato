@@ -5,61 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Wet Potato</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="assets/tasks.js"></script>
     <style>
         :root {
-            /* ── Warm Clay Palette ── */
-            --bg:           #1f1a16;
-            --bg2:          #2a2118;
-            --card:         #2e2520;
-            --card2:        #352a22;
-            --peach:        #f9b48a;
-            --peach-glow:   rgba(249,180,138,0.25);
-            --mint:         #8fd5b8;
-            --mint-glow:    rgba(143,213,184,0.2);
-            --lilac:        #c5a9d8;
-            --lilac-glow:   rgba(197,169,216,0.2);
-            --warm-red:     #e8614a;
-            --warm-red-glow:rgba(232,97,74,0.3);
-            --text:         #f5ece3;
-            --text-dark:    #1f1a16;
-            --text-muted:   #8a7060;
-            --border:       rgba(255,220,180,0.07);
-            --shadow-dark:  rgba(0,0,0,0.55);
-            --shadow-light: rgba(255,200,160,0.06);
+            /* ── Clay & Warm Palette ── */
+            --bg-color:         #ecd6c5;
+            --card-base:        #fffdf5;
+            --card-text:        #5c4a3f;
+            --card-muted:       #a79386;
+            
+            --peach:            #ffb28b;
+            --peach-dark:       #e8936a;
+            --mint:             #9ae8b9;
+            --mint-dark:        #7ac899;
+            --blue:             #9dbdf2;
+            --warm-red:         #ff8984;
+            --lilac:            #d0bcf2;
+            
+            --shadow-light:     rgba(255, 255, 255, 0.8);
+            --shadow-dark:      rgba(150, 130, 115, 0.25);
+            --shadow-darker:    rgba(150, 130, 115, 0.4);
         }
 
-        * { margin:0; padding:0; box-sizing:border-box;
+        * { margin:0; padding:0; box-sizing:border-box; 
             user-select:none; -webkit-user-select:none;
             -webkit-tap-highlight-color:transparent; }
 
         body {
-            background: radial-gradient(ellipse at 30% 10%, #2e2318 0%, var(--bg) 70%);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('assets/bg.png');
+            background-size: cover;
+            background-position: center;
+            color: var(--card-text);
+            /* Fredoka font for a soft, low poly/claymorphism feel */
+            font-family: 'Fredoka', sans-serif; 
             overflow: hidden; width: 100vw; height: 100vh;
             touch-action: none;
         }
 
-        /* ─── Warm Blobs ─── */
-        .bg-blobs { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
-        .blob {
-            position:absolute; border-radius:50%;
-            filter:blur(100px); opacity:0.18; will-change:transform;
-        }
-        .blob.b1 { width:65vw; height:65vw; background:#d4814a; top:-20vw; left:-12vw;
-            animation: bd1 20s ease-in-out infinite alternate; }
-        .blob.b2 { width:55vw; height:55vw; background:#8b5e3c; bottom:-18vw; right:-14vw;
-            animation: bd2 26s ease-in-out infinite alternate; }
-        .blob.b3 { width:40vw; height:40vw; background:#c5714a; top:38%; left:28%; opacity:0.1;
-            animation: bd3 32s ease-in-out infinite alternate; }
-        @keyframes bd1 { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(6vw,10vh) scale(1.1)} 100%{transform:translate(18vw,4vh) scale(0.92)} }
-        @keyframes bd2 { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(-8vw,-6vh) scale(1.15)} 100%{transform:translate(-3vw,-16vh) scale(0.88)} }
-        @keyframes bd3 { 0%{transform:translate(0,0) scale(1) rotate(0deg)} 100%{transform:translate(-12vw,8vh) scale(1.3) rotate(90deg)} }
-
         /* ─── Curtain ─── */
-        .curtain { position:fixed; inset:0; background:var(--bg); z-index:1000; pointer-events:none; opacity:0; transition:opacity .3s ease; }
+        .curtain { position:fixed; inset:0; background:var(--bg-color); z-index:1000; pointer-events:none; opacity:0; transition:opacity .3s ease; }
         .curtain.active { opacity:1; }
 
         /* ─── App Layout ─── */
@@ -70,178 +56,201 @@
             align-items:center; justify-content:center;
             opacity:0; pointer-events:none;
             transition:opacity .35s ease;
-            padding:22px 20px;
+            padding:20px;
             overflow-y:auto;
         }
         .screen.active { opacity:1; pointer-events:auto; }
-        #screen-game { justify-content:flex-start; padding-top:52px; }
 
-        /* ─── Clay Card ─── */
+        /* ─── Clay Card - Irregular Low Poly Style ─── */
         .clay-card {
-            background: linear-gradient(150deg, var(--card2) 0%, var(--card) 100%);
-            border-radius:32px;
-            padding:28px 22px;
+            background: var(--card-base);
+            /* Slightly irregular border-radius */
+            border-radius: 28px 24px 30px 22px / 22px 28px 24px 30px;
+            padding:28px 24px;
             box-shadow:
-                16px 16px 36px var(--shadow-dark),
-                inset 2px 2px 8px var(--shadow-light),
-                inset -2px -2px 8px rgba(0,0,0,0.3);
-            border:1px solid var(--border);
+                12px 14px 24px var(--shadow-dark),
+                -8px -10px 20px var(--shadow-light),
+                inset 2px 2px 6px rgba(255,255,255,1),
+                inset -2px -4px 8px rgba(150,130,115,0.1);
+            border: 2px solid #fffdf5;
             width:100%; max-width:350px;
             text-align:center;
-            display:flex; flex-direction:column; gap:13px;
+            display:flex; flex-direction:column; gap:14px;
+            position: relative;
         }
 
         /* ─── Clay Button ─── */
         .clay-btn {
-            border:none; border-radius:26px;
-            padding:17px 24px;
-            font-size:1rem; font-weight:800;
-            color:var(--text-dark); cursor:pointer;
-            text-transform:uppercase; letter-spacing:1.5px;
-            font-family:'Inter',sans-serif;
-            transition:transform .12s ease, box-shadow .12s ease, filter .12s;
+            border:none; 
+            background: var(--bg-color);
+            border-radius: 20px 24px 18px 26px / 24px 18px 26px 20px;
+            padding:16px 20px;
+            font-size:1.05rem; font-weight:700;
+            color:var(--card-text); cursor:pointer;
+            text-transform:uppercase; letter-spacing:1px;
+            font-family:'Fredoka',sans-serif;
+            transition:transform .12s ease, box-shadow .12s ease;
             box-shadow:
-                7px 7px 18px rgba(0,0,0,0.45),
-                inset 3px 3px 7px rgba(255,255,255,0.45),
-                inset -3px -3px 7px rgba(0,0,0,0.15);
+                6px 8px 14px var(--shadow-dark),
+                -4px -6px 12px var(--shadow-light),
+                inset 2px 2px 4px rgba(255,255,255,1),
+                inset -2px -2px 5px rgba(150,130,115,0.1);
         }
         .clay-btn:active {
-            transform:scale(0.95) translateY(2px);
+            transform:scale(0.96) translateY(2px);
             box-shadow:
-                3px 3px 9px rgba(0,0,0,0.35),
-                inset 5px 5px 10px rgba(0,0,0,0.2),
-                inset -2px -2px 5px rgba(255,255,255,0.18);
+                2px 4px 8px var(--shadow-dark),
+                -2px -3px 6px var(--shadow-light),
+                inset 4px 6px 8px rgba(150,130,115,0.18),
+                inset -2px -2px 4px rgba(255,255,255,1);
         }
 
         /* ─── Segmented selector (lang / mode / diff) ─── */
-        .seg-group { display:flex; gap:6px; background:rgba(0,0,0,0.25); border-radius:16px; padding:5px; }
+        .seg-group { display:flex; gap:8px; background: rgba(150, 130, 115, 0.08); border-radius: 18px; padding:6px; 
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light); }
         .seg-btn {
-            flex:1; border:none; border-radius:12px;
-            padding:10px 6px; background:transparent;
-            color:var(--text-muted); font-size:0.82rem;
-            font-weight:800; cursor:pointer; transition:all .2s;
-            text-transform:uppercase; font-family:'Inter',sans-serif;
-            letter-spacing:.8px;
+            flex:1; border:none; border-radius:14px;
+            padding:10px 4px; background:transparent;
+            color:var(--card-muted); font-size:0.9rem;
+            font-weight:700; cursor:pointer; transition:all .2s;
+            text-transform:uppercase; font-family:'Fredoka',sans-serif;
         }
         .seg-btn.active {
-            background:var(--peach); color:var(--text-dark);
-            box-shadow:0 3px 12px rgba(249,180,138,0.35);
+            background:var(--card-base); color:var(--card-text);
+            box-shadow: 2px 4px 8px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
         }
         .seg-label {
-            font-size:0.78rem; font-weight:800; color:var(--text-muted);
-            text-transform:uppercase; letter-spacing:1.2px;
-            text-align:left; margin-bottom:2px;
+            font-size:0.85rem; font-weight:700; color:var(--card-muted);
+            text-transform:uppercase; text-align:left; margin-bottom:4px; margin-left: 4px;
         }
 
         /* ─── Input ─── */
         .input-code {
-            background:#170f09; border:none; outline:none;
-            border-radius:18px; padding:15px;
-            font-size:1.45rem; font-weight:800;
-            color:var(--text); text-align:center;
+            background:#f0e3da; border:none; outline:none;
+            border-radius:18px 16px 20px 18px; padding:16px;
+            font-size:1.6rem; font-weight:700;
+            color:var(--card-text); text-align:center;
             text-transform:uppercase; letter-spacing:5px; width:100%;
-            box-shadow:inset 6px 6px 14px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(255,200,140,0.04);
-            font-family:'Inter',sans-serif;
+            box-shadow:inset 4px 6px 10px var(--shadow-dark), inset -2px -4px 6px var(--shadow-light);
+            font-family:'Fredoka',sans-serif;
         }
-        .input-code::placeholder { color:rgba(255,255,255,0.08); }
+        .input-code::placeholder { color: rgba(150,130,115,0.4); }
 
         .answer-input {
-            background:#160e08; border:1.5px solid rgba(197,169,216,.18);
-            outline:none; border-radius:16px; padding:14px 16px;
-            font-size:1.05rem; font-weight:700; color:var(--text);
+            background:#f0e3da; border:none;
+            outline:none; border-radius:18px 16px 20px 18px; padding:15px;
+            font-size:1.1rem; font-weight:600; color:var(--card-text);
             width:100%;
-            box-shadow:inset 5px 5px 12px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(255,200,140,0.03);
-            font-family:'Inter',sans-serif;
-            transition:border-color .25s, box-shadow .25s;
+            box-shadow:inset 4px 6px 10px var(--shadow-dark), inset -2px -2px 6px var(--shadow-light);
+            font-family:'Fredoka',sans-serif;
+            transition: box-shadow .25s;
             -webkit-user-select:text; user-select:text;
         }
         .answer-input:focus {
-            border-color:rgba(197,169,216,.5);
-            box-shadow:inset 5px 5px 12px rgba(0,0,0,0.65), 0 0 0 3px rgba(197,169,216,.1);
+            box-shadow:inset 6px 8px 12px var(--shadow-darker), 0 0 0 3px rgba(154, 232, 185, 0.5);
         }
-        .answer-input::placeholder { color:rgba(255,255,255,0.1); }
+        .answer-input.error {
+            box-shadow:inset 6px 8px 12px var(--shadow-darker), 0 0 0 3px rgba(255, 137, 132, 0.6);
+            animation: shakeInput 0.4s;
+        }
+        @keyframes shakeInput { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
 
         /* ─── Typography ─── */
         .logo-title {
-            font-size:3.2rem; font-weight:900; color:var(--peach);
-            text-shadow:3px 3px 12px rgba(0,0,0,0.55), 0 0 35px var(--peach-glow);
-            line-height:1.05; letter-spacing:2px; text-align:center;
-            margin-bottom:20px;
+            font-size:3.6rem; font-weight:700; color:var(--card-text);
+            text-shadow: 2px 4px 0px rgba(255,255,255,0.6), -2px -2px 0px rgba(150,130,115,0.2);
+            line-height:1; letter-spacing:2px; text-align:center;
+            margin-bottom:24px;
         }
 
         /* ─── Lobby Players ─── */
         .player-row {
-            display:flex; align-items:center; gap:13px;
-            padding:11px 14px;
-            background:rgba(0,0,0,0.2); border-radius:18px;
-            margin-bottom:7px;
-            box-shadow:inset 2px 2px 5px rgba(0,0,0,0.3), inset -1px -1px 3px rgba(255,200,140,0.02);
-            animation:showP .3s ease-out;
+            display:flex; align-items:center; gap:14px;
+            padding:12px 16px;
+            background:var(--bg-color); 
+            border-radius:18px 20px 16px 22px;
+            margin-bottom:10px;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
         }
-        @keyframes showP { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .player-avatar {
-            width:44px; height:44px; border-radius:50%;
-            background:var(--lilac); color:var(--text-dark);
-            font-weight:800; font-size:1.1rem;
+            width:46px; height:46px; border-radius:50%;
+            background:var(--card-base); color:var(--card-text);
+            font-weight:700; font-size:1.1rem;
             display:flex; justify-content:center; align-items:center;
-            box-shadow:inset 2px 2px 5px rgba(255,255,255,0.45), inset -2px -2px 5px rgba(0,0,0,0.25);
+            box-shadow: 3px 4px 8px var(--shadow-dark), -2px -2px 5px var(--shadow-light);
             flex-shrink:0;
+            border: 2px solid white;
         }
-        .player-name { font-weight:600; font-size:.98rem; }
+        .player-name { font-weight:600; font-size:1.05rem; }
 
         /* ─── Game HUD ─── */
         .players-bar {
             display:flex; justify-content:center; flex-wrap:wrap;
-            gap:11px; margin-bottom:16px; width:100%;
+            gap:14px; margin-bottom:16px; width:100%;
         }
         .p-mini {
-            width:42px; height:42px; border-radius:50%;
-            background:var(--card); color:var(--text-muted);
-            font-size:1rem; font-weight:800;
+            width:48px; height:48px; border-radius:50%;
+            background:var(--bg-color); color:var(--card-muted);
+            font-size:1.1rem; font-weight:700;
             display:flex; justify-content:center; align-items:center;
-            box-shadow:inset 2px 2px 5px rgba(0,0,0,0.35), inset -1px -1px 3px rgba(255,200,140,0.04);
+            box-shadow:inset 3px 3px 8px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
             transition:all .3s ease; position:relative;
+            border: 2px solid transparent;
         }
         .p-mini.active {
-            box-shadow:0 0 16px var(--peach-glow), inset 2px 2px 4px rgba(255,255,255,0.45);
-            background:var(--peach); color:var(--text-dark); transform:scale(1.15); z-index:5;
+            box-shadow: 4px 6px 12px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
+            background:var(--card-base); color:var(--card-text); transform:scale(1.18); z-index:5;
+            border: 2px solid #fff;
         }
-        .p-mini.dead { opacity:.22; transform:scale(0.88); filter:grayscale(1); }
-        .p-mini.dead::after { content:"✖"; position:absolute; color:var(--warm-red); font-size:1.4rem; font-weight:900; text-shadow:1px 1px 2px #000; }
+        .p-mini.dead { opacity:.4; transform:scale(0.85); filter:grayscale(1); }
+        .p-mini.dead::after { content:"✖"; position:absolute; color:var(--warm-red); font-size:1.6rem; font-weight:700; }
 
         .status-text {
-            color:var(--text-muted); font-size:.95rem;
-            font-weight:800; text-transform:uppercase; letter-spacing:1.5px;
-            text-align:center; margin-bottom:5px; min-height:20px;
+            color:var(--card-text); font-size:1.1rem;
+            font-weight:700; text-transform:uppercase; letter-spacing:1px;
+            text-align:center; margin-bottom:10px; min-height:24px;
             transition:color .3s;
+            text-shadow: 1px 2px 2px rgba(255,255,255,0.7);
         }
 
         .task-card {
-            color:var(--peach); font-size:1.15rem; font-weight:600;
-            transition:opacity .3s; min-height:78px;
+            color:var(--card-text); font-size:1.2rem; font-weight:600;
+            transition:opacity .3s; min-height:90px;
             display:flex; flex-direction:column;
             align-items:center; justify-content:center;
-            line-height:1.38; margin-bottom:3px;
-            padding:15px 20px; text-align:center;
+            line-height:1.3; margin-bottom:0px;
+            padding:18px 22px; text-align:center;
+            /* fix overflow */
+            word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;
         }
 
+        /* Top Panel - Game screen */
+        .game-top-panel {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            margin-bottom: 5px; padding: 0 15px;
+        }
+        .timer-container {
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .timer-title { font-size: 0.75rem; color: var(--card-muted); font-weight: 700; text-transform: uppercase; }
+
         .personal-timer {
-            font-size:4.8rem; font-weight:900; color:var(--lilac);
-            text-shadow:4px 4px 14px rgba(0,0,0,0.5), 0 0 28px var(--lilac-glow);
-            margin:1px 0 10px; font-variant-numeric:tabular-nums;
-            letter-spacing:-2px; transition:color .3s, opacity .3s;
+            font-size:3rem; font-weight:700; color:var(--card-text);
+            text-shadow: 2px 3px 5px rgba(150,130,115,0.3), -1px -1px 2px rgba(255,255,255,0.8);
+            margin:0px 0 0px; font-variant-numeric:tabular-nums;
+            letter-spacing: -2px; transition:color .3s, transform .3s;
         }
         .personal-timer.urgent { color:var(--warm-red); animation:tpulse .38s ease-in-out infinite alternate; }
-        @keyframes tpulse { from{transform:scale(1)} to{transform:scale(1.06)} }
+        @keyframes tpulse { from{transform:scale(1)} to{transform:scale(1.1)} }
 
         /* ─── Potato ─── */
         #potato-area {
             flex:1; width:100%;
             display:flex; justify-content:center; align-items:center;
-            flex-direction:column; gap:14px;
+            flex-direction:column; gap:20px;
         }
         #potato-container {
-            width:230px; height:230px;
+            width:240px; height:240px;
             display:flex; justify-content:center; align-items:center;
             z-index:50; position:relative;
         }
@@ -253,147 +262,132 @@
         #potato-pulse-wrapper:active { cursor:grabbing; }
 
         .potato-img {
-            width:215px;
-            filter:drop-shadow(0px 16px 26px rgba(0,0,0,0.55));
+            width:220px;
+            filter:drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.5));
             animation:floatP 4s ease-in-out infinite, morphP 10s ease-in-out infinite;
             transition:filter .4s ease;
             pointer-events:none; user-select:none;
         }
         .potato-img.locked {
-            filter:drop-shadow(0px 16px 26px rgba(0,0,0,0.55)) brightness(0.38) saturate(0.15);
+            filter:drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.4)) brightness(0.6) saturate(0.5);
         }
         .potato-img.shaking {
             animation:floatP 4s ease-in-out infinite, morphP 10s ease-in-out infinite, shake .14s ease-in-out infinite;
         }
-        @keyframes floatP  { 0%{transform:translateY(0)} 50%{transform:translateY(-13px)} 100%{transform:translateY(0)} }
+        @keyframes floatP  { 0%{transform:translateY(0)} 50%{transform:translateY(-15px)} 100%{transform:translateY(0)} }
         @keyframes morphP  { 0%{border-radius:60% 40% 55% 45%/50% 60% 40% 50%} 25%{border-radius:50% 50% 40% 60%/60% 40% 60% 40%} 50%{border-radius:40% 60% 60% 40%/40% 55% 45% 60%} 75%{border-radius:55% 45% 50% 50%/50% 45% 55% 50%} 100%{border-radius:60% 40% 55% 45%/50% 60% 40% 50%} }
-        @keyframes shake   { 0%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-1px) rotate(1.5deg)} 100%{transform:translateY(0) rotate(-0.5deg)} }
+        @keyframes shake   { 0%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-2px) rotate(2deg)} 100%{transform:translateY(0) rotate(-1deg)} }
 
         /* Lock overlay */
         #lock-overlay {
             position:absolute; inset:0; border-radius:50%;
-            background:rgba(16,10,5,.72);
+            background:rgba(255, 253, 245, 0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
             display:flex; flex-direction:column;
             align-items:center; justify-content:center;
             z-index:10; transition:opacity .3s ease;
         }
-        .lock-icon { font-size:2.8rem; animation:lbounce 1.8s ease-in-out infinite; }
-        .lock-hint { font-size:.72rem; font-weight:800; color:rgba(255,255,255,.42); text-transform:uppercase; letter-spacing:1.5px; margin-top:5px; }
-        @keyframes lbounce { 0%,100%{transform:scale(1) rotate(-8deg)} 50%{transform:scale(1.12) rotate(8deg)} }
+        .lock-icon { font-size:3rem; animation:lbounce 1.8s ease-in-out infinite; filter: drop-shadow(2px 4px 6px rgba(150,130,115,0.4));}
+        .lock-hint { font-size:.8rem; font-weight:700; color:var(--card-text); text-transform:uppercase; margin-top:8px; 
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
+        @keyframes lbounce { 0%,100%{transform:scale(1) rotate(-6deg)} 50%{transform:scale(1.1) rotate(6deg)} }
 
         /* Unlock flash */
         @keyframes unlockFlash { 0%{opacity:0;transform:scale(.8)} 40%{opacity:1;transform:scale(1.3)} 100%{opacity:0;transform:scale(1.8)} }
         .unlock-flash {
             position:absolute; inset:-18px; border-radius:50%;
-            background:radial-gradient(circle, rgba(197,169,216,.65) 0%, transparent 70%);
+            background:radial-gradient(circle, rgba(255,255,255,.9) 0%, transparent 70%);
             pointer-events:none; z-index:20;
             animation:unlockFlash .5s ease-out forwards;
         }
 
         /* ─── Combo Panel ─── */
         #combo-panel {
-            width:100%; max-width:330px;
-            display:none; flex-direction:column; gap:9px;
+            width:100%; max-width:340px;
+            display:none; flex-direction:column; gap:12px;
+            background: var(--card-base); padding: 18px; border-radius: 24px;
+            box-shadow: 6px 8px 16px var(--shadow-dark), -4px -6px 12px var(--shadow-light);
+            border: 2px solid white;
         }
         #combo-panel.visible { display:flex; animation:slideUp .35s cubic-bezier(.175,.885,.32,1.275) forwards; }
-        @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
         .swipe-hint {
-            display:flex; align-items:center; justify-content:center; gap:8px;
-            font-size:.76rem; font-weight:800; color:var(--text-muted);
-            text-transform:uppercase; letter-spacing:1.5px;
+            display:none; align-items:center; justify-content:center; gap:8px;
+            font-size:.85rem; font-weight:700; color:var(--card-text);
+            text-transform:uppercase;
             animation:hintP 1.2s ease-in-out infinite;
         }
-        @keyframes hintP { 0%,100%{opacity:.45} 50%{opacity:1} }
-
-        #btn-submit-answer {
-            background:linear-gradient(135deg, var(--mint), #6dc5a4);
-            color:var(--text-dark); border:none; border-radius:20px;
-            padding:15px 22px; font-size:.98rem; font-weight:900;
-            text-transform:uppercase; letter-spacing:2px;
-            cursor:pointer; width:100%;
-            box-shadow:7px 7px 18px rgba(0,0,0,0.4),
-                        inset 3px 3px 7px rgba(255,255,255,0.45),
-                        inset -3px -3px 7px rgba(0,0,0,0.1),
-                        0 0 18px var(--mint-glow);
-            font-family:'Inter',sans-serif;
-            transition:all .14s ease; display:none;
-        }
-        #btn-submit-answer.visible { display:block; }
-        #btn-submit-answer:active {
-            transform:scale(.96) translateY(2px);
-            box-shadow:3px 3px 9px rgba(0,0,0,0.3), inset 5px 5px 10px rgba(0,0,0,0.2);
+        @keyframes hintP { 0%,100%{opacity:.5} 50%{opacity:1} }
+        
+        .action-warn {
+            color: var(--card-muted); font-size: 0.85rem; text-align: center; line-height: 1.2;
         }
 
-        #potato-pulse-wrapper.swipe-ready { animation:readyGlow .85s ease-in-out infinite alternate; }
-        @keyframes readyGlow { from{filter:drop-shadow(0 0 0 transparent)} to{filter:drop-shadow(0 0 18px rgba(143,213,184,.55))} }
-
+        #btn-submit-answer, #btn-submit-action {
+            background:var(--mint);
+            color:var(--card-text);
+        }
+        
         /* ─── Mode badge ─── */
         .mode-badge {
             display:inline-flex; align-items:center; gap:5px;
-            padding:5px 12px; border-radius:20px;
-            font-size:.75rem; font-weight:800;
-            text-transform:uppercase; letter-spacing:1px;
-            margin-bottom:4px;
+            padding:6px 14px; border-radius:20px;
+            font-size:.8rem; font-weight:700;
+            text-transform:uppercase; letter-spacing:0.5px;
+            margin-bottom:6px; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.7), 2px 3px 5px rgba(150,130,115,0.2);
         }
-        .mode-badge.answers { background:rgba(249,180,138,.18); color:var(--peach); }
-        .mode-badge.actions { background:rgba(143,213,184,.18); color:var(--mint); }
-        .mode-badge.mix     { background:rgba(197,169,216,.18); color:var(--lilac); }
+        .mode-badge.answers { background:var(--peach); color:#fffdf5; text-shadow: 1px 1px 2px rgba(150,100,80,0.4); }
+        .mode-badge.actions { background:var(--blue); color:#fffdf5; text-shadow: 1px 1px 2px rgba(100,120,150,0.4); }
 
         /* VoteKick */
         .votekick-btn {
-            margin-top:10px; background:rgba(232,97,74,.12);
-            border:1px solid rgba(232,97,74,.28); border-radius:18px;
-            padding:9px 16px; color:var(--warm-red);
-            font-weight:800; font-size:.82rem; cursor:pointer;
-            text-transform:uppercase; letter-spacing:.5px;
-            transition:all .2s; font-family:'Inter',sans-serif;
+            margin-top:12px; background:var(--bg-color);
+            border:none; border-radius:20px;
+            padding:12px 18px; color:var(--warm-red);
+            font-weight:700; font-size:.9rem; cursor:pointer;
+            text-transform:uppercase;
+            transition:all .2s; font-family:'Fredoka',sans-serif;
+            box-shadow: 4px 4px 10px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
         }
-        .votekick-btn:active { transform:scale(.97); }
+        .votekick-btn:active { transform:scale(.96); box-shadow: 2px 2px 5px var(--shadow-dark); }
 
-        /* Menu back btn */
-        #btn-leave-spectate {
-            position:absolute; top:14px; right:14px;
-            z-index:10;
-        }
-
-        /* ─── Screen-specific helpers ─── */
-        .divider {
-            height:1px; background:var(--border); width:100%;
+        /* ─── Helpers ─── */
+        .divider { height:2px; background:rgba(150,130,115,0.1); width:100%; border-radius: 2px; }
+        .top-btn {
+            position:absolute; top:16px; left:16px;
+            z-index:10; padding: 12px 16px; font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
 
-<div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 <div class="curtain" id="curtain"></div>
 
 <div id="app">
 
     <!-- ══════ START ══════ -->
     <div id="screen-start" class="screen active">
-        <h1 class="logo-title">WET<br>POTATO</h1>
+        <h1 class="logo-title">WET POTATO</h1>
 
-        <div class="clay-card" style="gap:16px;">
+        <div class="clay-card">
             <!-- Language -->
             <div>
-                <div class="seg-label" id="lbl-lang">Язык / Language</div>
+                <div class="seg-label" id="lbl-lang">Language</div>
                 <div class="seg-group">
-                    <button class="seg-btn active" data-lang="ru" id="lang-ru">🇷🇺 RU</button>
-                    <button class="seg-btn"        data-lang="en" id="lang-en">🇬🇧 EN</button>
+                    <button class="seg-btn active" data-lang="ru" id="lang-ru">RU</button>
+                    <button class="seg-btn"        data-lang="en" id="lang-en">EN</button>
                 </div>
             </div>
 
             <div class="divider"></div>
 
-            <button class="clay-btn" id="btn-create-lobby"
-                style="background:var(--peach); width:100%; font-size:1.1rem; padding:19px;">
+            <button class="clay-btn" id="btn-create-lobby" style="background:var(--peach); color: white; text-shadow: 1px 1px 2px rgba(150,100,80,0.4);">
                 Создать лобби
             </button>
 
-            <div style="font-weight:600; font-size:.88rem; color:var(--text-muted);" id="lbl-or">Или введите код</div>
-            <input type="text" id="join-code-input" class="input-code" placeholder="----" maxlength="5">
-            <button class="clay-btn" id="btn-join-code" style="background:var(--lilac); width:100%;">
+            <div style="font-weight:600; font-size:.9rem; color:var(--card-muted);" id="lbl-or">Или введите код</div>
+            <input type="text" id="join-code-input" class="input-code" placeholder="____" maxlength="5">
+            <button class="clay-btn" id="btn-join-code" style="background:var(--blue); color: white; text-shadow: 1px 1px 2px rgba(100,120,150,0.4);">
                 Войти по коду
             </button>
         </div>
@@ -401,54 +395,44 @@
 
     <!-- ══════ LOBBY ══════ -->
     <div id="screen-lobby" class="screen">
-        <div class="clay-card" style="gap:16px; max-height:90vh; overflow-y:auto;">
-            <h2 style="color:var(--peach); font-size:.9rem; text-transform:uppercase; letter-spacing:2px;" id="lbl-lobby-code">Код лобби</h2>
-            <h1 id="lobby-id-display" style="font-size:3.5rem; letter-spacing:8px; margin:0 0 10px; text-shadow:3px 3px 8px rgba(0,0,0,0.4);"></h1>
+        <div class="clay-card" style="max-height:95vh; overflow-y:auto;">
+            <h2 style="color:var(--card-muted); font-size:.95rem; text-transform:uppercase;" id="lbl-lobby-code">Код лобби</h2>
+            <h1 id="lobby-id-display" style="font-size:3.5rem; letter-spacing:4px; margin:0 0 10px; color:var(--card-text); text-shadow: 2px 2px 0px white;"></h1>
 
-            <div id="lobby-players" style="margin-bottom:4px;"></div>
+            <div id="lobby-players" style="margin-bottom:6px;"></div>
 
-            <button class="clay-btn" id="btn-invite" style="background:var(--lilac); width:100%;">Пригласить</button>
+            <button class="clay-btn" id="btn-invite">Пригласить</button>
 
             <!-- Settings for host only -->
-            <div id="host-settings" style="display:none;">
-                <div class="divider"></div>
+            <div id="host-settings" style="display:none; text-align: left;">
+                <div class="divider" style="margin: 6px 0;"></div>
 
-                <!-- Language pick (mirrors start screen) -->
-                <div style="margin-top:4px;">
-                    <div class="seg-label" id="lbl-lobby-lang">Язык</div>
-                    <div class="seg-group">
-                        <button class="seg-btn active" data-lobby-lang="ru">🇷🇺 RU</button>
-                        <button class="seg-btn"        data-lobby-lang="en">🇬🇧 EN</button>
-                    </div>
+                <div class="seg-label" id="lbl-lobby-lang">Язык</div>
+                <div class="seg-group" style="margin-bottom: 12px;">
+                    <button class="seg-btn active" data-lobby-lang="ru">RU</button>
+                    <button class="seg-btn"        data-lobby-lang="en">EN</button>
                 </div>
 
-                <!-- Mode pick -->
-                <div style="margin-top:10px;">
-                    <div class="seg-label" id="lbl-mode">Режим</div>
-                    <div class="seg-group">
-                        <button class="seg-btn active" data-mode="answers" id="mode-answers">✏️ Ответы</button>
-                        <button class="seg-btn"        data-mode="actions" id="mode-actions">🎭 Действия</button>
-                        <button class="seg-btn"        data-mode="mix"     id="mode-mix">🔀 Микс</button>
-                    </div>
+                <div class="seg-label" id="lbl-mode">Режим</div>
+                <div class="seg-group" style="margin-bottom: 12px;">
+                    <button class="seg-btn active" data-mode="answers" id="mode-answers">✏️ Ответы</button>
+                    <button class="seg-btn"        data-mode="actions" id="mode-actions">🎭 Действия</button>
+                    <button class="seg-btn"        data-mode="mix"     id="mode-mix">🔀 Микс</button>
                 </div>
 
-                <!-- Difficulty pick -->
-                <div style="margin-top:10px;">
-                    <div class="seg-label" id="lbl-diff">Сложность</div>
-                    <div class="seg-group">
-                        <button class="seg-btn active" data-diff="easy"   id="diff-easy">Лёгкая</button>
-                        <button class="seg-btn"        data-diff="medium" id="diff-medium">Средняя</button>
-                        <button class="seg-btn"        data-diff="hard"   id="diff-hard">Сложная</button>
-                    </div>
+                <div class="seg-label" id="lbl-diff">Сложность</div>
+                <div class="seg-group" style="margin-bottom: 12px;">
+                    <button class="seg-btn active" data-diff="easy"   id="diff-easy">Лёгкая</button>
+                    <button class="seg-btn"        data-diff="medium" id="diff-medium">Средняя</button>
+                    <button class="seg-btn"        data-diff="hard"   id="diff-hard">Сложная</button>
                 </div>
 
-                <div class="divider"></div>
-                <button class="clay-btn" id="btn-start-game" style="background:var(--mint); width:100%;">
+                <button class="clay-btn" id="btn-start-game" style="background:var(--mint); width:100%; color: white; text-shadow: 1px 1px 2px rgba(100,150,120,0.4);">
                     Начать игру
                 </button>
             </div>
 
-            <div id="wait-host-msg" style="display:none; color:var(--text-muted); font-size:.88rem; margin-top:8px;">
+            <div id="wait-host-msg" style="display:none; color:var(--card-muted); font-size:.9rem; margin-top:8px;">
                 Ожидание хоста...
             </div>
         </div>
@@ -456,15 +440,18 @@
 
     <!-- ══════ GAME ══════ -->
     <div id="screen-game" class="screen">
-        <button class="clay-btn" id="btn-leave-spectate"
-            style="display:none; padding:9px 14px; background:rgba(0,0,0,0.35); font-size:.78rem; border-radius:14px; color:var(--text-muted); box-shadow:none;">
-            ← Меню
-        </button>
+        <button class="clay-btn top-btn" id="btn-leave-spectate" style="display:none;">← Меню</button>
 
-        <div id="players-bar" class="players-bar"></div>
+        <div class="game-top-panel">
+            <div id="players-bar" class="players-bar" style="margin: 0; justify-content: flex-start; flex:1;"></div>
+            <div class="timer-container">
+                <div class="timer-title" id="lbl-timer">Таймер</div>
+                <div id="personal-timer" class="personal-timer" style="opacity:0;">10.0</div>
+            </div>
+        </div>
+        
         <div id="status-text" class="status-text">...</div>
         <div id="task-display" class="clay-card task-card" style="opacity:0;"></div>
-        <div id="personal-timer" class="personal-timer" style="opacity:0;">10.0</div>
 
         <div id="potato-area">
             <div id="potato-container" style="opacity:0; transform:scale(0);">
@@ -478,10 +465,21 @@
             </div>
 
             <div id="combo-panel">
-                <input type="text" id="answer-input" class="answer-input" placeholder="Ответ...">
-                <button id="btn-submit-answer">✓ Готово — свайпни!</button>
-                <div class="swipe-hint" id="swipe-hint" style="display:none;">
-                    <span>← &nbsp;</span><span id="swipe-hint-text">Теперь свайпни!</span><span>&nbsp; →</span>
+                <!-- Shown for text answers -->
+                <div id="combo-text-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
+                    <input type="text" id="answer-input" class="answer-input" placeholder="Ответ...">
+                    <button class="clay-btn" id="btn-submit-answer">✓ Готово</button>
+                    <div id="input-error" style="color: var(--warm-red); font-size: 0.85rem; font-weight: 600; display: none;">Неверно! Ищи лучше.</div>
+                </div>
+                
+                <!-- Shown for physical actions -->
+                <div id="combo-action-wrapper" style="display: none; flex-direction: column; gap: 10px;">
+                    <div class="action-warn" id="lbl-action-warn">Выполни действие вживую, затем нажми кнопку!</div>
+                    <button class="clay-btn" id="btn-submit-action">✓ Выполнил</button>
+                </div>
+                
+                <div class="swipe-hint" id="swipe-hint">
+                    <span id="swipe-hint-text">Теперь свайпни картошку! →</span>
                 </div>
             </div>
         </div>
@@ -490,20 +488,18 @@
     <!-- ══════ GAMEOVER ══════ -->
     <div id="screen-gameover" class="screen">
         <div class="clay-card">
-            <h1 id="go-title" style="color:var(--warm-red); font-size:3.6rem; font-weight:900; letter-spacing:2px; text-shadow:2px 2px 0 rgba(255,255,255,0.04), 0 10px 18px rgba(0,0,0,0.7);">BOOM!</h1>
-            <h2 id="loser-name" style="margin:6px 0 18px; color:var(--text); font-size:1.28rem;"></h2>
-            <button class="clay-btn" id="btn-spectate" style="background:var(--lilac); width:100%; margin-bottom:9px; display:none;">Следить за игрой</button>
-            <button class="clay-btn" id="btn-to-lobby" style="background:var(--peach); width:100%;">В меню</button>
+            <h1 id="go-title" style="color:var(--warm-red); font-size:4rem; font-weight:700; letter-spacing:2px; text-shadow: 2px 2px 0 rgba(255,255,255,0.8), -2px -2px 0px rgba(150,130,115,0.2);">BOOM!</h1>
+            <h2 id="loser-name" style="margin:10px 0 24px; color:var(--card-text); font-size:1.4rem;"></h2>
+            <button class="clay-btn" id="btn-spectate" style="background:var(--blue); width:100%; margin-bottom:12px; display:none; color:white;">Следить за игрой</button>
+            <button class="clay-btn" id="btn-to-lobby" style="background:var(--peach); width:100%; color:white;">В меню</button>
         </div>
     </div>
 
-</div><!-- /#app -->
+</div>
 
 <script>
-// ── prevent native scroll
 document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
-// ── Telegram
 const tg = window.Telegram?.WebApp || {};
 if (tg.initData) { tg.expand(); tg.enableClosingConfirmation(); }
 
@@ -512,123 +508,51 @@ function haptic(type) {
         if (['light','medium','heavy','rigid','soft'].includes(type)) tg.HapticFeedback.impactOccurred(type);
         else if (['success','warning','error'].includes(type)) tg.HapticFeedback.notificationOccurred(type);
     }
-    if (navigator.vibrate) {
-        const ms = { light:15, medium:30, heavy:60, rigid:40, soft:12, success:50, warning:40, error:80 };
-        navigator.vibrate(ms[type] || 20);
-    }
+    if (navigator.vibrate) navigator.vibrate({ light:15, medium:30, heavy:60, rigid:40, soft:12, success:50, warning:40, error:80 }[type] || 20);
 }
 
-// ── Utils
 function generateCode() {
     let res = '', c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     for (let i = 0; i < 5; i++) res += c[Math.floor(Math.random() * c.length)];
     return res;
 }
 
-// ── Telegram user
 let initData = tg.initDataUnsafe || {};
-let startParam = initData.start_param || null;
-if (!startParam && window.location.search.includes('startapp='))
-    startParam = new URLSearchParams(window.location.search).get('startapp');
-
+let startParam = initData.start_param || new URLSearchParams(window.location.search).get('startapp');
 let currentUser = initData.user || { id: Math.floor(Math.random() * 100000), first_name: "Вы" };
 currentUser.shortInit = currentUser.first_name.substring(0, 2).toUpperCase();
 
-// ══════════════════════════════════════════════════════
-//  I18N
-// ══════════════════════════════════════════════════════
+// ═════ I18N ═════
 const i18n = {
     ru: {
-        createLobby:    "Создать лобби",
-        orEnterCode:    "Или введите код",
-        joinByCode:     "Войти по коду",
-        lobbyCode:      "Код лобби",
-        invite:         "Пригласить",
-        lang:           "Язык / Language",
-        mode:           "Режим",
-        modAnswers:     "✏️ Ответы",
-        modActions:     "🎭 Действия",
-        modMix:         "🔀 Микс",
-        diff:           "Сложность",
-        diffEasy:       "Лёгкая",
-        diffMed:        "Средняя",
-        diffHard:       "Сложная",
-        startGame:      "Начать игру",
-        waitHost:       "Ожидание хоста...",
-        myTurn:         "ТВОЙ ХОД!",
-        otherTurn:      "ЧУЖОЙ ХОД",
-        taskLabel:      "Задание:",
-        solves:         "Решает",
-        answer:         "Ответ",
-        voteKick:       "Не верим! Сжечь 🔥",
-        votesNeeded:    (c,r) => `Голосов: ${c}/${r}`,
-        voteAccepted:   "🔥 РЕШЕНО!",
-        flyingAway:     "Улетает...",
-        swipeNow:       "СВАЙПНИ!",
-        swipeHint:      "Теперь свайпни!",
-        tapUnlock:      "Tap to unlock",
-        readySwipe:     "✓ Готово — свайпни!",
-        answerPh:       "Введи ответ...",
-        boom:           "BOOM!",
-        exploded:       (n) => `💀 ${n} ВЗОРВАЛСЯ!`,
-        watching:       "Следить за игрой",
-        toMenu:         "В меню",
-        gameOver:       "ИГРА ОКОНЧЕНА",
-        winner:         "Победитель определён!",
-        victory:        "ПОБЕДА!",
-        survived:       "🏆 Ты выжил!",
-        menuBack:       "← Меню",
-        burned:         (n) => `💥 ${n} СГОРЕЛ!`,
-        modeLabels:     { answers:"Ответы", actions:"Действия", mix:"Микс" },
+        createLobby: "Создать лобби", orEnterCode: "Или введите код", joinByCode: "Войти по коду", lobbyCode: "Код лобби",
+        invite: "Пригласить", lang: "Язык", mode: "Режим", modAnswers: "✏️ Ответы", modActions: "🎭 Действия", modMix: "🔀 Микс",
+        diff: "Сложность", diffEasy: "Лёгкая", diffMed: "Средняя", diffHard: "Сложная", startGame: "Начать игру",
+        waitHost: "Ожидание хоста...", myTurn: "ТВОЙ ХОД!", otherTurn: "ХОД ПРОТИВНИКА", taskLabel: "Задание:",
+        solves: "Решает", answer: "Ответ", voteKick: "Не верим! Сжечь 🔥", votesNeeded: (c,r)=>`Голосов: ${c}/${r}`,
+        voteAccepted: "🔥 СЖЕЧЬ!", flyingAway: "Улетает...", swipeNow: "СВАЙПНИ!", swipeHint: "Свайпни картошку!",
+        tapUnlock: "Tap to unlock", readyAnswer: "✓ Готово", readyAction: "✓ Выполнил", answerPh: "Введи ответ...",
+        boom: "BOOM!", exploded: n=>`💀 ${n} ВЗОРВАЛСЯ!`, watching: "Следить за игрой", toMenu: "В меню",
+        gameOver: "КОНЕЦ ИГРЫ", winner: "Победитель определён!", victory: "ПОБЕДА!", survived: "🏆 Ты выжил!",
+        menuBack: "← Меню", burned: n=>`💥 ${n} СГОРЕЛ!`, timer: "ВРЕМЯ", actWarn: "Выполни действие вживую, затем жми!",
+        errTxt: "Неверно! Подумай еще.", modeLabels: { answers:"Ответы", actions:"Действия" },
     },
     en: {
-        createLobby:    "Create Lobby",
-        orEnterCode:    "Or enter room code",
-        joinByCode:     "Join by code",
-        lobbyCode:      "Lobby Code",
-        invite:         "Invite Friends",
-        lang:           "Language",
-        mode:           "Mode",
-        modAnswers:     "✏️ Answers",
-        modActions:     "🎭 Actions",
-        modMix:         "🔀 Mix",
-        diff:           "Difficulty",
-        diffEasy:       "Easy",
-        diffMed:        "Medium",
-        diffHard:       "Hard",
-        startGame:      "Start Game",
-        waitHost:       "Waiting for host...",
-        myTurn:         "YOUR TURN!",
-        otherTurn:      "THEIR TURN",
-        taskLabel:      "Task:",
-        solves:         "Solving",
-        answer:         "Answer",
-        voteKick:       "Disbelieve! Burn 🔥",
-        votesNeeded:    (c,r) => `Votes: ${c}/${r}`,
-        voteAccepted:   "🔥 DECIDED!",
-        flyingAway:     "Flying away...",
-        swipeNow:       "SWIPE IT!",
-        swipeHint:      "Swipe the potato!",
-        tapUnlock:      "Tap to unlock",
-        readySwipe:     "✓ Done — now swipe!",
-        answerPh:       "Type your answer...",
-        boom:           "BOOM!",
-        exploded:       (n) => `💀 ${n} EXPLODED!`,
-        watching:       "Spectate",
-        toMenu:         "Menu",
-        gameOver:       "GAME OVER",
-        winner:         "Winner determined!",
-        victory:        "VICTORY!",
-        survived:       "🏆 You survived!",
-        menuBack:       "← Menu",
-        burned:         (n) => `💥 ${n} IS OUT!`,
-        modeLabels:     { answers:"Answers", actions:"Actions", mix:"Mix" },
+        createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
+        invite: "Invite", lang: "Language", mode: "Mode", modAnswers: "✏️ Answers", modActions: "🎭 Actions", modMix: "🔀 Mix",
+        diff: "Difficulty", diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard", startGame: "Start Game",
+        waitHost: "Waiting for host...", myTurn: "YOUR TURN!", otherTurn: "THEIR TURN", taskLabel: "Task:",
+        solves: "Solving", answer: "Answer", voteKick: "Cap! Burn 🔥", votesNeeded: (c,r)=>`Votes: ${c}/${r}`,
+        voteAccepted: "🔥 BURNED!", flyingAway: "Flying away...", swipeNow: "SWIPE!", swipeHint: "Swipe the potato!",
+        tapUnlock: "Tap to unlock", readyAnswer: "✓ Done", readyAction: "✓ Finished", answerPh: "Type answer...",
+        boom: "BOOM!", exploded: n=>`💀 ${n} EXPLODED!`, watching: "Spectate", toMenu: "Menu",
+        gameOver: "GAME OVER", winner: "Winner determined!", victory: "VICTORY!", survived: "🏆 You survived!",
+        menuBack: "← Menu", burned: n=>`💥 ${n} IS OUT!`, timer: "TIMER", actWarn: "Do the action in real life, then tap!",
+        errTxt: "Wrong answer! Try again.", modeLabels: { answers:"Answers", actions:"Actions" },
     }
 };
 
-let currentLang = 'ru';
-let currentMode = 'answers';
-let currentDiff = 'easy';
+let currentLang = 'ru', currentMode = 'answers', currentDiff = 'easy';
 
 function T(key, ...args) {
     const v = i18n[currentLang][key];
@@ -636,604 +560,377 @@ function T(key, ...args) {
 }
 
 function applyI18n() {
-    // Start screen
-    document.getElementById('btn-create-lobby').innerText  = T('createLobby');
-    document.getElementById('lbl-or').innerText            = T('orEnterCode');
-    document.getElementById('btn-join-code').innerText     = T('joinByCode');
-    document.getElementById('lbl-lang').innerText          = T('lang');
-    // Lobby
-    document.getElementById('lbl-lobby-code').innerText    = T('lobbyCode');
-    document.getElementById('btn-invite').innerText        = T('invite');
-    document.getElementById('lbl-lobby-lang').innerText    = T('lang');
-    document.getElementById('lbl-mode').innerText          = T('mode');
-    document.getElementById('lbl-diff').innerText          = T('diff');
-    document.getElementById('mode-answers').innerText      = T('modAnswers');
-    document.getElementById('mode-actions').innerText      = T('modActions');
-    document.getElementById('mode-mix').innerText          = T('modMix');
-    document.getElementById('diff-easy').innerText         = T('diffEasy');
-    document.getElementById('diff-medium').innerText       = T('diffMed');
-    document.getElementById('diff-hard').innerText         = T('diffHard');
-    document.getElementById('btn-start-game').innerText    = T('startGame');
-    document.getElementById('wait-host-msg').innerText     = T('waitHost');
-    // Game
-    document.getElementById('lbl-tap-unlock').innerText    = T('tapUnlock');
-    document.getElementById('btn-submit-answer').innerText = T('readySwipe');
-    document.getElementById('answer-input').placeholder    = T('answerPh');
-    document.getElementById('swipe-hint-text').innerText   = T('swipeHint');
-    // Gameover
-    document.getElementById('btn-spectate').innerText      = T('watching');
-    document.getElementById('btn-to-lobby').innerText      = T('toMenu');
-    document.getElementById('btn-leave-spectate').innerText= T('menuBack');
+    document.getElementById('btn-create-lobby').innerText = T('createLobby');
+    document.getElementById('lbl-or').innerText = T('orEnterCode');
+    document.getElementById('btn-join-code').innerText = T('joinByCode');
+    document.getElementById('lbl-lang').innerText = T('lang');
+    document.getElementById('lbl-lobby-code').innerText = T('lobbyCode');
+    document.getElementById('btn-invite').innerText = T('invite');
+    document.getElementById('lbl-lobby-lang').innerText = T('lang');
+    document.getElementById('lbl-mode').innerText = T('mode');
+    document.getElementById('lbl-diff').innerText = T('diff');
+    document.getElementById('mode-answers').innerText = T('modAnswers');
+    document.getElementById('mode-actions').innerText = T('modActions');
+    document.getElementById('mode-mix').innerText = T('modMix');
+    document.getElementById('diff-easy').innerText = T('diffEasy');
+    document.getElementById('diff-medium').innerText = T('diffMed');
+    document.getElementById('diff-hard').innerText = T('diffHard');
+    document.getElementById('btn-start-game').innerText = T('startGame');
+    document.getElementById('wait-host-msg').innerText = T('waitHost');
+    document.getElementById('lbl-tap-unlock').innerText = T('tapUnlock');
+    document.getElementById('btn-submit-answer').innerText = T('readyAnswer');
+    document.getElementById('btn-submit-action').innerText = T('readyAction');
+    document.getElementById('answer-input').placeholder = T('answerPh');
+    document.getElementById('swipe-hint-text').innerText = T('swipeHint');
+    document.getElementById('btn-spectate').innerText = T('watching');
+    document.getElementById('btn-to-lobby').innerText = T('toMenu');
+    document.getElementById('btn-leave-spectate').innerText = T('menuBack');
+    document.getElementById('lbl-timer').innerText = T('timer');
+    document.getElementById('lbl-action-warn').innerText = T('actWarn');
+    document.getElementById('input-error').innerText = T('errTxt');
 }
 
-// Language selectors
 function setLang(lang) {
     currentLang = lang;
     document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     document.querySelectorAll('[data-lobby-lang]').forEach(b => b.classList.toggle('active', b.dataset.lobbyLang === lang));
     applyI18n();
 }
-document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
-document.querySelectorAll('[data-lobby-lang]').forEach(b => b.addEventListener('click', () => {
-    if (!network.isHost) return;
-    setLang(b.dataset.lobbyLang);
-}));
-
-// Mode selectors
-document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
-    if (!network.isHost) return;
-    document.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    currentMode = b.dataset.mode;
-}));
-
-// Difficulty selectors
-document.querySelectorAll('[data-diff]').forEach(b => b.addEventListener('click', () => {
-    if (!network.isHost) return;
-    document.querySelectorAll('[data-diff]').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    currentDiff = b.dataset.diff;
-}));
-
-// Init i18n
+document.querySelectorAll('.seg-btn').forEach(b => {
+    b.addEventListener('click', () => {
+        if (b.dataset.lang) setLang(b.dataset.lang);
+        if (!network.isHost && (b.dataset.lobbyLang || b.dataset.mode || b.dataset.diff)) return;
+        if (b.dataset.lobbyLang) setLang(b.dataset.lobbyLang);
+        if (b.dataset.mode) {
+            document.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('active'));
+            b.classList.add('active'); currentMode = b.dataset.mode;
+        }
+        if (b.dataset.diff) {
+            document.querySelectorAll('[data-diff]').forEach(x => x.classList.remove('active'));
+            b.classList.add('active'); currentDiff = b.dataset.diff;
+        }
+    });
+});
 applyI18n();
 
-// ══════════════════════════════════════════════════════
-//  NETWORK (simulated)
-// ══════════════════════════════════════════════════════
+// ═════ NETWORK ═════
 class NetworkManager {
     constructor() { this.lobbyId=null; this.players=[]; this.isHost=false; this.botTimers=[]; this.botPassBack=null; }
-
     connect(lobbyId, isHost=false) {
         this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
         this.players.push({ id:currentUser.id, name:currentUser.first_name, initials:currentUser.shortInit, isHost, isDead:false });
         updateLobbyUI();
         if (isHost) {
-            this.botTimers.push(setTimeout(() => { this.players.push({ id:2, name:"Иван (Bot)", initials:"ИВ", isHost:false, isDead:false }); updateLobbyUI(); haptic('light'); }, 1200));
-            this.botTimers.push(setTimeout(() => { this.players.push({ id:3, name:"Ксюша (Bot)", initials:"КС", isHost:false, isDead:false }); updateLobbyUI(); haptic('light'); }, 2800));
+            this.botTimers.push(setTimeout(() => { this.players.push({ id:2, name:"Иван", initials:"ИВ", isHost:false, isDead:false }); updateLobbyUI(); haptic('light'); }, 1200));
+            this.botTimers.push(setTimeout(() => { this.players.push({ id:3, name:"Оля", initials:"ОЛ", isHost:false, isDead:false }); updateLobbyUI(); haptic('light'); }, 2800));
         } else {
             this.players.push({ id:999, name:"Host", initials:"HO", isHost:true, isDead:false });
             updateLobbyUI();
             this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 4000));
         }
     }
-
     startBotTimer(botId) {
-        const cfg = diffConfigs();
-        const delay = (cfg.timeMin * 0.45 + Math.random() * cfg.timeMin * 0.35) * 1000;
-        this.botPassBack = setTimeout(() => {
-            if (currentScreen==='GAME' && !isGameOver && currentTurnPlayerId===botId) this.sendPotato();
-        }, delay);
+        const cfg = { easy:{min:6}, medium:{min:9}, hard:{min:13} }[currentDiff] || {min:6};
+        const delay = (cfg.min * 0.45 + Math.random() * cfg.min * 0.35) * 1000;
+        this.botPassBack = setTimeout(() => { if (currentScreen==='GAME' && !isGameOver && currentTurnPlayerId===botId) this.sendPotato(); }, delay);
     }
-
     sendPotato() {
         let alive = this.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId);
         if (!alive.length) return;
         let target = alive[Math.floor(Math.random() * alive.length)];
-        triggerCurtain(() => {
-            isProcessingTurn = false;
-            passPotato(target.id);
-        });
+        triggerCurtain(() => { isProcessingTurn = false; passPotato(target.id); });
     }
-
-    clearBotTimers() { this.botTimers.forEach(t => clearTimeout(t)); if (this.botPassBack) clearTimeout(this.botPassBack); }
+    clearBotTimers() { this.botTimers.forEach(clearTimeout); clearTimeout(this.botPassBack); }
 }
 
-// ══════════════════════════════════════════════════════
-//  CORE STATE
-// ══════════════════════════════════════════════════════
+// ═════ STATE ═════
 let network = new NetworkManager();
-let currentScreen = 'START';
-let isGameOver = false;
-let isCurtainActive = false;
-
-let globalTimer = 0, personalTimer = 0;
-let gameStartTime = null;
-let currentTurnPlayerId = null;
-let currentTaskString = "", currentTaskAnswer = "";
-
+let currentScreen = 'START', isGameOver = false, isCurtainActive = false, isSpectating = false;
+let globalTimer = 0, personalTimer = 0, gameStartTime = null, currentTurnPlayerId = null;
+let currentTaskObj = { q: "", a: "", type: "answer" };
 let pulsePhase = 0, gameLoopId = null;
-let isLocked = true, isAnswered = false;
-let isProcessingTurn = false, isExploding = false;
+let isLocked = true, isAnswered = false, isProcessingTurn = false, isExploding = false;
 let currentVotes = 0, requiredVotes = 1;
 
-// FIX: spectator flag — отдельно от isGameOver
-let isSpectating = false;
-
 const ui = {
-    curtain:   document.getElementById('curtain'),
-    status:    document.getElementById('status-text'),
-    task:      document.getElementById('task-display'),
-    timer:     document.getElementById('personal-timer'),
-    wrapper:   document.getElementById('potato-pulse-wrapper'),
-    container: document.getElementById('potato-container'),
-    pBar:      document.getElementById('players-bar'),
-    img:       document.getElementById('potato-img'),
-    lockOvr:   document.getElementById('lock-overlay'),
-    combo:     document.getElementById('combo-panel'),
-    input:     document.getElementById('answer-input'),
-    btnSub:    document.getElementById('btn-submit-answer'),
-    swipeHint: document.getElementById('swipe-hint'),
+    curtain:   document.getElementById('curtain'), status: document.getElementById('status-text'),
+    task:      document.getElementById('task-display'), timer: document.getElementById('personal-timer'),
+    wrapper:   document.getElementById('potato-pulse-wrapper'), container: document.getElementById('potato-container'),
+    pBar:      document.getElementById('players-bar'), img: document.getElementById('potato-img'),
+    lockOvr:   document.getElementById('lock-overlay'), combo: document.getElementById('combo-panel'),
+    input:     document.getElementById('answer-input'), hint: document.getElementById('swipe-hint'),
+    err:       document.getElementById('input-error'), txtWrap: document.getElementById('combo-text-wrapper'),
+    actWrap:   document.getElementById('combo-action-wrapper')
 };
 
-function diffConfigs() {
-    const diffs = { easy:{timeMin:6,timeMax:9}, medium:{timeMin:9,timeMax:14}, hard:{timeMin:13,timeMax:18} };
-    return diffs[currentDiff] || diffs.easy;
-}
-
-// ── Screens
 function showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(`screen-${name.toLowerCase()}`).classList.add('active');
     currentScreen = name;
 }
 function triggerCurtain(cb) {
-    if (isCurtainActive) return;
-    isCurtainActive = true;
-    ui.curtain.classList.add('active');
+    if (isCurtainActive) return; isCurtainActive = true; ui.curtain.classList.add('active');
     setTimeout(() => { cb(); ui.curtain.classList.remove('active'); isCurtainActive = false; }, 300);
 }
 
-// ── Start
-if (startParam) joinLobby(startParam, false);
-else showScreen('START');
+if (startParam) joinLobby(startParam, false); else showScreen('START');
+document.getElementById('btn-create-lobby').onclick = () => joinLobby(generateCode(), true);
+const cdInp = document.getElementById('join-code-input');
+cdInp.oninput = function() { this.value = this.value.toUpperCase(); };
+document.getElementById('btn-join-code').onclick = () => { if (cdInp.value.trim().length) joinLobby(cdInp.value.trim(), false); };
 
-document.getElementById('btn-create-lobby').addEventListener('click', () => joinLobby(generateCode(), true));
-const codeInput = document.getElementById('join-code-input');
-codeInput.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-document.getElementById('btn-join-code').addEventListener('click', () => {
-    let v = codeInput.value.trim();
-    if (v.length) joinLobby(v, false);
-});
-
-function joinLobby(lobbyId, isHost=false) {
-    showScreen('LOBBY');
-    document.getElementById('lobby-id-display').innerText = lobbyId;
-    document.getElementById('host-settings').style.display = isHost ? 'block' : 'none';
-    document.getElementById('wait-host-msg').style.display = isHost ? 'none' : 'block';
-    network.connect(lobbyId, isHost);
+function joinLobby(id, host=false) {
+    showScreen('LOBBY'); document.getElementById('lobby-id-display').innerText = id;
+    document.getElementById('host-settings').style.display = host ? 'block' : 'none';
+    document.getElementById('wait-host-msg').style.display = host ? 'none' : 'block';
+    network.connect(id, host);
 }
 function updateLobbyUI() {
-    let list = document.getElementById('lobby-players');
-    list.innerHTML = '';
-    network.players.forEach(p => {
-        list.innerHTML += `<div class="player-row"><div class="player-avatar">${p.initials}</div><div class="player-name">${p.name}${p.isHost?' 👑':''}</div></div>`;
-    });
+    document.getElementById('lobby-players').innerHTML = network.players.map(p => 
+        `<div class="player-row"><div class="player-avatar">${p.initials}</div><div class="player-name">${p.name}${p.isHost?' 👑':''}</div></div>`
+    ).join('');
 }
-document.getElementById('btn-invite').addEventListener('click', () => {
+document.getElementById('btn-invite').onclick = () => {
     if (tg.switchInlineQuery) tg.switchInlineQuery(network.lobbyId, ["users","groups"]);
-    else alert("Скопируй: https://t.me/your_bot?startapp=" + network.lobbyId);
-});
-document.getElementById('btn-start-game').addEventListener('click', () => startRound());
+    else alert("Link: https://t.me/your_bot?startapp=" + network.lobbyId);
+};
+document.getElementById('btn-start-game').onclick = () => startRound();
 
 function updatePlayersBar() {
-    ui.pBar.innerHTML = '';
-    network.players.forEach(p => {
-        let cls = (p.id===currentTurnPlayerId?' active':'') + (p.isDead?' dead':'');
-        ui.pBar.innerHTML += `<div class="p-mini${cls}">${p.initials}</div>`;
-    });
+    ui.pBar.innerHTML = network.players.map(p => `<div class="p-mini${p.id===currentTurnPlayerId?' active':''}${p.isDead?' dead':''}">${p.initials}</div>`).join('');
 }
 
-// ══════════════════════════════════════════════════════
-//  GAME LOGIC
-// ══════════════════════════════════════════════════════
+// ═════ GAME LOGIC ═════
 function startRound() {
-    isGameOver = false; isSpectating = false;
-    globalTimer = 30 + Math.random() * 30;
+    isGameOver = false; isSpectating = false; globalTimer = 30 + Math.random() * 30;
     network.players.forEach(p => p.isDead = false);
-    showScreen('GAME');
-    passPotato(currentUser.id);
+    showScreen('GAME'); passPotato(currentUser.id);
 }
 
 function passPotato(playerId) {
-    // reset all per-turn state
-    isExploding = false; isAnswered = false;
-    isProcessingTurn = false; currentVotes = 0;
+    isExploding = false; isAnswered = false; isProcessingTurn = false; currentVotes = 0;
     requiredVotes = Math.max(2, network.players.filter(p => !p.isDead).length - 1);
     currentTurnPlayerId = playerId;
 
-    // FIX: cancel old loop & reset timestamp
     if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
     gameStartTime = null;
 
-    const cfg = diffConfigs();
-    personalTimer = cfg.timeMin + Math.random() * (cfg.timeMax - cfg.timeMin);
-    pulsePhase = 0;
+    const diffs = { easy:{m:6,M:9}, medium:{m:9,M:14}, hard:{m:13,M:18} };
+    const cfg = diffs[currentDiff] || diffs.easy;
+    personalTimer = cfg.m + Math.random() * (cfg.M - cfg.m); pulsePhase = 0;
 
-    // pick task
     const pool = getTaskPool(currentLang, currentMode, currentDiff);
-    const task = pool[Math.floor(Math.random() * pool.length)];
-    currentTaskString = task?.q || "БЫСТРЕЙ!";
-    currentTaskAnswer = task?.a || "—";
+    currentTaskObj = pool[Math.floor(Math.random() * pool.length)] || { q: "Давай!", a: "", type: "answer" };
 
     updatePlayersBar();
 
     if (playerId === currentUser.id) {
-        // ── MY TURN ──────────────────────────────────────
-        isLocked = true;
-        resetComboPanel();
-
-        // Task hidden until unlock — show only label
-        ui.task.innerHTML = '';
-        ui.task.style.opacity = '1';
-
-        ui.timer.style.opacity = '1';
-        ui.timer.classList.remove('urgent');
-        ui.status.innerText = T('myTurn');
-        ui.status.style.color = 'var(--mint)';
-
+        // MY TURN
+        isLocked = true; resetComboPanel();
+        ui.task.innerHTML = ''; ui.task.style.opacity = '1';
+        ui.timer.style.opacity = '1'; ui.timer.classList.remove('urgent');
+        ui.status.innerText = T('myTurn'); ui.status.style.color = 'var(--card-text)';
         haptic('warning');
-
-        ui.img.classList.add('locked');
-        ui.img.classList.remove('shaking');
-        ui.lockOvr.style.opacity = '1';
-        ui.lockOvr.style.pointerEvents = 'auto';
+        ui.img.classList.add('locked'); ui.img.classList.remove('shaking');
+        ui.lockOvr.style.opacity = '1'; ui.lockOvr.style.pointerEvents = 'auto';
         ui.wrapper.classList.remove('swipe-ready');
 
-        // Fly-in animation
-        ui.container.style.transition = 'none';
-        ui.container.style.transform = `translate(0, -${window.innerHeight/2}px) scale(0.5)`;
-        ui.container.style.opacity = '0';
-        void ui.container.offsetWidth;
+        ui.container.style.transition = 'none'; ui.container.style.transform = `translate(0, -${window.innerHeight/2}px) scale(0.5)`;
+        ui.container.style.opacity = '0'; void ui.container.offsetWidth;
         ui.container.style.transition = 'transform .52s cubic-bezier(.175,.885,.32,1.275), opacity .32s ease';
-        ui.container.style.transform = 'translate(0,0) scale(1)';
-        ui.container.style.opacity = '1';
-
+        ui.container.style.transform = 'translate(0,0) scale(1)'; ui.container.style.opacity = '1';
     } else {
-        // ── SPECTATING ───────────────────────────────────
-        isLocked = false;
-        resetComboPanel();
-
+        // THEIR TURN
+        isLocked = false; resetComboPanel();
         let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
-        const modeBadge = `<span class="mode-badge ${currentMode}">${T('modeLabels')[currentMode]}</span>`;
+        const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
+        const badge = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>`;
         ui.task.innerHTML = `
-            ${modeBadge}
-            <span style="font-size:.82rem; color:var(--text-muted); display:block; margin-bottom:6px; letter-spacing:2px; text-transform:uppercase;">${T('solves')} ${pName.toUpperCase()}:</span>
-            <span style="font-size:1.18rem;">${currentTaskString}</span>
-            <div style="margin-top:11px; font-size:.88rem; color:var(--text-muted); background:rgba(0,0,0,.22); border-radius:12px; padding:9px;">
-                ${T('answer')}: <span style="font-weight:800; color:var(--lilac);">${currentTaskAnswer}</span>
+            ${badge}
+            <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
+            <span style="font-size:1.2rem;">${currentTaskObj.q}</span>
+            <div style="margin-top:14px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.5); border-radius:14px; padding:10px;">
+                ${currentTaskObj.type === 'answer' ? T('answer')+': ' : 'Действие: '}<span style="font-weight:700;">${currentTaskObj.a}</span>
             </div>
             <button class="votekick-btn" onclick="voteKick(this)">${T('voteKick')}</button>`;
         ui.task.style.opacity = '1';
-        ui.task.style.color = 'var(--text)';
-
-        ui.timer.style.opacity = '0.55';
-        ui.status.innerText = T('otherTurn');
-        ui.status.style.color = 'var(--text-muted)';
-
-        ui.img.classList.remove('locked','shaking');
-        ui.lockOvr.style.opacity = '0';
-        ui.lockOvr.style.pointerEvents = 'none';
+        ui.timer.style.opacity = '0.7'; ui.status.innerText = T('otherTurn'); ui.status.style.color = 'var(--card-muted)';
+        ui.img.classList.remove('locked','shaking'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
         ui.wrapper.classList.remove('swipe-ready');
-
-        ui.container.style.transition = 'transform .5s cubic-bezier(.175,.885,.32,1.275), opacity .5s ease';
-        ui.container.style.transform = 'scale(0.62)';
-        ui.container.style.opacity = '0.52';
+        ui.container.style.transition = 'transform .5s ease, opacity .5s ease';
+        ui.container.style.transform = 'scale(0.65)'; ui.container.style.opacity = '0.6';
     }
-
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 function resetComboPanel() {
-    ui.combo.classList.remove('visible');
-    ui.input.value = '';
-    ui.btnSub.classList.remove('visible');
-    ui.swipeHint.style.display = 'none';
-    ui.input.removeEventListener('input', onTyping);
+    ui.combo.classList.remove('visible'); ui.input.value = ''; ui.input.classList.remove('error'); ui.err.style.display = 'none';
+    ui.hint.style.display = 'none'; ui.input.removeEventListener('input', onTyping);
 }
 
-// ─── LOCK & KEY ────────────────────────────────────
 function unlockPotato() {
-    if (!isLocked) return;
-    isLocked = false;
-    haptic('heavy');
-
-    // Flash
-    const flash = document.createElement('div');
-    flash.className = 'unlock-flash';
-    ui.container.appendChild(flash);
-    setTimeout(() => flash.remove(), 600);
-
-    ui.img.classList.remove('locked');
-    ui.lockOvr.style.opacity = '0';
-    ui.lockOvr.style.pointerEvents = 'none';
-
-    const modeBadge = `<span class="mode-badge ${currentMode}">${T('modeLabels')[currentMode]}</span>`;
-    ui.task.innerHTML = `
-        ${modeBadge}
-        <span style="font-size:.82rem; color:var(--text-muted); display:block; margin-bottom:7px; letter-spacing:2px; text-transform:uppercase;">⚡ ${T('taskLabel')}</span>
-        <span style="font-size:1.25rem; font-weight:700;">${currentTaskString}</span>`;
-
+    if (!isLocked) return; isLocked = false; haptic('heavy');
+    const flash = document.createElement('div'); flash.className = 'unlock-flash'; ui.container.appendChild(flash); setTimeout(() => flash.remove(), 600);
+    ui.img.classList.remove('locked'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
+    
+    const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
+    ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
+        <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">⚡ ${T('taskLabel')}</span>
+        <span style="font-size:1.3rem; font-weight:700;">${currentTaskObj.q}</span>`;
+    
     ui.combo.classList.add('visible');
-    ui.btnSub.classList.remove('visible');
-    ui.input.removeEventListener('input', onTyping);
-    ui.input.addEventListener('input', onTyping);
-    setTimeout(() => ui.input.focus(), 100);
+    
+    // Toggle correct combo UI
+    if (currentTaskObj.type === 'action') {
+        ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'flex';
+    } else {
+        ui.actWrap.style.display = 'none'; ui.txtWrap.style.display = 'flex';
+        ui.input.removeEventListener('input', onTyping); ui.input.addEventListener('input', onTyping);
+        setTimeout(() => ui.input.focus(), 100);
+    }
 }
 
 function onTyping() {
-    ui.img.classList.add('shaking');
-    clearTimeout(onTyping._t);
+    ui.img.classList.add('shaking'); clearTimeout(onTyping._t);
     onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
-    ui.btnSub.classList.toggle('visible', ui.input.value.trim().length > 0);
+    ui.input.classList.remove('error'); ui.err.style.display = 'none';
 }
 
-// Tap container = unlock (if locked)
-let pointerWasDrag = false;
-ui.container.addEventListener('mousedown', e => { pointerWasDrag = false; });
-ui.container.addEventListener('click', () => {
+function validateAnswer() {
+    if (currentTaskObj.type !== 'answer') return true;
+    let expected = currentTaskObj.a.toLowerCase().trim();
+    let given = ui.input.value.toLowerCase().trim();
+    
+    if (given.length < 1) return false;
+    if (expected.includes('любо') || expected.includes('any')) return true;
+    
+    // Match numbers
+    if (/^\d+$/.test(expected)) {
+        let nums = given.match(/\d+/g);
+        if (nums && nums.includes(expected)) return true;
+    }
+    
+    // Match partial keywords
+    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
+    if (expWords.length === 0) return true;
+    let match = expWords.some(w => given.includes(w) || w.includes(given.substring(0,4)));
+    if (match || given === expected) return true;
+    return false;
+}
+
+function markDone() {
+    if (isAnswered) return; 
+    
+    if (currentTaskObj.type === 'answer') {
+        if (!validateAnswer()) {
+            ui.input.classList.add('error'); ui.err.style.display = 'block'; haptic('error'); return;
+        }
+    }
+    
+    isAnswered = true; haptic('success');
+    ui.input.blur(); ui.img.classList.remove('shaking');
+    ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'none';
+    
+    ui.wrapper.classList.add('swipe-ready'); ui.hint.style.display = 'flex';
+    ui.status.innerText = T('swipeNow'); ui.status.style.color = 'var(--warm-red)';
+}
+
+document.getElementById('btn-submit-answer').onclick = markDone;
+document.getElementById('btn-submit-action').onclick = markDone;
+
+let ptrDrag = false;
+ui.container.onmousedown = () => { ptrDrag = false; };
+ui.container.onclick = () => {
     if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
-    if (isLocked && !pointerWasDrag) unlockPotato();
-});
+    if (isLocked && !ptrDrag) unlockPotato();
+};
 
-// Submit → unlock for swipe
-ui.btnSub.addEventListener('click', () => {
-    if (isAnswered) return;
-    isAnswered = true;
-    haptic('medium');
-    ui.btnSub.classList.remove('visible');
-    ui.input.blur();
-    ui.img.classList.remove('shaking');
-    ui.wrapper.classList.add('swipe-ready');
-    ui.swipeHint.style.display = 'flex';
-    ui.status.innerText = T('swipeNow');
-    ui.status.style.color = 'var(--peach)';
-    haptic('light');
-});
-
-// ── GAME LOOP ─────────────────────────────────────
 function gameLoop(time) {
     if (currentScreen !== 'GAME' || isGameOver) return;
-    if (gameStartTime === null) gameStartTime = time;
+    if (!gameStartTime) gameStartTime = time;
+    let dt = Math.min((time - gameStartTime) / 1000, 0.15); gameStartTime = time;
+    globalTimer -= dt; personalTimer -= dt;
 
-    let dt = (time - gameStartTime) / 1000;
-    gameStartTime = time;
-    if (dt > 0.15) dt = 0.15;
+    const isMine = currentTurnPlayerId === currentUser.id;
+    let speed = 1 + (10 - Math.max(0, personalTimer)) * 0.3;
+    pulsePhase += dt * Math.PI * 2 * speed;
+    ui.wrapper.style.transform = `scale(${1 + Math.sin(pulsePhase) * (isAnswered ? 0.04 : 0.08)})`;
 
-    globalTimer  -= dt;
-    personalTimer -= dt;
-
-    updatePulse(dt);
+    let oldCy = Math.floor((pulsePhase - dt * Math.PI * 2 * speed) / (Math.PI * 2)), newCy = Math.floor(pulsePhase / (Math.PI * 2));
+    if (isMine && newCy > oldCy) haptic(personalTimer > 6 ? 'light' : personalTimer > 3 ? 'medium' : 'heavy');
 
     const tVal = Math.max(0, personalTimer);
-    ui.timer.innerText = tVal.toFixed(1);
-    ui.timer.classList.toggle('urgent', tVal < 3);
+    ui.timer.innerText = tVal.toFixed(1); ui.timer.classList.toggle('urgent', tVal < 3);
 
     if (personalTimer <= 0 || globalTimer <= 0) { handleExplosion(); return; }
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-function updatePulse(dt) {
-    const isMine = currentTurnPlayerId === currentUser.id;
-    let speed = 1 + (10 - Math.max(0, personalTimer)) * 0.28;
-    pulsePhase += dt * Math.PI * 2 * speed;
-    const amp = isAnswered ? 0.04 : 0.082;
-    ui.wrapper.style.transform = `scale(${1 + Math.sin(pulsePhase) * amp})`;
-
-    const prevCycle = Math.floor((pulsePhase - dt * Math.PI * 2 * speed) / (Math.PI * 2));
-    const newCycle  = Math.floor(pulsePhase / (Math.PI * 2));
-    if (isMine && newCycle > prevCycle) {
-        if (personalTimer > 6) haptic('light');
-        else if (personalTimer > 3) haptic('medium');
-        else haptic('heavy');
-    }
-}
-
 function handleExplosion() {
-    if (isExploding) return;
-    isExploding = true;
+    if (isExploding) return; isExploding = true;
     if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
     network.clearBotTimers();
-
     let dead = network.players.find(p => p.id === currentTurnPlayerId);
     if (dead) dead.isDead = true;
 
-    const meInGame = !isSpectating; // FIX: spectator is NOT an active player
-
-    if (!dead || (dead.id === currentUser.id && meInGame)) {
-        // ── I exploded (or unknown)
-        triggerGameOver(dead ? dead.name : T('boom'));
-    } else {
-        // ── Someone else exploded (I'm watching or I'm alive)
+    if (!dead || (dead.id === currentUser.id && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
+    else {
         haptic('rigid');
-        ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:900;">${T('burned', dead.name)}</span>`;
-        ui.task.style.color = 'var(--warm-red)';
-        ui.timer.style.opacity = '0';
-        ui.container.style.opacity = '0';
-
-        // Flash screen red
-        ui.curtain.style.backgroundColor = 'rgba(232,97,74,.35)';
-        ui.curtain.classList.add('active');
-        setTimeout(() => { ui.curtain.classList.remove('active'); ui.curtain.style.backgroundColor = 'var(--bg)'; }, 180);
-
+        ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
+        ui.task.style.color = 'var(--warm-red)'; ui.timer.style.opacity = '0'; ui.container.style.opacity = '0';
+        ui.curtain.style.background = 'rgba(255, 137, 132, 0.5)'; ui.curtain.classList.add('active');
+        setTimeout(() => { ui.curtain.classList.remove('active'); ui.curtain.style.background = 'var(--bg-color)'; }, 180);
         updatePlayersBar();
         let alive = network.players.filter(p => !p.isDead);
-
-        if (alive.length <= 1) {
-            // Only one or zero alive → game over
-            // FIX: if spectator checks if they should be shown winner
-            setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
-        } else {
-            setTimeout(() => {
-                globalTimer = 25 + Math.random() * 20;
-                let next = alive[Math.floor(Math.random() * alive.length)];
-                triggerCurtain(() => {
-                    passPotato(next.id);
-                    if (next.id !== currentUser.id) network.startBotTimer(next.id);
-                });
-            }, 2600);
-        }
+        if (alive.length <= 1) setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
+        else setTimeout(() => {
+            globalTimer = 25 + Math.random() * 20; let next = alive[Math.floor(Math.random() * alive.length)];
+            triggerCurtain(() => { passPotato(next.id); if(next.id !== currentUser.id) network.startBotTimer(next.id); });
+        }, 2600);
     }
 }
 
-// ── SWIPE / DRAG ───────────────────────────────────
-let isDragging = false, startX=0, startY=0, curX=0, curY=0;
+// ── SWIPE ──
+let isDragging = false, sX=0, sY=0, cX=0, cY=0;
+function canDrag() { return currentScreen==='GAME' && !isGameOver && currentTurnPlayerId===currentUser.id && !isLocked && isAnswered; }
+function startDrag(x,y) { if(currentScreen!=='GAME' || isGameOver || currentTurnPlayerId!==currentUser.id) return;
+    isDragging=true; ptrDrag=false; sX=x; sY=y; cX=x; cY=y; if(!isLocked) ui.container.style.transition='none'; }
+function moveDrag(x,y) { if(!isDragging) return; cX=x; cY=y; const dx=cX-sX, dy=cY-sY; if(Math.hypot(dx,dy)>8) ptrDrag=true;
+    if(canDrag()) ui.container.style.transform=`translate(${dx*.6}px,${dy*.6}px)`; }
+function endDrag() { if(!isDragging) return; isDragging=false; const dx=cX-sX, dy=cY-sY;
+    if(!ptrDrag && isLocked) { unlockPotato(); return; }
+    if(canDrag() && Math.hypot(dx,dy)>80) {
+        if(isProcessingTurn) return; isProcessingTurn=true; if(gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+        ui.task.style.opacity='0'; ui.timer.style.opacity='0'; ui.status.innerText=T('flyingAway'); ui.combo.classList.remove('visible'); haptic('medium');
+        const fly=window.innerWidth*1.5; ui.container.style.transition='transform .4s ease-out, opacity .3s ease';
+        ui.container.style.transform=`translate(${Math.cos(Math.atan2(dy,dx))*fly}px,${Math.sin(Math.atan2(dy,dx))*fly}px) scale(.2)`; ui.container.style.opacity='0';
+        setTimeout(() => network.sendPotato(), 150);
+    } else if(!isLocked) { ui.container.style.transition='transform .4s cubic-bezier(.175,.885,.32,1.275)'; ui.container.style.transform='translate(0,0) scale(1)'; } }
 
-function canDrag() {
-    return currentScreen==='GAME' && !isGameOver
-        && currentTurnPlayerId===currentUser.id
-        && !isLocked && isAnswered;
-}
+ui.container.addEventListener('touchstart', e=>{ e.stopPropagation(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+window.addEventListener('touchmove', e=>{ if(isDragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+window.addEventListener('touchend', endDrag);
+ui.container.addEventListener('mousedown', e=>startDrag(e.clientX,e.clientY));
+window.addEventListener('mousemove', e=>{ if(isDragging) moveDrag(e.clientX,e.clientY); });
+window.addEventListener('mouseup', endDrag);
 
-function handleDragStart(x, y) {
-    if (currentScreen!=='GAME' || isGameOver || currentTurnPlayerId!==currentUser.id) return;
-    isDragging = true; pointerWasDrag = false;
-    startX=x; startY=y; curX=x; curY=y;
-    if (!isLocked) ui.container.style.transition = 'none';
-}
-function handleDragMove(x, y) {
-    if (!isDragging) return;
-    curX=x; curY=y;
-    const dx=curX-startX, dy=curY-startY;
-    if (Math.hypot(dx,dy) > 8) pointerWasDrag = true;
-    if (canDrag()) ui.container.style.transform = `translate(${dx*.55}px,${dy*.55}px)`;
-}
-function handleDragEnd() {
-    if (!isDragging) return;
-    isDragging = false;
-    const dx=curX-startX, dy=curY-startY, dist=Math.hypot(dx,dy);
+window.voteKick = function(b) { if(isGameOver || isExploding) return; currentVotes++;
+    if(currentVotes < requiredVotes) { b.innerText = T('votesNeeded', currentVotes, requiredVotes); b.style.transform = `scale(${1+currentVotes*.05})`; haptic('light'); }
+    else { b.innerText = T('voteAccepted'); b.style.opacity = '.5'; haptic('heavy'); personalTimer = 0; handleExplosion(); } };
 
-    if (!pointerWasDrag && isLocked) { unlockPotato(); return; }
+function triggerGameOver(name) { isGameOver=true; if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} haptic('error');
+    const alive = network.players.filter(p=>!p.isDead), go = document.getElementById('go-title'), ls = document.getElementById('loser-name');
+    if(name==="LAST_SURVIVOR" || alive.length<=1) {
+        if(isSpectating || network.players.find(p=>p.id===currentUser.id)?.isDead) {
+            go.innerText=T('gameOver'); go.style.color="var(--blue)"; ls.innerText=alive.length ? `🏆 ${alive[0].name}!` : T('winner'); document.getElementById('btn-spectate').style.display='none';
+        } else { go.innerText=T('victory'); go.style.color="var(--mint-dark)"; ls.innerText=T('survived'); document.getElementById('btn-spectate').style.display='none'; }
+    } else { go.innerText=T('boom'); go.style.color="var(--warm-red)"; ls.innerText=T('exploded', name); document.getElementById('btn-spectate').style.display=isSpectating?'none':'block'; } showScreen('GAMEOVER'); }
 
-    if (canDrag() && dist > 82) {
-        localPassPotato(Math.atan2(dy,dx));
-    } else if (!isLocked) {
-        ui.container.style.transition = 'transform .45s cubic-bezier(.175,.885,.32,1.275)';
-        ui.container.style.transform = 'translate(0,0) scale(1)';
-        setTimeout(() => { if (!canDrag()) ui.container.style.transition='none'; }, 450);
-    }
-}
+document.getElementById('btn-spectate').onclick = () => { isGameOver=false; isSpectating=true; showScreen('GAME'); document.getElementById('btn-leave-spectate').style.display='block';
+    let alive = network.players.filter(p=>!p.isDead); if(alive.length>0) { triggerCurtain(()=>{ let n=alive[Math.floor(Math.random()*alive.length)]; passPotato(n.id); if(n.id!==currentUser.id) network.startBotTimer(n.id); }); } };
 
-ui.container.addEventListener('touchstart', e => { e.stopPropagation(); handleDragStart(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-window.addEventListener('touchmove',  e => { if(isDragging) handleDragMove(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-window.addEventListener('touchend',   () => handleDragEnd());
-ui.container.addEventListener('mousedown', e => handleDragStart(e.clientX, e.clientY));
-window.addEventListener('mousemove', e => { if(isDragging) handleDragMove(e.clientX, e.clientY); });
-window.addEventListener('mouseup',   () => handleDragEnd());
-
-function localPassPotato(angle) {
-    if (isProcessingTurn) return;
-    isProcessingTurn = true;
-    if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-
-    ui.task.style.opacity = '0';
-    ui.timer.style.opacity = '0';
-    ui.status.innerText = T('flyingAway');
-    ui.combo.classList.remove('visible');
-    haptic('medium');
-
-    const fly = window.innerWidth * 1.5;
-    ui.container.style.transition = 'transform .4s ease-out, opacity .3s ease';
-    ui.container.style.transform = `translate(${Math.cos(angle)*fly}px,${Math.sin(angle)*fly}px) scale(.25)`;
-    ui.container.style.opacity = '0';
-    setTimeout(() => network.sendPotato(), 150);
-}
-
-// ── VOTE KICK ─────────────────────────────────────
-window.voteKick = function(btn) {
-    if (isGameOver || isExploding) return;
-    currentVotes++;
-    if (currentVotes < requiredVotes) {
-        btn.innerText = T('votesNeeded', currentVotes, requiredVotes);
-        btn.style.transform = `scale(${1 + currentVotes*.06})`;
-        haptic('light');
-    } else {
-        btn.innerText = T('voteAccepted');
-        btn.style.opacity = '.5';
-        haptic('heavy');
-        personalTimer = 0;
-        handleExplosion();
-    }
-};
-
-// ── GAME OVER ─────────────────────────────────────
-function triggerGameOver(loserName) {
-    isGameOver = true;
-    if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-    haptic('error');
-
-    const alive = network.players.filter(p => !p.isDead);
-    const goTitle = document.getElementById('go-title');
-    const loserEl = document.getElementById('loser-name');
-
-    if (loserName === "LAST_SURVIVOR" || alive.length <= 1) {
-        // ─── FIX: Spectator должен видеть "GAME OVER" а не победу
-        if (isSpectating) {
-            // Спектатор не играет — определить победителя
-            goTitle.innerText = T('gameOver');
-            goTitle.style.color = "var(--lilac)";
-            loserEl.innerText = alive.length > 0 ? `🏆 ${alive[0].name}!` : T('winner');
-            document.getElementById('btn-spectate').style.display = 'none';
-        } else {
-            const me = network.players.find(p => p.id === currentUser.id);
-            if (me?.isDead) {
-                goTitle.innerText = T('gameOver');
-                goTitle.style.color = "var(--lilac)";
-                loserEl.innerText = T('winner');
-                document.getElementById('btn-spectate').style.display = 'none';
-            } else {
-                goTitle.innerText = T('victory');
-                goTitle.style.color = "var(--mint)";
-                loserEl.innerText = T('survived');
-                document.getElementById('btn-spectate').style.display = 'none';
-            }
-        }
-    } else {
-        goTitle.innerText = T('boom');
-        goTitle.style.color = "var(--warm-red)";
-        loserEl.innerText = T('exploded', loserName);
-        document.getElementById('btn-spectate').style.display = isSpectating ? 'none' : 'block';
-    }
-    showScreen('GAMEOVER');
-}
-
-document.getElementById('btn-spectate').addEventListener('click', () => {
-    isGameOver = false;
-    isSpectating = true;  // FIX: mark as spectator
-    showScreen('GAME');
-    document.getElementById('btn-leave-spectate').style.display = 'block';
-    let alive = network.players.filter(p => !p.isDead);
-    if (alive.length > 0) {
-        let next = alive[Math.floor(Math.random() * alive.length)];
-        triggerCurtain(() => {
-            passPotato(next.id);
-            if (next.id !== currentUser.id) network.startBotTimer(next.id);
-        });
-    }
-});
-
-function resetToMenu() {
-    if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-    network.clearBotTimers();
-    network = new NetworkManager();
-    gameStartTime = null;
-    isSpectating = false;
-    codeInput.value = '';
-    document.getElementById('btn-leave-spectate').style.display = 'none';
-    showScreen('START');
-}
-document.getElementById('btn-leave-spectate').addEventListener('click', resetToMenu);
-document.getElementById('btn-to-lobby').addEventListener('click', resetToMenu);
+function resetToMenu() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} network.clearBotTimers(); network=new NetworkManager(); gameStartTime=null; isSpectating=false; document.getElementById('btn-leave-spectate').style.display='none'; showScreen('START'); }
+document.getElementById('btn-leave-spectate').onclick = resetToMenu; document.getElementById('btn-to-lobby').onclick = resetToMenu;
 </script>
 </body>
 </html>

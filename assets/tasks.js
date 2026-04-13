@@ -310,16 +310,18 @@ const TASKS = {
  * Используйте getMixPool(lang, diff) для получения массива
  */
 function getMixPool(lang, diff) {
-    const a = TASKS[lang]?.answers?.[diff] || [];
-    const b = TASKS[lang]?.actions?.[diff] || [];
+    const a = (TASKS[lang]?.answers?.[diff] || []).map(t => ({...t, type: 'answer'}));
+    const b = (TASKS[lang]?.actions?.[diff] || []).map(t => ({...t, type: 'action'}));
     return [...a, ...b].sort(() => Math.random() - 0.5);
 }
 
 /**
  * Получить задачи для нужного режима
- * getTaskPool(lang, mode, diff) → Array<{q, a}>
+ * getTaskPool(lang, mode, diff) → Array<{q, a, type}>
  */
 function getTaskPool(lang, mode, diff) {
     if (mode === 'mix') return getMixPool(lang, diff);
-    return TASKS[lang]?.[mode]?.[diff] || TASKS['ru']?.['answers']?.['easy'] || [];
+    const tasks = TASKS[lang]?.[mode]?.[diff] || TASKS['ru']?.['answers']?.['easy'] || [];
+    const type = mode === 'answers' ? 'answer' : 'action';
+    return tasks.map(t => ({...t, type}));
 }

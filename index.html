@@ -642,8 +642,16 @@
         }
 
         let currentTaskAnswer = "";
+        let isExploding = false;
+        let currentVotes = 0;
+        let requiredVotes = 1;
 
         function setTurn(playerId) {
+            isExploding = false;
+            currentVotes = 0;
+            // requiredVotes = all living players EXCEPT the player currently answering
+            requiredVotes = Math.max(2, network.players.filter(p => !p.isDead).length - 1); 
+
             currentTurnPlayerId = playerId;
             let cfg = diffConfigs[currentDifficulty];
             personalTimer = cfg.timeMin + Math.random() * (cfg.timeMax - cfg.timeMin);
@@ -678,7 +686,7 @@
             } else {
                 // Чужой ход - Spectator Mode Fix
                 let pName = network.players.find(p => p.id === playerId)?.name || 'Игрок';
-                ui.taskDisplay.innerHTML = `<span style="font-size:0.95rem; color:var(--text-muted); display:block; margin-bottom:8px; letter-spacing: 2px;">РЕШАЕТ ${pName.toUpperCase()}:</span><span style="font-size: 1.25rem;">${currentTaskString}</span><div style="margin-top: 15px; font-size: 0.95rem; color: var(--text-muted); background: rgba(0,0,0,0.25); border-radius: 12px; padding: 10px;">Ответ: <span style="font-weight: 800; color: var(--btn-purple)">${currentTaskAnswer}</span></div><button onclick="voteKick()" style="margin-top: 15px; background-color: var(--danger); border: none; border-radius: 20px; padding: 8px 15px; color: white; font-weight: 800; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-transform: uppercase;">Не верим! (Сжечь)</button>`;
+                ui.taskDisplay.innerHTML = `<span style="font-size:0.95rem; color:var(--text-muted); display:block; margin-bottom:8px; letter-spacing: 2px;">РЕШАЕТ ${pName.toUpperCase()}:</span><span style="font-size: 1.25rem;">${currentTaskString}</span><div style="margin-top: 15px; font-size: 0.95rem; color: var(--text-muted); background: rgba(0,0,0,0.25); border-radius: 12px; padding: 10px;">Ответ: <span style="font-weight: 800; color: var(--btn-purple)">${currentTaskAnswer}</span></div><button id="btn-votekick" onclick="voteKick(this)" style="margin-top: 15px; background-color: var(--danger); border: none; border-radius: 20px; padding: 8px 15px; color: white; font-weight: 800; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-transform: uppercase;">Не верим! (Сжечь)</button>`;
                 ui.taskDisplay.style.opacity = '1';
                 ui.taskDisplay.style.color = 'var(--text-light)';
                 
@@ -760,6 +768,9 @@
         }
 
         function handleExplosion() {
+            if (isExploding) return;
+            isExploding = true;
+            
             network.clearBotTimers();
             let deadPlayer = network.players.find(p => p.id === currentTurnPlayerId);
             if (deadPlayer) deadPlayer.isDead = true;
@@ -866,9 +877,21 @@
         }
 
         // --- GAMEOVER ---
-        window.voteKick = function() {
-            if (currentTurnPlayerId && currentTurnPlayerId !== currentUser.id && !isGameOver) {
-                personalTimer = 0; // instantly blow them up
+        window.voteKick = function(btn) {
+            if (isGameOver || isExploding) return;
+            
+            currentVotes++;
+            
+            if (currentVotes < requiredVotes) {
+                btn.innerText = `Нужно голосов! (${currentVotes}/${requiredVotes})`;
+                btn.style.transform = `scale(${1 + currentVotes * 0.05})`;
+                if (window.Telegram?.WebApp?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            } else {
+                btn.innerText = `РЕШЕНИЕ ПРИНЯТО!`;
+                btn.style.backgroundColor = "var(--text-muted)";
+                if (window.Telegram?.WebApp?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+                
+                personalTimer = 0; 
                 handleExplosion();
             }
         };

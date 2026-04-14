@@ -15,7 +15,7 @@
     <script src="assets/tasks.js"></script>
     <style>
         :root {
-            /* ── Clay & Warm Palette ── */
+            /* ── Clay & Warm Palette (Family Friendly) ── */
             --bg-color:         #dfc5b7;
             --card-base:        #fff9f0;
             --card-rim:         #f0e5da;
@@ -33,6 +33,31 @@
             --shadow-light:     rgba(255, 255, 255, 0.6);
             --shadow-dark:      rgba(110, 80, 70, 0.35);
             --shadow-darker:    rgba(110, 80, 70, 0.5);
+
+            --bg-overlay:       rgba(255, 255, 255, 0); /* For background darkening */
+        }
+
+        /* ── Dark Mode / 18+ Palette ── */
+        body.dark-mode {
+            --bg-color:         #1a1114;
+            --card-base:        #2a1f22;
+            --card-rim:         #3d2b30;
+            --card-text:        #f5e6e8;
+            --card-muted:       #a38c91;
+            
+            --peach:            #91384e;
+            --peach-dark:       #6b2637;
+            --mint:             #8b4566;
+            --mint-dark:        #5c2c43;
+            --blue:             #4a3b5c;
+            --warm-red:         #d4263f;
+            --lilac:            #5a4066;
+            
+            --shadow-light:     rgba(60, 40, 45, 0.6);
+            --shadow-dark:      rgba(10, 5, 8, 0.8);
+            --shadow-darker:    rgba(0, 0, 0, 0.9);
+
+            --bg-overlay:       rgba(20, 10, 15, 0.85);
         }
 
         * { margin:0; padding:0; box-sizing:border-box; 
@@ -41,7 +66,7 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: url('assets/bg.webp');
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('assets/bg.webp');
             background-size: cover;
             background-position: center;
             color: var(--card-text);
@@ -55,6 +80,32 @@
             /* Prevent iOS rubber-band / bounce */
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        /* Emoji Rain for 18+ mode */
+        .emoji-rain-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1; overflow: hidden;
+            opacity: 0; visibility: hidden; transition: opacity 1s ease;
+        }
+        body.dark-mode .emoji-rain-container {
+            opacity: 0.15; /* Subtle background effect */
+            visibility: visible;
+        }
+        .falling-emoji {
+            position: absolute; font-size: 2rem;
+            animation: fall linear infinite;
+            filter: drop-shadow(0px 0px 5px rgba(255,100,100,0.5));
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* Elements transitions for dark mode */
+        .clay-card, .clay-btn, .answer-input, .input-code, .nick-input, .seg-group, .p-mini, .player-row, .chat-sheet, .chat-msg {
+            transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease;
         }
 
         /* ─── Wave Curtain ─── */
@@ -64,17 +115,23 @@
             height: 100%;
             z-index: 2000;
             pointer-events: none;
-            background: linear-gradient(180deg, #d6bdb0 0%, #e2cbbc 100%);
+            background: linear-gradient(180deg, var(--bg-color) 0%, var(--card-rim) 100%);
             transform: translateY(-110%);
             overflow: visible;
+            transition: background 0.5s ease;
         }
         .curtain::after {
             content: '';
             position: absolute;
             bottom: -58px; left: -1px;
             width: calc(100% + 2px); height: 60px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath fill='%23d6bdb0' d='M0,30 C160,0 320,60 480,28 C640,0 800,55 960,25 C1120,0 1280,55 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E") no-repeat center top;
-            background-size: 100% 100%;
+            /* We use a mask for dynamic color */
+            background-color: var(--card-rim);
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0,30 C160,0 320,60 480,28 C640,0 800,55 960,25 C1120,0 1280,55 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0,30 C160,0 320,60 480,28 C640,0 800,55 960,25 C1120,0 1280,55 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E");
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+            transition: background-color 0.5s ease;
         }
 
         /* ─── App Layout ─── */
@@ -140,10 +197,15 @@
             box-shadow: inset 2px 3px 8px rgba(180,160,150,0.3);
             transition: border-color .2s, box-shadow .2s;
         }
+        body.dark-mode .nick-input { background: rgba(0,0,0,0.4); box-shadow: inset 2px 3px 8px rgba(0,0,0,0.6); }
         .nick-input:focus {
             border-color: var(--peach);
             box-shadow: inset 2px 3px 8px rgba(180,160,150,0.3), 0 0 0 3px rgba(245,168,127,0.3);
         }
+        body.dark-mode .nick-input:focus {
+            box-shadow: inset 2px 3px 8px rgba(0,0,0,0.6), 0 0 0 3px rgba(212,38,63,0.4);
+        }
+        
         .clay-card {
             background: var(--card-base);
             border: 12px solid var(--card-rim);
@@ -152,13 +214,21 @@
             box-shadow: 
                 15px 20px 35px var(--shadow-dark),
                 -10px -15px 25px var(--shadow-light),
-                inset 8px 8px 15px rgba(255,255,255,1),
-                inset -6px -8px 20px rgba(180,160,150,0.5),
-                inset 0 0 60px rgba(255,210,130,0.25);
+                inset 8px 8px 15px rgba(255,255,255,0.8),
+                inset -6px -8px 20px rgba(180,160,150,0.3),
+                inset 0 0 60px rgba(255,210,130,0.15);
             width:100%; max-width:350px;
             text-align:center;
             display:flex; flex-direction:column; gap:14px;
             position: relative;
+        }
+        body.dark-mode .clay-card {
+            box-shadow: 
+                15px 20px 35px var(--shadow-dark),
+                -10px -15px 25px rgba(40, 20, 25, 0.5),
+                inset 4px 4px 10px rgba(255,255,255,0.05),
+                inset -6px -8px 20px rgba(0,0,0,0.5),
+                inset 0 0 60px rgba(145,56,78,0.1);
         }
 
         /* ─── Explosion Flash Overlay ─── */
@@ -167,6 +237,9 @@
             background: radial-gradient(circle at center, rgba(255,220,150,0.9) 0%, rgba(255,100,80,0.6) 40%, transparent 75%);
             pointer-events: none;
             animation: flashBoom 0.7s ease-out forwards;
+        }
+        body.dark-mode .explosion-flash {
+            background: radial-gradient(circle at center, rgba(212,38,63,0.9) 0%, rgba(100,20,30,0.6) 40%, transparent 75%);
         }
         @keyframes flashBoom {
             0%   { opacity: 0; transform: scale(0.3); }
@@ -177,23 +250,31 @@
         /* ─── Clay Button ─── */
         .clay-btn {
             border:none; 
-            background: #d6b8a6;
-            border: 6px solid #ecdbcf;
+            background: var(--card-rim);
+            border: 6px solid var(--card-base);
             border-radius: 20px 25px 18px 24px / 25px 18px 24px 20px;
             padding:12px 18px;
             font-size:1.05rem; font-weight:700;
-            color: #4a3424; cursor:pointer;
+            color: var(--card-text); cursor:pointer;
             text-transform:uppercase; letter-spacing:1px;
             font-family:'Fredoka',sans-serif;
-            transition:transform .12s ease, box-shadow .12s ease;
+            transition:transform .12s ease, box-shadow .12s ease, background-color 0.5s ease, border-color 0.5s ease;
             box-shadow:
                 8px 10px 20px var(--shadow-dark),
                 -5px -8px 15px var(--shadow-light),
-                inset 3px 4px 8px rgba(255,255,255,0.8),
-                inset -2px -4px 8px rgba(110,80,70,0.2);
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+                inset 3px 4px 8px rgba(255,255,255,0.4),
+                inset -2px -4px 8px rgba(110,80,70,0.1);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.2);
             width: 100%;
             display: block;
+        }
+        body.dark-mode .clay-btn {
+            box-shadow:
+                8px 10px 20px var(--shadow-dark),
+                -5px -8px 15px rgba(50,30,35,0.5),
+                inset 2px 2px 6px rgba(255,255,255,0.05),
+                inset -2px -4px 8px rgba(0,0,0,0.3);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
         }
         .clay-btn + .clay-btn { margin-top: 10px; }
         .clay-btn:active {
@@ -202,12 +283,16 @@
                 2px 4px 8px var(--shadow-dark),
                 -2px -3px 6px var(--shadow-light),
                 inset 4px 6px 12px rgba(110,80,70,0.3),
-                inset -2px -2px 4px rgba(255,255,255,0.8);
+                inset -2px -2px 4px rgba(255,255,255,0.4);
         }
 
         /* ─── Segmented selector ─── */
         .seg-group { display:flex; gap:8px; background: rgba(180, 150, 140, 0.2); border-radius: 18px; padding:6px; 
             box-shadow: inset 4px 4px 8px rgba(110,80,70,0.2), inset -2px -2px 5px rgba(255,255,255,0.6); }
+        body.dark-mode .seg-group {
+            background: rgba(0,0,0,0.3);
+            box-shadow: inset 4px 4px 8px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(100,60,70,0.2);
+        }
         .seg-btn {
             flex:1; border:none; border-radius:14px;
             padding:10px 4px; background:transparent;
@@ -216,51 +301,70 @@
             text-transform:uppercase; font-family:'Fredoka',sans-serif;
         }
         .seg-btn.active {
-            background:#fdf9f4; color:var(--card-text);
+            background: var(--card-base); color:var(--card-text);
             box-shadow: 2px 4px 10px rgba(110,80,70,0.2), -2px -2px 6px rgba(255,255,255,0.6);
+        }
+        body.dark-mode .seg-btn.active {
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.5), -1px -1px 4px rgba(100,50,60,0.3);
         }
         .seg-label {
             font-size:0.85rem; font-weight:700; color:var(--card-muted);
             text-transform:uppercase; text-align:left; margin-bottom:4px; margin-left: 4px;
         }
 
+        /* 18+ Button specific styling */
+        #mode-adult.active {
+            background: var(--warm-red);
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
         /* ─── Input ─── */
-        .input-code {
-            background:#ebe0d7; border:none; outline:none;
+        .input-code, .answer-input, .chat-input {
+            background: var(--card-rim); border:none; outline:none;
             border-radius:18px 16px 20px 18px; padding:16px;
-            font-size:1.6rem; font-weight:700;
-            color:var(--card-text); text-align:center;
+            color:var(--card-text); font-family:'Fredoka',sans-serif;
+            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -4px 6px rgba(255,255,255,0.6);
+            transition: background-color 0.5s, box-shadow 0.25s;
+        }
+        body.dark-mode .input-code, body.dark-mode .answer-input, body.dark-mode .chat-input {
+            box-shadow:inset 4px 6px 12px rgba(0,0,0,0.6), inset -2px -4px 6px rgba(100,60,70,0.2);
+        }
+        .input-code {
+            font-size:1.6rem; font-weight:700; text-align:center;
             text-transform:uppercase; letter-spacing:5px; width:100%;
-            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -4px 6px rgba(255,255,255,0.8);
-            font-family:'Fredoka',sans-serif;
         }
         .input-code::placeholder { color: rgba(150,130,115,0.5); }
+        body.dark-mode .input-code::placeholder { color: rgba(200,180,190,0.3); }
 
         .answer-input {
-            background:#ebe0d7; border:none;
-            outline:none; border-radius:18px 16px 20px 18px; padding:15px;
-            font-size:1.1rem; font-weight:600; color:var(--card-text);
-            width:100%;
-            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -2px 6px rgba(255,255,255,0.8);
-            font-family:'Fredoka',sans-serif;
-            transition: box-shadow .25s;
+            font-size:1.1rem; font-weight:600; width:100%; padding:15px;
             -webkit-user-select:text; user-select:text;
         }
         .answer-input:focus {
             box-shadow:inset 6px 8px 16px rgba(110,80,70,0.4), 0 0 0 3px rgba(143, 213, 184, 0.6);
         }
+        body.dark-mode .answer-input:focus {
+            box-shadow:inset 6px 8px 16px rgba(0,0,0,0.8), 0 0 0 3px rgba(212,38,63,0.5);
+        }
         .answer-input.error {
             box-shadow:inset 6px 8px 16px rgba(110,80,70,0.4), 0 0 0 3px rgba(232, 107, 98, 0.7);
             animation: shakeInput 0.4s;
+        }
+        body.dark-mode .answer-input.error {
+            box-shadow:inset 6px 8px 16px rgba(0,0,0,0.8), 0 0 0 3px rgba(232, 107, 98, 0.8);
         }
         @keyframes shakeInput { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
 
         /* ─── Typography ─── */
         .logo-title {
-            font-size:3.6rem; font-weight:700; color:#5c4033;
+            font-size:3.6rem; font-weight:700; color:var(--card-text);
             text-shadow: 2px 4px 0px rgba(255,255,255,0.5), -2px -2px 0px rgba(110,80,70,0.3);
             line-height:1; letter-spacing:2px; text-align:center;
             margin-bottom:20px;
+        }
+        body.dark-mode .logo-title {
+            text-shadow: 2px 4px 0px rgba(0,0,0,0.8), -2px -2px 0px rgba(200,50,80,0.2);
         }
 
         /* ─── Lobby Players ─── */
@@ -272,6 +376,9 @@
             margin-bottom:10px;
             box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
         }
+        body.dark-mode .player-row {
+            box-shadow: inset 4px 4px 8px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(100,50,60,0.1);
+        }
         .player-avatar {
             width:46px; height:46px; border-radius:50%;
             background:var(--card-base); color:var(--card-text);
@@ -279,7 +386,11 @@
             display:flex; justify-content:center; align-items:center;
             box-shadow: 3px 4px 8px var(--shadow-dark), -2px -2px 5px var(--shadow-light);
             flex-shrink:0;
-            border: 2px solid white;
+            border: 2px solid var(--card-rim);
+            transition: background-color 0.5s, color 0.5s, border-color 0.5s;
+        }
+        body.dark-mode .player-avatar {
+            box-shadow: 3px 4px 8px rgba(0,0,0,0.8), -1px -1px 3px rgba(100,50,60,0.2);
         }
         .player-name { font-weight:600; font-size:1.05rem; }
 
@@ -297,10 +408,16 @@
             transition:all .3s ease; position:relative;
             border: 2px solid transparent;
         }
+        body.dark-mode .p-mini {
+            box-shadow:inset 3px 3px 8px rgba(0,0,0,0.7), inset -1px -1px 3px rgba(100,50,60,0.2);
+        }
         .p-mini.active {
             box-shadow: 4px 6px 12px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
             background:var(--card-base); color:var(--card-text); transform:scale(1.18); z-index:5;
-            border: 2px solid #fff;
+            border: 2px solid var(--card-rim);
+        }
+        body.dark-mode .p-mini.active {
+            box-shadow: 4px 6px 12px rgba(0,0,0,0.8), -1px -1px 4px rgba(100,50,60,0.2);
         }
         .p-mini.dead { opacity:.4; transform:scale(0.85); filter:grayscale(1); }
         .p-mini.dead::after { content:"✖"; position:absolute; color:var(--warm-red); font-size:1.6rem; font-weight:700; }
@@ -310,13 +427,14 @@
             font-weight:700; text-transform:uppercase; letter-spacing:1px;
             text-align:center; margin-bottom:10px; min-height:24px;
             transition:color .3s;
-            text-shadow: 1px 2px 2px rgba(255,255,255,0.7);
+            text-shadow: 1px 2px 2px rgba(255,255,255,0.5);
         }
+        body.dark-mode .status-text { text-shadow: 1px 2px 2px rgba(0,0,0,0.8); }
 
         /* ─── TASK CARD FIX ─── */
         .task-card {
             color: var(--card-text); font-weight: 600;
-            transition: opacity .3s; 
+            transition: opacity .3s, background-color 0.5s, box-shadow 0.5s, border-color 0.5s; 
             height: auto; /* ALLOW IT TO GROW */
             min-height: 90px;
             display: flex; flex-direction: column;
@@ -345,6 +463,7 @@
             margin:0px 0 0px; font-variant-numeric:tabular-nums;
             letter-spacing: -2px; transition:color .3s, transform .3s;
         }
+        body.dark-mode .personal-timer { text-shadow: 2px 3px 5px rgba(0,0,0,0.8), -1px -1px 2px rgba(200,50,80,0.2); }
         .personal-timer.urgent { color:var(--warm-red); animation:tpulse .38s ease-in-out infinite alternate; }
         @keyframes tpulse { from{transform:scale(1)} to{transform:scale(1.1)} }
 
@@ -373,8 +492,14 @@
             transition:filter .4s ease;
             pointer-events:none; user-select:none;
         }
+        body.dark-mode .potato-img {
+            filter:drop-shadow(6px 16px 18px rgba(0, 0, 0, 0.8)) brightness(0.85);
+        }
         .potato-img.locked {
             filter:drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.4)) brightness(0.6) saturate(0.5);
+        }
+        body.dark-mode .potato-img.locked {
+            filter:drop-shadow(6px 16px 18px rgba(0, 0, 0, 0.6)) brightness(0.4) saturate(0.5);
         }
         .potato-img.shaking {
             animation:floatP 4s ease-in-out infinite, morphP 10s ease-in-out infinite, shake .14s ease-in-out infinite;
@@ -391,9 +516,11 @@
             align-items:center; justify-content:center;
             z-index:10; transition:opacity .3s ease;
         }
+        body.dark-mode #lock-overlay { background:rgba(0, 0, 0, 0.6); }
         .lock-icon { font-size:3rem; animation:lbounce 1.8s ease-in-out infinite; filter: drop-shadow(2px 4px 6px rgba(150,130,115,0.4));}
         .lock-hint { font-size:.8rem; font-weight:700; color:var(--card-text); text-transform:uppercase; margin-top:8px; 
             text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
+        body.dark-mode .lock-hint { text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
         @keyframes lbounce { 0%,100%{transform:scale(1) rotate(-6deg)} 50%{transform:scale(1.1) rotate(6deg)} }
 
         /* Unlock flash */
@@ -404,6 +531,7 @@
             pointer-events:none; z-index:20;
             animation:unlockFlash .5s ease-out forwards;
         }
+        body.dark-mode .unlock-flash { background:radial-gradient(circle, rgba(200,50,80,.9) 0%, transparent 70%); }
 
         /* ─── Combo Panel ─── */
         #combo-panel {
@@ -411,7 +539,11 @@
             display:none; flex-direction:column; gap:12px;
             background: var(--card-base); padding: 18px; border-radius: 24px;
             box-shadow: 6px 8px 16px var(--shadow-dark), -4px -6px 12px var(--shadow-light);
-            border: 2px solid white;
+            border: 2px solid var(--card-rim);
+            transition: background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
+        }
+        body.dark-mode #combo-panel {
+            box-shadow: 6px 8px 16px rgba(0,0,0,0.8), -2px -2px 10px rgba(100,50,60,0.2);
         }
         #combo-panel.visible { display:flex; animation:slideUp .35s cubic-bezier(.175,.885,.32,1.275) forwards; }
         @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -430,7 +562,8 @@
 
         #btn-submit-answer, #btn-submit-action {
             background:var(--mint);
-            color:var(--card-text);
+            color:#fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
         
         /* ─── Mode badge ─── */
@@ -439,10 +572,11 @@
             padding:6px 14px; border-radius:20px;
             font-size:.8rem; font-weight:700;
             text-transform:uppercase; letter-spacing:0.5px;
-            margin-bottom:6px; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.7), 2px 3px 5px rgba(150,130,115,0.2);
+            margin-bottom:6px; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.4), 2px 3px 5px rgba(0,0,0,0.1);
         }
-        .mode-badge.answers { background:var(--peach); color:#fffdf5; text-shadow: 1px 1px 2px rgba(150,100,80,0.4); }
-        .mode-badge.actions { background:var(--blue); color:#fffdf5; text-shadow: 1px 1px 2px rgba(100,120,150,0.4); }
+        body.dark-mode .mode-badge { box-shadow: inset 2px 2px 4px rgba(255,255,255,0.1), 2px 3px 5px rgba(0,0,0,0.5); }
+        .mode-badge.answers { background:var(--peach); color:#fffdf5; }
+        .mode-badge.actions { background:var(--blue); color:#fffdf5; }
 
         /* VoteKick */
         .votekick-btn {
@@ -454,10 +588,12 @@
             transition:all .2s; font-family:'Fredoka',sans-serif;
             box-shadow: 4px 4px 10px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
         }
+        body.dark-mode .votekick-btn { box-shadow: 4px 4px 10px rgba(0,0,0,0.8), -1px -1px 4px rgba(100,50,60,0.2); }
         .votekick-btn:active { transform:scale(.96); box-shadow: 2px 2px 5px var(--shadow-dark); }
 
         /* ─── Helpers ─── */
         .divider { height:2px; background:rgba(150,130,115,0.1); width:100%; border-radius: 2px; }
+        body.dark-mode .divider { background: rgba(0,0,0,0.3); }
         .top-btn {
             position: absolute; 
             top: max(8px, env(safe-area-inset-top)); 
@@ -475,13 +611,14 @@
         .life-dot {
             width: 7px; height: 7px; border-radius: 50%;
             background: var(--mint);
-            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6), 1px 2px 3px rgba(100,80,70,0.3);
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6), 1px 2px 3px rgba(0,0,0,0.2);
             transition: background .4s, box-shadow .4s;
             border: 1px solid rgba(255,255,255,0.4);
         }
         .life-dot.lost {
-            background: #6b4a3a;
-            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4);
+            background: var(--card-muted);
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
+            border-color: transparent;
         }
         @media (max-width: 599px) {
             .life-dot { width: 5px; height: 5px; }
@@ -489,10 +626,9 @@
         }
 
         /* ─── 2. Emotes ─── */
-        .emote-btn {
+        .emote-btn, .chat-btn {
             position: fixed;
             right: 14px;
-            bottom: calc(70px + env(safe-area-inset-bottom, 0px));
             z-index: 500;
             width: 50px; height: 50px;
             border-radius: 50% 50% 40% 50% / 50% 50% 50% 40%;
@@ -503,10 +639,17 @@
             cursor: pointer;
             display: none;
             align-items: center; justify-content: center;
-            transition: transform .15s;
+            transition: transform .15s, background-color 0.5s, border-color 0.5s;
         }
-        .emote-btn:active { transform: scale(0.9); }
-        #screen-game.active .emote-btn { display: flex; }
+        body.dark-mode .emote-btn, body.dark-mode .chat-btn {
+            box-shadow: 4px 6px 14px rgba(0,0,0,0.8), -1px -1px 5px rgba(100,50,60,0.2);
+        }
+        .emote-btn { bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+        .chat-btn { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+        
+        .emote-btn:active, .chat-btn:active { transform: scale(0.9); }
+        #screen-game.active .emote-btn, #screen-game.active .chat-btn { display: flex; }
+        
         .emote-fan {
             position: fixed; right: 14px;
             bottom: calc(128px + env(safe-area-inset-bottom, 0px));
@@ -526,6 +669,7 @@
             cursor: pointer;
             transform: scale(0); transition: transform .2s cubic-bezier(.175,.885,.32,1.275);
         }
+        body.dark-mode .emote-opt { box-shadow: 3px 4px 10px rgba(0,0,0,0.8); }
         .emote-fan.open .emote-opt { transform: scale(1); }
         .emote-fan.open .emote-opt:nth-child(1) { transition-delay: 0ms; }
         .emote-fan.open .emote-opt:nth-child(2) { transition-delay: 40ms; }
@@ -544,37 +688,20 @@
         }
 
         /* ─── 3. Chat Bottom Sheet ─── */
-        .chat-btn {
-            position: fixed;
-            right: 14px;
-            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-            z-index: 500;
-            width: 50px; height: 50px;
-            border-radius: 50% 50% 40% 50% / 50% 50% 50% 40%;
-            background: var(--card-base);
-            border: 4px solid var(--card-rim);
-            box-shadow: 4px 6px 14px var(--shadow-dark), -3px -4px 10px var(--shadow-light);
-            font-size: 1.4rem;
-            cursor: pointer;
-            display: none;
-            align-items: center; justify-content: center;
-            transition: transform .15s;
-        }
-        .chat-btn:active { transform: scale(0.9); }
-        #screen-game.active .chat-btn { display: flex; }
         .chat-sheet {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             height: 42%;
             z-index: 800;
-            background: #f5ede4;
+            background: var(--card-rim);
             border-radius: 28px 28px 0 0;
-            box-shadow: 0 -8px 32px rgba(110,80,70,0.25);
+            box-shadow: 0 -8px 32px var(--shadow-dark);
             display: flex; flex-direction: column;
             transform: translateY(110%);
-            transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
+            transition: transform .35s cubic-bezier(.175,.885,.32,1.275), background-color 0.5s;
             padding-bottom: env(safe-area-inset-bottom, 0px);
         }
+        body.dark-mode .chat-sheet { box-shadow: 0 -8px 32px rgba(0,0,0,0.9); }
         .chat-sheet.open { transform: translateY(0); }
         .chat-handle {
             width: 40px; height: 5px; border-radius: 3px;
@@ -598,25 +725,24 @@
             max-width: 85%;
             word-break: break-word;
             animation: slideUp .2s ease;
+            color: var(--card-text);
         }
+        body.dark-mode .chat-msg { box-shadow: 2px 3px 8px rgba(0,0,0,0.6); }
         .chat-msg.mine {
             align-self: flex-end;
             border-radius: 16px 16px 4px 16px;
             background: var(--mint);
+            color: #fff;
         }
         .chat-msg-name { font-size: 0.72rem; color: var(--card-muted); margin-bottom: 2px; }
         .chat-input-row {
             display: flex; gap: 8px; padding: 10px 12px;
-            border-top: 2px solid var(--card-rim);
+            border-top: 2px solid var(--bg-color);
             flex-shrink: 0;
         }
         .chat-input {
-            flex: 1; background: #ebe0d7; border: none; outline: none;
-            border-radius: 16px; padding: 10px 14px;
+            flex: 1; padding: 10px 14px;
             font-size: 0.95rem; font-weight: 600;
-            color: var(--card-text); font-family: 'Fredoka', sans-serif;
-            box-shadow: inset 3px 4px 8px rgba(110,80,70,0.2);
-            -webkit-user-select: text; user-select: text;
         }
         .chat-send-btn {
             width: 42px; height: 42px; border-radius: 50%;
@@ -626,7 +752,9 @@
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
             transition: transform .12s;
+            color: #fff;
         }
+        body.dark-mode .chat-send-btn { box-shadow: 3px 4px 10px rgba(0,0,0,0.8); }
         .chat-send-btn:active { transform: scale(0.9); }
         .chat-overlay {
             position: fixed; inset: 0; z-index: 799;
@@ -638,6 +766,13 @@
         @keyframes dangerPulse {
             0%, 100% { box-shadow: inset 0 0 0px rgba(232, 107, 98, 0); }
             50%        { box-shadow: inset 0 0 80px 30px rgba(232, 107, 98, 0.55); }
+        }
+        body.dark-mode.danger-active #app {
+            animation: dangerPulseDark 0.5s ease-in-out infinite;
+        }
+        @keyframes dangerPulseDark {
+            0%, 100% { box-shadow: inset 0 0 0px rgba(212, 38, 63, 0); }
+            50%        { box-shadow: inset 0 0 80px 30px rgba(212, 38, 63, 0.65); }
         }
         body.danger-active #app {
             animation: dangerPulse 0.5s ease-in-out infinite;
@@ -800,13 +935,13 @@
 
             <div class="divider"></div>
 
-            <button class="clay-btn" id="btn-create-lobby" style="background:var(--peach); color: white; text-shadow: 1px 1px 2px rgba(150,100,80,0.4);">
+            <button class="clay-btn" id="btn-create-lobby" style="background:var(--peach); color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
                 Создать лобби
             </button>
 
             <div style="font-weight:600; font-size:.9rem; color:var(--card-muted);" id="lbl-or">Или введите код</div>
             <input type="text" id="join-code-input" class="input-code" placeholder="____" maxlength="5">
-            <button class="clay-btn" id="btn-join-code" style="background:var(--blue); color: white; text-shadow: 1px 1px 2px rgba(100,120,150,0.4);">
+            <button class="clay-btn" id="btn-join-code" style="background:var(--blue); color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
                 Войти по коду
             </button>
         </div>
@@ -818,7 +953,7 @@
         <div class="screen-inner">
         <div class="clay-card">
             <h2 style="color:var(--card-muted); font-size:.95rem; text-transform:uppercase;" id="lbl-lobby-code">Код лобби</h2>
-            <h1 id="lobby-id-display" style="font-size:3.5rem; letter-spacing:4px; margin:0 0 10px; color:var(--card-text); text-shadow: 2px 2px 0px white;"></h1>
+            <h1 id="lobby-id-display" style="font-size:3.5rem; letter-spacing:4px; margin:0 0 10px; color:var(--card-text); text-shadow: 2px 2px 0px rgba(255,255,255,0.4);"></h1>
 
             <div id="lobby-players" style="margin-bottom:6px;"></div>
 
@@ -832,6 +967,13 @@
                 <div class="seg-group" style="margin-bottom: 12px;">
                     <button class="seg-btn active" data-lobby-lang="ru">RU</button>
                     <button class="seg-btn"        data-lobby-lang="en">EN</button>
+                </div>
+
+                <!-- 18+ Content Toggle -->
+                <div class="seg-label" id="lbl-content">Контент</div>
+                <div class="seg-group" style="margin-bottom: 12px;">
+                    <button class="seg-btn active" data-adult="false" id="mode-family">🟢 0+</button>
+                    <button class="seg-btn" data-adult="true" id="mode-adult">🔞 18+</button>
                 </div>
 
                 <div class="seg-label" id="lbl-mode">Режим</div>
@@ -848,7 +990,7 @@
                     <button class="seg-btn"        data-diff="hard"   id="diff-hard">Сложная</button>
                 </div>
 
-                <button class="clay-btn" id="btn-start-game" style="background:var(--mint); width:100%; color: white; text-shadow: 1px 1px 2px rgba(100,150,120,0.4);">
+                <button class="clay-btn" id="btn-start-game" style="background:var(--mint); width:100%; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
                     Начать игру
                 </button>
             </div>
@@ -944,7 +1086,7 @@
 </div>
 
 <script>
-// Only block touchmove on the game screen to prevent page scroll during play
+// Prevent scrolling on game screen
 document.getElementById('screen-game').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
 const tg = window.Telegram?.WebApp || {};
@@ -983,7 +1125,7 @@ const i18n = {
         gameOver: "КОНЕЦ ИГРЫ", winner: "Победитель определён!", victory: "ПОБЕДА!", survived: "🏆 Ты выжил!",
         menuBack: "← Меню", burned: n=>`💥 ${n} СГОРЕЛ!`, timer: "ВРЕМЯ", actWarn: "Выполни действие вживую, затем жми!",
         errTxt: "Неверно! Подумай еще.", modeLabels: { answers:"Ответы", actions:"Действия" },
-        nickname: "Ваш ник", nickPh: "Введите ник...",
+        nickname: "Ваш ник", nickPh: "Введите ник...", content: "Контент"
     },
     en: {
         createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
@@ -997,11 +1139,11 @@ const i18n = {
         gameOver: "GAME OVER", winner: "Winner determined!", victory: "VICTORY!", survived: "🏆 You survived!",
         menuBack: "← Menu", burned: n=>`💥 ${n} IS OUT!`, timer: "TIMER", actWarn: "Do the action in real life, then tap!",
         errTxt: "Wrong answer! Try again.", modeLabels: { answers:"Answers", actions:"Actions" },
-        nickname: "Your nick", nickPh: "Enter nickname...",
+        nickname: "Your nick", nickPh: "Enter nickname...", content: "Content"
     }
 };
 
-let currentLang = 'ru', currentMode = 'answers', currentDiff = 'easy';
+let currentLang = 'ru', currentMode = 'answers', currentDiff = 'easy', isAdultMode = false;
 
 function T(key, ...args) {
     const v = i18n[currentLang][key];
@@ -1037,11 +1179,31 @@ function applyI18n() {
     document.getElementById('lbl-timer').innerText = T('timer');
     document.getElementById('lbl-action-warn').innerText = T('actWarn');
     document.getElementById('input-error').innerText = T('errTxt');
-    const _nickLbl = document.getElementById('lbl-nickname');
-    if (_nickLbl) _nickLbl.innerText = T('nickname');
-    const _nickInp = document.getElementById('nickname-input');
-    if (_nickInp) _nickInp.placeholder = T('nickPh');
+    
+    const _nickLbl = document.getElementById('lbl-nickname'); if (_nickLbl) _nickLbl.innerText = T('nickname');
+    const _nickInp = document.getElementById('nickname-input'); if (_nickInp) _nickInp.placeholder = T('nickPh');
+    const _contentLbl = document.getElementById('lbl-content'); if (_contentLbl) _contentLbl.innerText = T('content');
 }
+
+// Create Emoji Rain elements
+function createEmojiRain() {
+    const container = document.createElement('div');
+    container.className = 'emoji-rain-container';
+    container.id = 'emoji-rain';
+    document.body.appendChild(container);
+    const emojis = ['🍆', '🍑', '💦', '😈', '👅', '🍒', '🔞', '🔥', '🥵'];
+    for(let i=0; i<35; i++) {
+        let el = document.createElement('div');
+        el.className = 'falling-emoji';
+        el.innerText = emojis[Math.floor(Math.random()*emojis.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (Math.random() * 4 + 3) + 's';
+        el.style.animationDelay = (Math.random() * 5) + 's';
+        el.style.fontSize = (Math.random() * 2 + 1.2) + 'rem';
+        container.appendChild(el);
+    }
+}
+createEmojiRain();
 
 function setLang(lang) {
     currentLang = lang;
@@ -1052,7 +1214,8 @@ function setLang(lang) {
 document.querySelectorAll('.seg-btn').forEach(b => {
     b.addEventListener('click', () => {
         if (b.dataset.lang) setLang(b.dataset.lang);
-        if (!network.isHost && (b.dataset.lobbyLang || b.dataset.mode || b.dataset.diff)) return;
+        if (!network.isHost && (b.dataset.lobbyLang || b.dataset.mode || b.dataset.diff || b.dataset.adult)) return;
+        
         if (b.dataset.lobbyLang) setLang(b.dataset.lobbyLang);
         if (b.dataset.mode) {
             document.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('active'));
@@ -1061,6 +1224,16 @@ document.querySelectorAll('.seg-btn').forEach(b => {
         if (b.dataset.diff) {
             document.querySelectorAll('[data-diff]').forEach(x => x.classList.remove('active'));
             b.classList.add('active'); currentDiff = b.dataset.diff;
+        }
+        if (b.dataset.adult) {
+            document.querySelectorAll('[data-adult]').forEach(x => x.classList.remove('active'));
+            b.classList.add('active'); 
+            isAdultMode = b.dataset.adult === 'true';
+            if (isAdultMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         }
     });
 });
@@ -1127,22 +1300,30 @@ const fallbackPool = [
 function getTaskPool(lang, mode, diff) {
     let basePool = fallbackPool;
     
-    // Преобразуем формат из tasks.js под наш index.html, если tasks.js загрузился
     if (typeof potatoTasks !== 'undefined' && potatoTasks.length > 0) {
         basePool = potatoTasks.map(t => ({
             q: t.question[lang] || t.question.ru,
-            a: Array.isArray(t.answers) ? t.answers[0] : (t.a || "ок"), // Для отображения чужого ответа
-            allAnswers: t.answers, // Для валидации всех вариантов
-            type: t.type === 'action' ? 'action' : 'answer'
+            a: Array.isArray(t.answers) ? t.answers[0] : (t.a || "ок"),
+            allAnswers: t.answers,
+            type: t.type === 'action' ? 'action' : 'answer',
+            is18Plus: t.is18Plus === true // Ensure boolean
         }));
     }
 
-    let filtered = basePool;
+    // Filter by Age Content (18+ or Family)
+    let filtered = basePool.filter(t => isAdultMode ? t.is18Plus : !t.is18Plus);
+    
+    // Fallback if the chosen age pool is completely empty
+    if (filtered.length === 0) filtered = basePool;
+
+    // Filter by Mode (Answers / Actions / Mix)
     if (mode === 'answers') {
-        filtered = basePool.filter(t => t.type !== 'action');
+        let modeFiltered = filtered.filter(t => t.type !== 'action');
+        if (modeFiltered.length > 0) filtered = modeFiltered;
     } else if (mode === 'actions') {
-        filtered = basePool.filter(t => t.type === 'action');
-    } // Если mode === 'mix', оставляем всё
+        let modeFiltered = filtered.filter(t => t.type === 'action');
+        if (modeFiltered.length > 0) filtered = modeFiltered;
+    } 
     
     return filtered.length > 0 ? filtered : fallbackPool;
 }
@@ -1159,18 +1340,13 @@ function triggerCurtain(cb) {
     const dur = 520;
     const ease = 'cubic-bezier(0.76, 0, 0.24, 1)';
 
-    // Phase 1: sweep DOWN to cover
-    c.style.transition = `transform ${dur}ms ${ease}`;
+    c.style.transition = `transform ${dur}ms ${ease}, background 0.5s`;
     c.style.transform = 'translateY(0)';
 
     setTimeout(() => {
-        cb(); // do work while hidden
-
-        // Phase 2: continue sweeping DOWN to exit (no bounce!)
+        cb(); 
         c.style.transform = 'translateY(115%)';
-
         setTimeout(() => {
-            // Silent reset back above screen
             c.style.transition = 'none';
             c.style.transform = 'translateY(-110%)';
             isCurtainActive = false;
@@ -1234,7 +1410,9 @@ let usedTaskIds = new Set();
 function startRound() {
     isGameOver = false; isSpectating = false; globalTimer = 30 + Math.random() * 30;
     network.players.forEach(p => { p.isDead = false; p.lives = MAX_LIVES; });
-    usedTaskIds = new Set();
+    
+    // WE DONT CLEAR usedTaskIds HERE ANYMORE! This fixes the repeating tasks bug.
+    
     showScreen('GAME'); passPotato(currentUser.id);
 }
 
@@ -1251,13 +1429,18 @@ function passPotato(playerId) {
     personalTimer = cfg.m + Math.random() * (cfg.M - cfg.m); pulsePhase = 0;
 
     const pool = getTaskPool(currentLang, currentMode, currentDiff);
-    const available = pool.filter((_, idx) => !usedTaskIds.has(idx));
-    const src = available.length > 0 ? available : pool;
-    const chosen = src[Math.floor(Math.random() * src.length)];
+    let available = pool.filter((_, idx) => !usedTaskIds.has(idx));
+    
+    // ONLY clear when all questions are exhausted!
+    if (available.length === 0) {
+        usedTaskIds.clear();
+        available = pool;
+    }
+
+    const chosen = available[Math.floor(Math.random() * available.length)];
     const chosenIdx = pool.indexOf(chosen);
     if (chosenIdx !== -1) usedTaskIds.add(chosenIdx);
     
-    // Fallback if array fails
     currentTaskObj = chosen || { q: "ДУМАЙ БЫСТРЕЙ!", a: "ок", type: "answer" };
 
     updatePlayersBar();
@@ -1268,7 +1451,7 @@ function passPotato(playerId) {
         // MY TURN
         closeChatSheet();
         isLocked = true; resetComboPanel();
-        ui.task.innerHTML = ''; // Clear so we don't see opponent's text
+        ui.task.innerHTML = ''; 
         ui.task.style.opacity = '1';
         ui.timer.style.opacity = '1'; ui.timer.classList.remove('urgent');
         ui.status.innerText = T('myTurn'); ui.status.style.color = 'var(--card-text)';
@@ -1287,12 +1470,12 @@ function passPotato(playerId) {
         let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
         const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
         const badge = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>`;
-        // USING RESPONSIVE FONT SIZE CLAMP HERE
+        
         ui.task.innerHTML = `
             ${badge}
             <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:6px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
             <span style="font-size: clamp(15px, 5vw, 22px); line-height:1.2; font-weight:700;">${currentTaskObj.q}</span>
-            <div style="margin-top:10px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.5); border-radius:14px; padding:10px;">
+            <div style="margin-top:10px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.2); border-radius:14px; padding:10px; border: 1px solid var(--card-rim);">
                 ${currentTaskObj.type === 'answer' ? T('answer')+': ' : 'Действие: '}<span style="font-weight:700;">${currentTaskObj.a}</span>
             </div>
             <button class="votekick-btn" onclick="voteKick(this)">${T('voteKick')}</button>`;
@@ -1317,14 +1500,12 @@ function unlockPotato() {
     ui.img.classList.remove('locked'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
     
     const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
-    // USING RESPONSIVE FONT SIZE CLAMP HERE AS WELL
     ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
         <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('taskLabel')}</span>
         <span style="font-size: clamp(16px, 6vw, 26px); font-weight:700; line-height:1.2; padding: 0 4px;">${currentTaskObj.q}</span>`;
     
     ui.combo.classList.add('visible');
     
-    // Toggle correct combo UI
     if (currentTaskObj.type === 'action') {
         ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'flex';
     } else {
@@ -1339,7 +1520,6 @@ function onTyping() {
     onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
     ui.input.classList.remove('error'); ui.err.style.display = 'none';
 }
-// 5. Input focus → shake potato
 ui.input.addEventListener('focus', () => {
     if (currentScreen === 'GAME' && !isLocked) ui.img.classList.add('shaking');
 });
@@ -1354,7 +1534,6 @@ function validateAnswer() {
     
     if (given.length < 1) return false;
     
-    // Поддерживаем как массив ответов из tasks.js, так и единичный ответ из fallbackPool
     let expectedList = currentTaskObj.allAnswers || [currentTaskObj.a];
 
     for (let ans of expectedList) {
@@ -1398,7 +1577,6 @@ function markDone() {
         if (!validateAnswer()) {
             ui.input.classList.add('error'); ui.err.style.display = 'block'; haptic('error'); 
             
-            // Penalty
             personalTimer -= 2.5;
             ui.timer.style.color = 'var(--warm-red)'; ui.timer.style.transform = 'scale(1.3)';
             setTimeout(() => { ui.timer.style.color='var(--card-text)'; ui.timer.style.transform='scale(1)'; }, 350);
@@ -1446,19 +1624,14 @@ function gameLoop(time) {
     const tVal = Math.max(0, personalTimer);
     ui.timer.innerText = tVal.toFixed(1); ui.timer.classList.toggle('urgent', tVal < 3);
 
-    // Danger pulse when < 3s
-    if (tVal < 3) {
-        document.body.classList.add('danger-active');
-    } else {
-        document.body.classList.remove('danger-active');
-    }
+    if (tVal < 3) document.body.classList.add('danger-active');
+    else document.body.classList.remove('danger-active');
 
     if (personalTimer <= 0 || globalTimer <= 0) { handleExplosion(); return; }
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 function createExplosionParticles() {
-    // Full-screen flash
     const flash = document.createElement('div');
     flash.className = 'explosion-flash';
     document.body.appendChild(flash);
@@ -1479,7 +1652,7 @@ function createExplosionParticles() {
         const ang = Math.random() * Math.PI * 2;
         const vel = 120 + Math.random() * 320;
         const tx = Math.cos(ang) * vel;
-        const ty = Math.sin(ang) * vel - 60; // slight upward bias
+        const ty = Math.sin(ang) * vel - 60; 
         const rot = (Math.random() - 0.5) * 720;
         const dur = 700 + Math.random() * 600;
         p.animate([
@@ -1555,7 +1728,7 @@ window.addEventListener('mouseup', endDrag);
 window.voteKick = function(b) { 
     if(isGameOver || isExploding) return; 
     
-    if (b.dataset.voted === 'true') return; // Prevent double vote from local player
+    if (b.dataset.voted === 'true') return; 
     b.dataset.voted = 'true';
     b.style.pointerEvents = 'none';
     currentVotes++;
@@ -1571,7 +1744,6 @@ window.voteKick = function(b) {
     };
     check();
     
-    // Simulate bots voting if available
     let bots = network.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId && p.id !== currentUser.id);
     bots.forEach((bObj, idx) => {
         setTimeout(() => {
@@ -1623,7 +1795,6 @@ document.querySelectorAll('.emote-opt').forEach(opt => {
         emoteOpen = false;
         emoteFan.classList.remove('open');
         haptic('medium');
-        // Find current user's avatar in players bar
         const myAvatar = ui.pBar.querySelector(`[data-pid="${currentUser.id}"]`);
         const el = document.createElement('div');
         el.className = 'emote-popup';
@@ -1633,7 +1804,6 @@ document.querySelectorAll('.emote-opt').forEach(opt => {
             el.style.left = (rect.left + rect.width/2 - 18) + 'px';
             el.style.top  = (rect.top - 10) + 'px';
         } else {
-            // Fallback: center of screen
             el.style.left = '50%';
             el.style.top  = '30%';
             el.style.transform = 'translateX(-50%)';
@@ -1646,8 +1816,6 @@ document.querySelectorAll('.emote-opt').forEach(opt => {
 document.addEventListener('click', () => {
     if (emoteOpen) { emoteOpen = false; emoteFan.classList.remove('open'); }
 });
-
-// Prevent touchmove on emote fan closing chat
 emoteFan && emoteFan.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
 
 // ═════ 3. CHAT ═════
@@ -1659,7 +1827,6 @@ const chatInput = document.getElementById('chat-input');
 function openChatSheet() {
     chatSheet.classList.add('open');
     chatOverlay.classList.add('open');
-    // Prevent game touchmove block from interfering
     chatSheet.addEventListener('touchmove', e => e.stopPropagation(), {passive: false});
 }
 function closeChatSheet() {
@@ -1690,7 +1857,6 @@ function sendChatMsg() {
     chatInput.value = '';
     addChatMsg(currentUser.first_name, text, true);
     haptic('light');
-    // Simulate bot reply after 1-2s
     const bots = network.players.filter(p => p.id !== currentUser.id && !p.isDead);
     if (bots.length && Math.random() > 0.4) {
         const bot = bots[Math.floor(Math.random() * bots.length)];
@@ -1705,38 +1871,27 @@ document.getElementById('chat-send').addEventListener('click', sendChatMsg);
 chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMsg(); });
 chatInput.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
 
-    // ── Loader: hide after fonts + bg image ready ──
     function hideLoader() {
         const loader = document.getElementById('initial-loader');
         if (!loader) return;
         loader.style.opacity = '0';
         setTimeout(() => loader.remove(), 450);
     }
-    // Minimum 400ms so loader doesn't flash away instantly
     const loaderMinTime = Date.now();
     function scheduleHideLoader() {
         const elapsed = Date.now() - loaderMinTime;
         const wait = Math.max(0, 400 - elapsed);
         setTimeout(hideLoader, wait);
     }
-    // Hide after fonts are ready (or after 2s timeout)
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(scheduleHideLoader);
-    } else {
-        window.addEventListener('load', scheduleHideLoader);
-    }
-    // Failsafe: always hide after 2.5s
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleHideLoader);
+    else window.addEventListener('load', scheduleHideLoader);
     setTimeout(hideLoader, 2500);
 
-    // ── Visual Viewport: shrink game area when keyboard opens ──
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', () => {
             const ratio = window.visualViewport.height / window.screen.height;
-            if (ratio < 0.65) {
-                document.body.classList.add('kb-open');
-            } else {
-                document.body.classList.remove('kb-open');
-            }
+            if (ratio < 0.65) document.body.classList.add('kb-open');
+            else document.body.classList.remove('kb-open');
         });
     }
 </script>

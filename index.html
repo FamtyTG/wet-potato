@@ -454,19 +454,32 @@
         /* ─── Helpers ─── */
         .divider { height:2px; background:rgba(150,130,115,0.1); width:100%; border-radius: 2px; }
         .top-btn {
-            position:absolute; top:16px; left:16px;
-            z-index:100; padding: 12px 16px; font-size: 0.85rem;
+            position: absolute; 
+            top: max(8px, env(safe-area-inset-top)); 
+            left: 12px;
+            z-index: 100; 
+            padding: 8px 14px; 
+            font-size: 0.8rem;
+            width: auto;
+            min-width: 80px;
         }
 
         /* ─── Mobile: full game screen must fit without scroll ─── */
         @media (max-width: 599px) {
-            /* Start/Lobby/Gameover: allow scroll */
+            /* Start/Lobby/Gameover: allow scroll, justify top */
             #screen-start, #screen-lobby, #screen-gameover {
                 overflow-y: auto !important;
+                display: block;
+            }
+            #screen-start .screen-inner, #screen-lobby .screen-inner, #screen-gameover .screen-inner {
+                justify-content: flex-start;
+                padding-top: 20px;
+                padding-bottom: 40px;
             }
             /* Game screen: rigid column, no scroll, fits any phone */
             #screen-game {
                 padding: 4px 6px !important;
+                padding-top: max(40px, calc(10px + env(safe-area-inset-top))) !important;
                 overflow: hidden !important;
                 display: flex;
                 flex-direction: column;
@@ -657,7 +670,7 @@
                 </button>
             </div>
 
-            <div id="wait-host-msg" style="display:none; color:var(--card-muted); font-size:.9rem; margin-top:8px;">
+            <div id="wait-host-msg" style="display:none; color:var(--card-muted); font-size:.9rem; margin-top:8px; text-align: center;">
                 Ожидание хоста...
             </div>
         </div>

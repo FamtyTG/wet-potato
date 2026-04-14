@@ -37,11 +37,10 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: url('assets/bg.png');
+            background-image: url('assets/bg.webp');
             background-size: cover;
             background-position: center;
             color: var(--card-text);
-            /* Fredoka font for a soft, low poly/claymorphism feel */
             font-family: 'Fredoka', sans-serif; 
             overflow: hidden; width: 100vw; height: 100vh;
             touch-action: none;
@@ -448,20 +447,47 @@
             z-index:100; padding: 12px 16px; font-size: 0.85rem;
         }
 
-        /* ─── Mobile Responsiveness ─── */
-        @media (max-width: 400px) {
-            .logo-title { font-size: 2.8rem; margin-bottom: 12px; }
-            .clay-card { width: 92%; padding: 20px 16px; border-width: 8px; }
-            #potato-container { width: 200px; height: 200px; }
-            .potato-img { width: 180px; }
-            .personal-timer { font-size: 2.5rem; }
-            .p-mini { width: 42px; height: 42px; font-size: 1rem; }
-            .seg-btn { font-size: 0.8rem; padding: 8px 2px; }
-            .task-card { font-size: 1.1rem; padding: 12px 16px; min-height: 80px; }
-            .clay-btn { padding: 10px 14px; font-size: 0.95rem; }
-            #combo-panel { padding: 14px; border-radius: 20px; width: 92%; }
-            .game-top-panel { padding: 0 10px; }
-            #potato-area { gap: 10px; }
+        /* ─── Mobile: full game screen must fit without scroll ─── */
+        @media (max-width: 599px) {
+            /* Start/Lobby/Gameover: allow scroll */
+            #screen-start, #screen-lobby, #screen-gameover {
+                overflow-y: auto !important;
+            }
+            /* Game screen: compact everything to fit */
+            #screen-game {
+                padding: 4px 6px !important;
+                gap: 0;
+            }
+            .game-top-panel { 
+                padding: 2px 8px;
+                margin-bottom: 2px;
+                flex-shrink: 0;
+            }
+            .personal-timer { font-size: 2.2rem; letter-spacing: -1px; }
+            .p-mini { width: 38px; height: 38px; font-size: 0.85rem; }
+            .players-bar { gap: 6px; flex-wrap: nowrap; overflow-x: auto; max-width: 65%; }
+            .status-text { font-size: 0.9rem; margin-bottom: 4px; letter-spacing: 0; min-height: 18px; }
+            .task-card { 
+                font-size: 1rem; padding: 10px 12px; 
+                min-height: 60px; max-height: 110px;
+                overflow-y: auto; margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            #potato-area { gap: 8px; flex: 1; min-height: 0; }
+            #potato-container { width: 160px; height: 160px; flex-shrink: 0; }
+            .potato-img { width: 145px; }
+            #combo-panel { padding: 10px 12px; border-radius: 18px; gap: 8px; flex-shrink: 0; }
+            .clay-btn { padding: 10px 14px; font-size: 0.9rem; }
+            .logo-title { font-size: 2.8rem; margin-bottom: 8px; }
+            .clay-card { padding: 16px; border-width: 8px; }
+            .seg-btn { font-size: 0.8rem; padding: 8px 4px; }
+        }
+        @media (max-width: 380px) {
+            .personal-timer { font-size: 1.9rem; }
+            #potato-container { width: 140px; height: 140px; }
+            .potato-img { width: 125px; }
+            .task-card { font-size: 0.9rem; padding: 8px 10px; max-height: 90px; }
+            .logo-title { font-size: 2.4rem; }
         }
 
         /* ─── Initial Loader ─── */
@@ -491,13 +517,10 @@
         @keyframes pulseL { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
         @media (max-width: 350px) {
-            .logo-title { font-size: 2.4rem; }
-            .clay-card { padding: 16px 12px; border-width: 6px; gap: 10px; }
-            #potato-container { width: 180px; height: 180px; }
-            .potato-img { width: 160px; }
-            .personal-timer { font-size: 2.22rem; }
-            .p-mini { width: 38px; height: 38px; gap: 4px; }
-            .players-bar { gap: 8px; }
+            .personal-timer { font-size: 1.7rem; }
+            #potato-container { width: 120px; height: 120px; }
+            .potato-img { width: 105px; }
+            .players-bar { gap: 4px; }
             .input-code { font-size: 1.3rem; padding: 12px; }
         }
 
@@ -668,7 +691,8 @@
 </div>
 
 <script>
-document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+// Only block touchmove on the game screen to prevent page scroll during play
+document.getElementById('screen-game').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
 const tg = window.Telegram?.WebApp || {};
 if (tg.initData) { tg.expand(); tg.enableClosingConfirmation(); }

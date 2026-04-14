@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="color-scheme" content="light">
     <title>Wet Potato</title>
     <!-- Preconnect for faster font fetch -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -670,8 +671,8 @@
             .players-bar::-webkit-scrollbar { display: none; }
             .status-text { font-size: 0.88rem; margin-bottom: 3px; letter-spacing: 0; min-height: 16px; }
             .task-card { 
-                font-size: 0.98rem; padding: 8px 12px; 
-                min-height: 50px; max-height: 100px;
+                font-size: 1rem; padding: 12px 14px; border-width: 4px;
+                min-height: 70px; max-height: 130px;
                 overflow-y: auto; margin-bottom: 0;
                 flex-shrink: 0;
             }
@@ -1461,7 +1462,7 @@ function handleExplosion() {
     ui.status.style.color = "var(--warm-red)";
 
     setTimeout(() => {
-        if (!dead || (dead.id === currentUser.id && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
+        if (!dead || (dead.id === currentUser.id && dead.isDead && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
         else {
             ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
             ui.task.style.opacity = '1'; ui.task.style.color = 'var(--warm-red)'; ui.container.style.opacity = '0';

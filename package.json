@@ -1,0 +1,26 @@
+{
+  "name": "primary",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx http-server -p 3000",
+    "preview": "npx http-server -p 3000",
+    "test": "echo \"No tests specified\"",
+    "postinstall": "mkdir -p assets/vendor && cp node_modules/@vercel/speed-insights/dist/index.mjs assets/vendor/speed-insights.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FamtyTG/wet-potato.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FamtyTG/wet-potato/issues"
+  },
+  "homepage": "https://github.com/FamtyTG/wet-potato#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}

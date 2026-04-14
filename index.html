@@ -313,15 +313,19 @@
             text-shadow: 1px 2px 2px rgba(255,255,255,0.7);
         }
 
+        /* ─── TASK CARD FIX ─── */
         .task-card {
-            color:var(--card-text); font-size:1.2rem; font-weight:600;
-            transition:opacity .3s; min-height:90px;
-            display:flex; flex-direction:column;
-            align-items:center; justify-content:center;
-            line-height:1.3; margin-bottom:0px;
-            padding:18px 22px; text-align:center;
-            /* fix overflow */
+            color: var(--card-text); font-weight: 600;
+            transition: opacity .3s; 
+            height: auto; /* ALLOW IT TO GROW */
+            min-height: 90px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            line-height: 1.3; margin-bottom: 0px;
+            padding: 18px 15px; text-align: center;
             word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;
+            box-sizing: border-box; /* Prevent padding from breaking layout */
+            width: 100%;
         }
 
         /* Top Panel - Game screen */
@@ -633,7 +637,7 @@
         /* ─── 4. Danger Pulse ─── */
         @keyframes dangerPulse {
             0%, 100% { box-shadow: inset 0 0 0px rgba(232, 107, 98, 0); }
-            50%       { box-shadow: inset 0 0 80px 30px rgba(232, 107, 98, 0.55); }
+            50%        { box-shadow: inset 0 0 80px 30px rgba(232, 107, 98, 0.55); }
         }
         body.danger-active #app {
             animation: dangerPulse 0.5s ease-in-out infinite;
@@ -641,7 +645,6 @@
 
         /* ─── Mobile: full game screen must fit without scroll ─── */
         @media (max-width: 599px) {
-            /* Start/Lobby/Gameover: allow scroll, justify top */
             #screen-start, #screen-lobby, #screen-gameover {
                 overflow-y: auto !important;
                 display: block;
@@ -651,7 +654,6 @@
                 padding-top: 20px;
                 padding-bottom: 40px;
             }
-            /* Game screen: rigid column, no scroll, fits any phone */
             #screen-game {
                 padding: 4px 6px !important;
                 padding-top: max(40px, calc(10px + env(safe-area-inset-top))) !important;
@@ -670,13 +672,17 @@
             .players-bar { gap: 6px; flex-wrap: nowrap; overflow-x: auto; max-width: 65%; scrollbar-width: none; }
             .players-bar::-webkit-scrollbar { display: none; }
             .status-text { font-size: 0.88rem; margin-bottom: 3px; letter-spacing: 0; min-height: 16px; }
+            
+            /* TASK CARD MOBILE FIX: Allow it to stretch naturally */
             .task-card { 
-                font-size: 1rem; padding: 12px 14px; border-width: 4px;
-                min-height: 70px; max-height: 130px;
-                overflow-y: auto; margin-bottom: 0;
+                padding: 12px 10px; border-width: 4px;
+                min-height: 80px; 
+                height: auto; /* Removed max-height so text fits */
+                margin-bottom: 0;
                 flex-shrink: 0;
                 justify-content: flex-start;
             }
+            
             /* Potato area: takes remaining vertical space, never overflows */
             #potato-area { gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
             #potato-container { width: 150px; height: 150px; flex-shrink: 0; }
@@ -691,7 +697,7 @@
             .personal-timer { font-size: 1.9rem; }
             #potato-container { width: 130px; height: 130px; }
             .potato-img { width: 115px; }
-            .task-card { font-size: 0.9rem; padding: 6px 10px; max-height: 80px; }
+            .task-card { padding: 10px 8px; }
             .logo-title { font-size: 2.4rem; }
             .p-mini { width: 32px; height: 32px; font-size: 0.75rem; }
         }
@@ -738,7 +744,7 @@
             }
         }
 
-        /* When keyboard is open (JS adds .kb-open to body), shrink game screen */
+        /* When keyboard is open */
         body.kb-open #screen-game #potato-area {
             flex: 0 0 auto;
         }
@@ -753,9 +759,8 @@
             display: none;
         }
         body.kb-open #screen-game .task-card {
-            max-height: 70px;
+            max-height: 90px;
         }
-        /* hide emote/chat buttons when keyboard open */
         body.kb-open .emote-btn, body.kb-open .chat-btn { display: none !important; }
     </style>
 </head>
@@ -1112,6 +1117,20 @@ const ui = {
     actWrap:   document.getElementById('combo-action-wrapper')
 };
 
+// Fallback pool in case tasks.js is missing or fails
+const fallbackPool = [
+    {q: "Назови любой фрукт", a: "яблоко", type: "answer"},
+    {q: "Три марки машин", a: "форд", type: "answer"},
+    {q: "Покажи язык", a: "ок", type: "action"}
+];
+function getTaskPool(lang, mode, diff) {
+    if (typeof window.getTaskPool === 'function') {
+        let pool = window.getTaskPool(lang, mode, diff);
+        return pool && pool.length ? pool : fallbackPool;
+    }
+    return fallbackPool;
+}
+
 function showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(`screen-${name.toLowerCase()}`).classList.add('active');
@@ -1221,7 +1240,9 @@ function passPotato(playerId) {
     const chosen = src[Math.floor(Math.random() * src.length)];
     const chosenIdx = pool.indexOf(chosen);
     if (chosenIdx !== -1) usedTaskIds.add(chosenIdx);
-    currentTaskObj = chosen || { q: "Давай!", a: "", type: "answer" };
+    
+    // Fallback if array fails
+    currentTaskObj = chosen || { q: "ДУМАЙ БЫСТРЕЙ!", a: "ок", type: "answer" };
 
     updatePlayersBar();
 
@@ -1231,7 +1252,8 @@ function passPotato(playerId) {
         // MY TURN
         closeChatSheet();
         isLocked = true; resetComboPanel();
-        ui.task.innerHTML = ''; ui.task.style.opacity = '1';
+        ui.task.innerHTML = ''; // Clear so we don't see opponent's text
+        ui.task.style.opacity = '1';
         ui.timer.style.opacity = '1'; ui.timer.classList.remove('urgent');
         ui.status.innerText = T('myTurn'); ui.status.style.color = 'var(--card-text)';
         haptic('warning');
@@ -1249,11 +1271,12 @@ function passPotato(playerId) {
         let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
         const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
         const badge = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>`;
+        // USING RESPONSIVE FONT SIZE CLAMP HERE
         ui.task.innerHTML = `
             ${badge}
-            <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
-            <span style="font-size:1.2rem;">${currentTaskObj.q}</span>
-            <div style="margin-top:14px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.5); border-radius:14px; padding:10px;">
+            <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:6px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
+            <span style="font-size: clamp(15px, 5vw, 22px); line-height:1.2; font-weight:700;">${currentTaskObj.q}</span>
+            <div style="margin-top:10px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.5); border-radius:14px; padding:10px;">
                 ${currentTaskObj.type === 'answer' ? T('answer')+': ' : 'Действие: '}<span style="font-weight:700;">${currentTaskObj.a}</span>
             </div>
             <button class="votekick-btn" onclick="voteKick(this)">${T('voteKick')}</button>`;
@@ -1278,9 +1301,10 @@ function unlockPotato() {
     ui.img.classList.remove('locked'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
     
     const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
+    // USING RESPONSIVE FONT SIZE CLAMP HERE AS WELL
     ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
         <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('taskLabel')}</span>
-        <span style="font-size:1.3rem; font-weight:700;">${currentTaskObj.q}</span>`;
+        <span style="font-size: clamp(16px, 6vw, 26px); font-weight:700; line-height:1.2; padding: 0 4px;">${currentTaskObj.q}</span>`;
     
     ui.combo.classList.add('visible');
     

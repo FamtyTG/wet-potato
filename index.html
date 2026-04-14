@@ -1227,6 +1227,7 @@ function passPotato(playerId) {
 
     if (playerId === currentUser.id) {
         // MY TURN
+        closeChatSheet();
         isLocked = true; resetComboPanel();
         ui.task.innerHTML = ''; ui.task.style.opacity = '1';
         ui.timer.style.opacity = '1'; ui.timer.classList.remove('urgent');
@@ -1394,7 +1395,7 @@ function gameLoop(time) {
     ui.timer.innerText = tVal.toFixed(1); ui.timer.classList.toggle('urgent', tVal < 3);
 
     // Danger pulse when < 3s
-    if (tVal < 3 && currentTurnPlayerId === currentUser.id) {
+    if (tVal < 3) {
         document.body.classList.add('danger-active');
     } else {
         document.body.classList.remove('danger-active');

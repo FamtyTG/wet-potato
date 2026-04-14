@@ -464,6 +464,180 @@
             min-width: 80px;
         }
 
+        /* ─── 1. Lives Dots ─── */
+        .p-mini-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .lives-dots { display: flex; gap: 3px; }
+        .life-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--mint);
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6), 1px 2px 3px rgba(100,80,70,0.3);
+            transition: background .4s, box-shadow .4s;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        .life-dot.lost {
+            background: #6b4a3a;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4);
+        }
+        @media (max-width: 599px) {
+            .life-dot { width: 5px; height: 5px; }
+            .lives-dots { gap: 2px; }
+        }
+
+        /* ─── 2. Emotes ─── */
+        .emote-btn {
+            position: fixed;
+            right: 14px;
+            bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+            z-index: 500;
+            width: 50px; height: 50px;
+            border-radius: 50% 50% 40% 50% / 50% 50% 50% 40%;
+            background: var(--card-base);
+            border: 4px solid var(--card-rim);
+            box-shadow: 4px 6px 14px var(--shadow-dark), -3px -4px 10px var(--shadow-light);
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: none;
+            align-items: center; justify-content: center;
+            transition: transform .15s;
+        }
+        .emote-btn:active { transform: scale(0.9); }
+        #screen-game.active .emote-btn { display: flex; }
+        .emote-fan {
+            position: fixed; right: 14px;
+            bottom: calc(128px + env(safe-area-inset-bottom, 0px));
+            z-index: 501;
+            display: flex; flex-direction: column; gap: 8px;
+            align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity .2s;
+        }
+        .emote-fan.open { opacity: 1; pointer-events: auto; }
+        .emote-opt {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--card-base); border: 3px solid var(--card-rim);
+            box-shadow: 3px 4px 10px var(--shadow-dark);
+            font-size: 1.3rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transform: scale(0); transition: transform .2s cubic-bezier(.175,.885,.32,1.275);
+        }
+        .emote-fan.open .emote-opt { transform: scale(1); }
+        .emote-fan.open .emote-opt:nth-child(1) { transition-delay: 0ms; }
+        .emote-fan.open .emote-opt:nth-child(2) { transition-delay: 40ms; }
+        .emote-fan.open .emote-opt:nth-child(3) { transition-delay: 80ms; }
+        .emote-fan.open .emote-opt:nth-child(4) { transition-delay: 120ms; }
+        .emote-fan.open .emote-opt:nth-child(5) { transition-delay: 160ms; }
+        @keyframes emoteFloat {
+            0%   { opacity: 1; transform: translateY(0) scale(1); }
+            60%  { opacity: 1; transform: translateY(-60px) scale(1.3); }
+            100% { opacity: 0; transform: translateY(-120px) scale(0.8); }
+        }
+        .emote-popup {
+            position: fixed; z-index: 600;
+            font-size: 2.2rem; pointer-events: none;
+            animation: emoteFloat 1.5s ease-out forwards;
+        }
+
+        /* ─── 3. Chat Bottom Sheet ─── */
+        .chat-btn {
+            position: fixed;
+            right: 14px;
+            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+            z-index: 500;
+            width: 50px; height: 50px;
+            border-radius: 50% 50% 40% 50% / 50% 50% 50% 40%;
+            background: var(--card-base);
+            border: 4px solid var(--card-rim);
+            box-shadow: 4px 6px 14px var(--shadow-dark), -3px -4px 10px var(--shadow-light);
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: none;
+            align-items: center; justify-content: center;
+            transition: transform .15s;
+        }
+        .chat-btn:active { transform: scale(0.9); }
+        #screen-game.active .chat-btn { display: flex; }
+        .chat-sheet {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 42%;
+            z-index: 800;
+            background: #f5ede4;
+            border-radius: 28px 28px 0 0;
+            box-shadow: 0 -8px 32px rgba(110,80,70,0.25);
+            display: flex; flex-direction: column;
+            transform: translateY(110%);
+            transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .chat-sheet.open { transform: translateY(0); }
+        .chat-handle {
+            width: 40px; height: 5px; border-radius: 3px;
+            background: var(--card-muted); opacity: 0.4;
+            margin: 12px auto 8px;
+            flex-shrink: 0;
+        }
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 8px 16px;
+            -webkit-overflow-scrolling: touch;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--card-muted); border-radius: 4px; opacity: .4; }
+        .chat-msg {
+            background: var(--card-base);
+            border-radius: 16px 16px 16px 4px;
+            padding: 8px 12px;
+            font-size: 0.88rem; font-weight: 600;
+            box-shadow: 2px 3px 8px var(--shadow-dark);
+            max-width: 85%;
+            word-break: break-word;
+            animation: slideUp .2s ease;
+        }
+        .chat-msg.mine {
+            align-self: flex-end;
+            border-radius: 16px 16px 4px 16px;
+            background: var(--mint);
+        }
+        .chat-msg-name { font-size: 0.72rem; color: var(--card-muted); margin-bottom: 2px; }
+        .chat-input-row {
+            display: flex; gap: 8px; padding: 10px 12px;
+            border-top: 2px solid var(--card-rim);
+            flex-shrink: 0;
+        }
+        .chat-input {
+            flex: 1; background: #ebe0d7; border: none; outline: none;
+            border-radius: 16px; padding: 10px 14px;
+            font-size: 0.95rem; font-weight: 600;
+            color: var(--card-text); font-family: 'Fredoka', sans-serif;
+            box-shadow: inset 3px 4px 8px rgba(110,80,70,0.2);
+            -webkit-user-select: text; user-select: text;
+        }
+        .chat-send-btn {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: var(--peach); border: none; cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 3px 4px 10px var(--shadow-dark);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: transform .12s;
+        }
+        .chat-send-btn:active { transform: scale(0.9); }
+        .chat-overlay {
+            position: fixed; inset: 0; z-index: 799;
+            display: none;
+        }
+        .chat-overlay.open { display: block; }
+
+        /* ─── 4. Danger Pulse ─── */
+        @keyframes dangerPulse {
+            0%, 100% { box-shadow: inset 0 0 0px rgba(232, 107, 98, 0); }
+            50%       { box-shadow: inset 0 0 80px 30px rgba(232, 107, 98, 0.55); }
+        }
+        body.danger-active #app {
+            animation: dangerPulse 0.5s ease-in-out infinite;
+        }
+
         /* ─── Mobile: full game screen must fit without scroll ─── */
         @media (max-width: 599px) {
             /* Start/Lobby/Gameover: allow scroll, justify top */
@@ -579,6 +753,8 @@
         body.kb-open #screen-game .task-card {
             max-height: 70px;
         }
+        /* hide emote/chat buttons when keyboard open */
+        body.kb-open .emote-btn, body.kb-open .chat-btn { display: none !important; }
     </style>
 </head>
 <body>
@@ -686,6 +862,28 @@
             <div class="timer-container">
                 <div class="timer-title" id="lbl-timer">Таймер</div>
                 <div id="personal-timer" class="personal-timer" style="opacity:0;">10.0</div>
+            </div>
+        </div>
+
+        <!-- Emote Button -->
+        <button class="emote-btn" id="btn-emote">😊</button>
+        <div class="emote-fan" id="emote-fan">
+            <div class="emote-opt" data-emote="😂">😂</div>
+            <div class="emote-opt" data-emote="😱">😱</div>
+            <div class="emote-opt" data-emote="💩">💩</div>
+            <div class="emote-opt" data-emote="🔥">🔥</div>
+            <div class="emote-opt" data-emote="🤦">🤦</div>
+        </div>
+
+        <!-- Chat Button + Sheet -->
+        <button class="chat-btn" id="btn-chat">💬</button>
+        <div class="chat-overlay" id="chat-overlay"></div>
+        <div class="chat-sheet" id="chat-sheet">
+            <div class="chat-handle"></div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-row">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Сообщение..." maxlength="80">
+                <button class="chat-send-btn" id="chat-send">→</button>
             </div>
         </div>
         
@@ -862,17 +1060,18 @@ document.querySelectorAll('.seg-btn').forEach(b => {
 applyI18n();
 
 // ═════ NETWORK ═════
+const MAX_LIVES = 3;
 class NetworkManager {
     constructor() { this.lobbyId=null; this.players=[]; this.isHost=false; this.botTimers=[]; this.botPassBack=null; }
     connect(lobbyId, isHost=false) {
         this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
-        this.players.push({ id:currentUser.id, name:currentUser.first_name, initials:currentUser.shortInit, isHost, isDead:false });
+        this.players.push({ id:currentUser.id, name:currentUser.first_name, initials:currentUser.shortInit, isHost, isDead:false, lives:MAX_LIVES });
         updateLobbyUI();
         if (isHost) {
-            this.botTimers.push(setTimeout(() => { this.players.push({ id:2, name:"Иван", initials:"ИВ", isHost:false, isDead:false }); updateLobbyUI(); haptic('light'); }, 1200));
-            this.botTimers.push(setTimeout(() => { this.players.push({ id:3, name:"Оля", initials:"ОЛ", isHost:false, isDead:false }); updateLobbyUI(); haptic('light'); }, 2800));
+            this.botTimers.push(setTimeout(() => { this.players.push({ id:2, name:"Иван", initials:"ИВ", isHost:false, isDead:false, lives:MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 1200));
+            this.botTimers.push(setTimeout(() => { this.players.push({ id:3, name:"Оля", initials:"ОЛ", isHost:false, isDead:false, lives:MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 2800));
         } else {
-            this.players.push({ id:999, name:"Host", initials:"HO", isHost:true, isDead:false });
+            this.players.push({ id:999, name:"Host", initials:"HO", isHost:true, isDead:false, lives:MAX_LIVES });
             updateLobbyUI();
             this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 4000));
         }
@@ -950,6 +1149,17 @@ function applyNickname() {
     }
 }
 if (startParam) joinLobby(startParam, false); else showScreen('START');
+
+function lifeDots(p) {
+    const total = MAX_LIVES;
+    const lost = total - (p.lives ?? total);
+    let dots = '';
+    for (let i = 0; i < total; i++) {
+        dots += `<div class="life-dot${i >= (total - lost) ? ' lost' : ''}"></div>`;
+    }
+    return dots;
+}
+
 document.getElementById('btn-create-lobby').onclick = () => { applyNickname(); joinLobby(generateCode(), true); };
 const cdInp = document.getElementById('join-code-input');
 cdInp.oninput = function() { this.value = this.value.toUpperCase(); };
@@ -973,7 +1183,12 @@ document.getElementById('btn-invite').onclick = () => {
 document.getElementById('btn-start-game').onclick = () => startRound();
 
 function updatePlayersBar() {
-    ui.pBar.innerHTML = network.players.map(p => `<div class="p-mini${p.id===currentTurnPlayerId?' active':''}${p.isDead?' dead':''}">${p.initials}</div>`).join('');
+    ui.pBar.innerHTML = network.players.map(p =>
+        `<div class="p-mini-wrap">
+            <div class="p-mini${p.id===currentTurnPlayerId?' active':''}${p.isDead?' dead':''}" data-pid="${p.id}">${p.initials}</div>
+            <div class="lives-dots">${lifeDots(p)}</div>
+        </div>`
+    ).join('');
 }
 
 // ═════ GAME LOGIC ═════
@@ -981,7 +1196,7 @@ let usedTaskIds = new Set();
 
 function startRound() {
     isGameOver = false; isSpectating = false; globalTimer = 30 + Math.random() * 30;
-    network.players.forEach(p => p.isDead = false);
+    network.players.forEach(p => { p.isDead = false; p.lives = MAX_LIVES; });
     usedTaskIds = new Set();
     showScreen('GAME'); passPotato(currentUser.id);
 }
@@ -1081,6 +1296,14 @@ function onTyping() {
     onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
     ui.input.classList.remove('error'); ui.err.style.display = 'none';
 }
+// 5. Input focus → shake potato
+ui.input.addEventListener('focus', () => {
+    if (currentScreen === 'GAME' && !isLocked) ui.img.classList.add('shaking');
+});
+ui.input.addEventListener('blur', () => {
+    clearTimeout(onTyping._t);
+    ui.img.classList.remove('shaking');
+});
 
 function validateAnswer() {
     if (currentTaskObj.type !== 'answer') return true;
@@ -1170,6 +1393,13 @@ function gameLoop(time) {
     const tVal = Math.max(0, personalTimer);
     ui.timer.innerText = tVal.toFixed(1); ui.timer.classList.toggle('urgent', tVal < 3);
 
+    // Danger pulse when < 3s
+    if (tVal < 3 && currentTurnPlayerId === currentUser.id) {
+        document.body.classList.add('danger-active');
+    } else {
+        document.body.classList.remove('danger-active');
+    }
+
     if (personalTimer <= 0 || globalTimer <= 0) { handleExplosion(); return; }
     gameLoopId = requestAnimationFrame(gameLoop);
 }
@@ -1209,10 +1439,15 @@ function createExplosionParticles() {
 
 function handleExplosion() {
     if (isExploding) return; isExploding = true;
+    document.body.classList.remove('danger-active');
+    closeChatSheet();
     if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
     network.clearBotTimers();
     let dead = network.players.find(p => p.id === currentTurnPlayerId);
-    if (dead) dead.isDead = true;
+    if (dead) {
+        dead.lives = Math.max(0, (dead.lives ?? MAX_LIVES) - 1);
+        dead.isDead = dead.lives <= 0;
+    }
 
     haptic('rigid');
     createExplosionParticles();
@@ -1304,8 +1539,118 @@ function triggerGameOver(name) { isGameOver=true; if(gameLoopId){cancelAnimation
 document.getElementById('btn-spectate').onclick = () => { isGameOver=false; isSpectating=true; showScreen('GAME'); document.getElementById('btn-leave-spectate').style.display='block';
     let alive = network.players.filter(p=>!p.isDead); if(alive.length>0) { triggerCurtain(()=>{ let n=alive[Math.floor(Math.random()*alive.length)]; passPotato(n.id); if(n.id!==currentUser.id) network.startBotTimer(n.id); }); } };
 
-function resetToMenu() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} network.clearBotTimers(); network=new NetworkManager(); gameStartTime=null; isSpectating=false; document.getElementById('btn-leave-spectate').style.display='none'; showScreen('START'); }
-document.getElementById('btn-leave-spectate').onclick = resetToMenu; document.getElementById('btn-to-lobby').onclick = resetToMenu;
+function resetToMenu() {
+    if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;}
+    network.clearBotTimers(); network=new NetworkManager();
+    gameStartTime=null; isSpectating=false;
+    document.body.classList.remove('danger-active');
+    document.getElementById('btn-leave-spectate').style.display='none';
+    closeChatSheet();
+    showScreen('START');
+}
+document.getElementById('btn-leave-spectate').onclick = resetToMenu;
+document.getElementById('btn-to-lobby').onclick = resetToMenu;
+
+// ═════ 2. EMOTES ═════
+const btnEmote = document.getElementById('btn-emote');
+const emoteFan = document.getElementById('emote-fan');
+let emoteOpen = false;
+
+btnEmote.addEventListener('click', e => {
+    e.stopPropagation();
+    emoteOpen = !emoteOpen;
+    emoteFan.classList.toggle('open', emoteOpen);
+    haptic('light');
+});
+
+document.querySelectorAll('.emote-opt').forEach(opt => {
+    opt.addEventListener('click', e => {
+        e.stopPropagation();
+        const emote = opt.dataset.emote;
+        emoteOpen = false;
+        emoteFan.classList.remove('open');
+        haptic('medium');
+        // Find current user's avatar in players bar
+        const myAvatar = ui.pBar.querySelector(`[data-pid="${currentUser.id}"]`);
+        const el = document.createElement('div');
+        el.className = 'emote-popup';
+        el.textContent = emote;
+        if (myAvatar) {
+            const rect = myAvatar.getBoundingClientRect();
+            el.style.left = (rect.left + rect.width/2 - 18) + 'px';
+            el.style.top  = (rect.top - 10) + 'px';
+        } else {
+            // Fallback: center of screen
+            el.style.left = '50%';
+            el.style.top  = '30%';
+            el.style.transform = 'translateX(-50%)';
+        }
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1600);
+    });
+});
+
+document.addEventListener('click', () => {
+    if (emoteOpen) { emoteOpen = false; emoteFan.classList.remove('open'); }
+});
+
+// Prevent touchmove on emote fan closing chat
+emoteFan && emoteFan.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
+
+// ═════ 3. CHAT ═════
+const chatSheet = document.getElementById('chat-sheet');
+const chatOverlay = document.getElementById('chat-overlay');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+
+function openChatSheet() {
+    chatSheet.classList.add('open');
+    chatOverlay.classList.add('open');
+    // Prevent game touchmove block from interfering
+    chatSheet.addEventListener('touchmove', e => e.stopPropagation(), {passive: false});
+}
+function closeChatSheet() {
+    chatSheet.classList.remove('open');
+    chatOverlay.classList.remove('open');
+    chatInput.blur();
+}
+
+document.getElementById('btn-chat').addEventListener('click', e => {
+    e.stopPropagation();
+    if (chatSheet.classList.contains('open')) closeChatSheet();
+    else { openChatSheet(); setTimeout(() => chatMessages.scrollTop = chatMessages.scrollHeight, 50); }
+    haptic('light');
+});
+chatOverlay.addEventListener('click', closeChatSheet);
+
+function addChatMsg(name, text, mine) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg' + (mine ? ' mine' : '');
+    div.innerHTML = mine ? `<div>${text}</div>` : `<div class="chat-msg-name">${name}</div><div>${text}</div>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function sendChatMsg() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+    addChatMsg(currentUser.first_name, text, true);
+    haptic('light');
+    // Simulate bot reply after 1-2s
+    const bots = network.players.filter(p => p.id !== currentUser.id && !p.isDead);
+    if (bots.length && Math.random() > 0.4) {
+        const bot = bots[Math.floor(Math.random() * bots.length)];
+        const replies = ['😂', '🔥', 'ок', 'да ладно', 'хаха', '💀', 'ого', 'пфф', '👀'];
+        setTimeout(() => {
+            addChatMsg(bot.name, replies[Math.floor(Math.random()*replies.length)], false);
+        }, 800 + Math.random() * 1200);
+    }
+}
+
+document.getElementById('chat-send').addEventListener('click', sendChatMsg);
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMsg(); });
+chatInput.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
 
     // ── Loader: hide after fonts + bg image ready ──
     function hideLoader() {

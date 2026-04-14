@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Wet Potato</title>
+    <!-- Preconnect for faster font fetch -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- display=swap: don't block render, use system font first -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="assets/tasks.js"></script>
     <style>
@@ -42,8 +45,15 @@
             background-position: center;
             color: var(--card-text);
             font-family: 'Fredoka', sans-serif; 
-            overflow: hidden; width: 100vw; height: 100vh;
+            overflow: hidden;
+            width: 100vw;
+            /* Use dvh so iOS toolbar doesn't count */
+            height: 100vh;
+            height: 100dvh;
             touch-action: none;
+            /* Prevent iOS rubber-band / bounce */
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
         }
 
         /* ─── Wave Curtain ─── */
@@ -68,18 +78,19 @@
 
         /* ─── App Layout ─── */
         #app {
-            position: relative; width: 100%; height: 100%;
+            position: fixed;
+            inset: 0;
             display: flex; justify-content: center; align-items: center;
         }
 
         /* ─── Desktop: game card floats on desk ─── */
         @media (min-width: 600px) {
             #app {
-                position: fixed;
                 top: 50%; left: 50%;
+                bottom: auto; right: auto;
                 transform: translate(-50%, -50%);
                 width: 420px;
-                height: min(780px, 96vh);
+                height: min(780px, 96dvh);
                 border-radius: 38px;
                 box-shadow:
                     0 30px 80px rgba(80, 50, 30, 0.5),
@@ -94,18 +105,18 @@
             }
         }
         .screen {
-            position:absolute; inset:0;
-            display:flex; flex-direction:column;
-            align-items:center; justify-content:flex-start;
-            opacity:0; pointer-events:none;
-            transition:opacity .35s ease;
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            opacity: 0; pointer-events: none;
+            transition: opacity .35s ease;
             padding: 16px 16px env(safe-area-inset-bottom, 16px);
             padding-top: calc(16px + env(safe-area-inset-top, 0px));
             overflow-y: auto;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
-        /* Center content vertically when it fits */
-        .screen.active { opacity:1; pointer-events:auto; }
+        .screen.active { opacity: 1; pointer-events: auto; }
         .screen-inner {
             display: flex; flex-direction: column; align-items: center;
             width: 100%; gap: 16px;
@@ -453,10 +464,13 @@
             #screen-start, #screen-lobby, #screen-gameover {
                 overflow-y: auto !important;
             }
-            /* Game screen: compact everything to fit */
+            /* Game screen: rigid column, no scroll, fits any phone */
             #screen-game {
                 padding: 4px 6px !important;
-                gap: 0;
+                overflow: hidden !important;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
             }
             .game-top-panel { 
                 padding: 2px 8px;
@@ -464,19 +478,21 @@
                 flex-shrink: 0;
             }
             .personal-timer { font-size: 2.2rem; letter-spacing: -1px; }
-            .p-mini { width: 38px; height: 38px; font-size: 0.85rem; }
-            .players-bar { gap: 6px; flex-wrap: nowrap; overflow-x: auto; max-width: 65%; }
-            .status-text { font-size: 0.9rem; margin-bottom: 4px; letter-spacing: 0; min-height: 18px; }
+            .p-mini { width: 36px; height: 36px; font-size: 0.8rem; }
+            .players-bar { gap: 6px; flex-wrap: nowrap; overflow-x: auto; max-width: 65%; scrollbar-width: none; }
+            .players-bar::-webkit-scrollbar { display: none; }
+            .status-text { font-size: 0.88rem; margin-bottom: 3px; letter-spacing: 0; min-height: 16px; }
             .task-card { 
-                font-size: 1rem; padding: 10px 12px; 
-                min-height: 60px; max-height: 110px;
+                font-size: 0.98rem; padding: 8px 12px; 
+                min-height: 50px; max-height: 100px;
                 overflow-y: auto; margin-bottom: 0;
                 flex-shrink: 0;
             }
-            #potato-area { gap: 8px; flex: 1; min-height: 0; }
-            #potato-container { width: 160px; height: 160px; flex-shrink: 0; }
-            .potato-img { width: 145px; }
-            #combo-panel { padding: 10px 12px; border-radius: 18px; gap: 8px; flex-shrink: 0; }
+            /* Potato area: takes remaining vertical space, never overflows */
+            #potato-area { gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
+            #potato-container { width: 150px; height: 150px; flex-shrink: 0; }
+            .potato-img { width: 135px; }
+            #combo-panel { padding: 10px 12px; border-radius: 18px; gap: 6px; flex-shrink: 0; max-width: 100%; }
             .clay-btn { padding: 10px 14px; font-size: 0.9rem; }
             .logo-title { font-size: 2.8rem; margin-bottom: 8px; }
             .clay-card { padding: 16px; border-width: 8px; }
@@ -484,10 +500,11 @@
         }
         @media (max-width: 380px) {
             .personal-timer { font-size: 1.9rem; }
-            #potato-container { width: 140px; height: 140px; }
-            .potato-img { width: 125px; }
-            .task-card { font-size: 0.9rem; padding: 8px 10px; max-height: 90px; }
+            #potato-container { width: 130px; height: 130px; }
+            .potato-img { width: 115px; }
+            .task-card { font-size: 0.9rem; padding: 6px 10px; max-height: 80px; }
             .logo-title { font-size: 2.4rem; }
+            .p-mini { width: 32px; height: 32px; font-size: 0.75rem; }
         }
 
         /* ─── Initial Loader ─── */
@@ -518,8 +535,8 @@
 
         @media (max-width: 350px) {
             .personal-timer { font-size: 1.7rem; }
-            #potato-container { width: 120px; height: 120px; }
-            .potato-img { width: 105px; }
+            #potato-container { width: 110px; height: 110px; }
+            .potato-img { width: 95px; }
             .players-bar { gap: 4px; }
             .input-code { font-size: 1.3rem; padding: 12px; }
         }
@@ -527,9 +544,27 @@
         /* Fix for tall screens / viewport fit */
         @supports (padding: env(safe-area-inset-top)) {
             .screen {
-                padding-top: calc(20px + env(safe-area-inset-top));
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+                padding-top: calc(16px + env(safe-area-inset-top));
+                padding-bottom: calc(12px + env(safe-area-inset-bottom));
             }
+        }
+
+        /* When keyboard is open (JS adds .kb-open to body), shrink game screen */
+        body.kb-open #screen-game #potato-area {
+            flex: 0 0 auto;
+        }
+        body.kb-open #screen-game #potato-container {
+            width: 80px; height: 80px;
+        }
+        body.kb-open #screen-game .potato-img {
+            width: 70px;
+        }
+        body.kb-open #screen-game .status-text,
+        body.kb-open #screen-game .players-bar {
+            display: none;
+        }
+        body.kb-open #screen-game .task-card {
+            max-height: 70px;
         }
     </style>
 </head>
@@ -1259,15 +1294,40 @@ document.getElementById('btn-spectate').onclick = () => { isGameOver=false; isSp
 function resetToMenu() { if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} network.clearBotTimers(); network=new NetworkManager(); gameStartTime=null; isSpectating=false; document.getElementById('btn-leave-spectate').style.display='none'; showScreen('START'); }
 document.getElementById('btn-leave-spectate').onclick = resetToMenu; document.getElementById('btn-to-lobby').onclick = resetToMenu;
 
-    window.addEventListener('load', () => {
+    // ── Loader: hide after fonts + bg image ready ──
+    function hideLoader() {
         const loader = document.getElementById('initial-loader');
-        if (loader) {
-            setTimeout(() => {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 400);
-            }, 600);
-        }
-    });
+        if (!loader) return;
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 450);
+    }
+    // Minimum 400ms so loader doesn't flash away instantly
+    const loaderMinTime = Date.now();
+    function scheduleHideLoader() {
+        const elapsed = Date.now() - loaderMinTime;
+        const wait = Math.max(0, 400 - elapsed);
+        setTimeout(hideLoader, wait);
+    }
+    // Hide after fonts are ready (or after 2s timeout)
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(scheduleHideLoader);
+    } else {
+        window.addEventListener('load', scheduleHideLoader);
+    }
+    // Failsafe: always hide after 2.5s
+    setTimeout(hideLoader, 2500);
+
+    // ── Visual Viewport: shrink game area when keyboard opens ──
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            const ratio = window.visualViewport.height / window.screen.height;
+            if (ratio < 0.65) {
+                document.body.classList.add('kb-open');
+            } else {
+                document.body.classList.remove('kb-open');
+            }
+        });
+    }
 </script>
 </body>
 </html>

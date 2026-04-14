@@ -675,6 +675,7 @@
                 min-height: 70px; max-height: 130px;
                 overflow-y: auto; margin-bottom: 0;
                 flex-shrink: 0;
+                justify-content: flex-start;
             }
             /* Potato area: takes remaining vertical space, never overflows */
             #potato-area { gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
@@ -1278,7 +1279,7 @@ function unlockPotato() {
     
     const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
     ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
-        <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">⚡ ${T('taskLabel')}</span>
+        <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('taskLabel')}</span>
         <span style="font-size:1.3rem; font-weight:700;">${currentTaskObj.q}</span>`;
     
     ui.combo.classList.add('visible');

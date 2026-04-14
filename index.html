@@ -1123,12 +1123,28 @@ const fallbackPool = [
     {q: "Три марки машин", a: "форд", type: "answer"},
     {q: "Покажи язык", a: "ок", type: "action"}
 ];
+
 function getTaskPool(lang, mode, diff) {
-    if (typeof window.getTaskPool === 'function') {
-        let pool = window.getTaskPool(lang, mode, diff);
-        return pool && pool.length ? pool : fallbackPool;
+    let basePool = fallbackPool;
+    
+    // Преобразуем формат из tasks.js под наш index.html, если tasks.js загрузился
+    if (typeof potatoTasks !== 'undefined' && potatoTasks.length > 0) {
+        basePool = potatoTasks.map(t => ({
+            q: t.question[lang] || t.question.ru,
+            a: Array.isArray(t.answers) ? t.answers[0] : (t.a || "ок"), // Для отображения чужого ответа
+            allAnswers: t.answers, // Для валидации всех вариантов
+            type: t.type === 'action' ? 'action' : 'answer'
+        }));
     }
-    return fallbackPool;
+
+    let filtered = basePool;
+    if (mode === 'answers') {
+        filtered = basePool.filter(t => t.type !== 'action');
+    } else if (mode === 'actions') {
+        filtered = basePool.filter(t => t.type === 'action');
+    } // Если mode === 'mix', оставляем всё
+    
+    return filtered.length > 0 ? filtered : fallbackPool;
 }
 
 function showScreen(name) {
@@ -1334,34 +1350,44 @@ ui.input.addEventListener('blur', () => {
 
 function validateAnswer() {
     if (currentTaskObj.type !== 'answer') return true;
-    let expected = currentTaskObj.a.toLowerCase().trim();
     let given = ui.input.value.toLowerCase().trim();
     
     if (given.length < 1) return false;
-    if (expected.includes('любо') || expected.includes('any')) return true;
     
-    // Match numbers exactly
-    if (/^\d+$/.test(expected)) {
-        let nums = given.match(/\d+/g);
-        return (nums && nums.includes(expected));
+    // Поддерживаем как массив ответов из tasks.js, так и единичный ответ из fallbackPool
+    let expectedList = currentTaskObj.allAnswers || [currentTaskObj.a];
+
+    for (let ans of expectedList) {
+        let expected = ans.toLowerCase().trim();
+        if (expected.includes('любо') || expected.includes('any')) return true;
+        
+        if (/^\d+$/.test(expected)) {
+            let nums = given.match(/\d+/g);
+            if (nums && nums.includes(expected)) return true;
+            continue;
+        }
+        
+        let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
+        if (expWords.length === 0) {
+            if (given === expected || given.includes(expected)) return true;
+            continue;
+        }
+        
+        let givenWords = given.split(/\s+/);
+        let match = expWords.some(ew => {
+            return givenWords.some(gw => {
+                if (gw.length < 3 && ew.length >= 3) return false;
+                if (gw === ew) return true;
+                if (gw.length >= 4 && ew.length >= 4) {
+                   return ew.includes(gw.substring(0, 4)) || gw.includes(ew.substring(0, 4));
+                }
+                return false;
+            });
+        });
+        
+        if (match || given === expected || given.includes(expected)) return true;
     }
     
-    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
-    if (expWords.length === 0) return given === expected || given.includes(expected);
-    
-    // given must contain a word that matches an expected word
-    let givenWords = given.split(/\s+/);
-    let match = expWords.some(ew => {
-        return givenWords.some(gw => {
-            if (gw.length < 3 && ew.length >= 3) return false;
-            if (gw === ew) return true;
-            if (gw.length >= 4 && ew.length >= 4) {
-               return ew.includes(gw.substring(0, 4)) || gw.includes(ew.substring(0, 4));
-            }
-            return false;
-        });
-    });
-    if (match || given === expected || given.includes(expected)) return true;
     return false;
 }
 

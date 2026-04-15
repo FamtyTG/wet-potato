@@ -2951,6 +2951,8 @@
             let alive = network.players.filter(p => !p.isDead); if (alive.length > 0) { triggerCurtain(() => { let n = alive[Math.floor(Math.random() * alive.length)]; passPotato(n.id); if (n.id !== currentUser.id) network.startBotTimer(n.id); }); }
         };
 
+        document.getElementById('btn-to-lobby').onclick = resetToMenu;
+
         function resetToMenu() {
             if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
             network.clearBotTimers(); network = new NetworkManager();

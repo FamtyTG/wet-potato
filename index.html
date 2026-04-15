@@ -1528,7 +1528,7 @@
         }
 
         .copy-wallet::after {
-            content: '📋 Нажми, чтобы скопировать';
+            content: attr(data-hint);
             display: block;
             margin-top: 8px;
             font-weight: bold;
@@ -2029,14 +2029,14 @@
         <!-- ══════ DONATE MODAL ══════ -->
         <div id="donate-modal" class="modal-overlay">
             <div class="clay-card modal-card">
-                <h2 style="color:var(--warm-red); margin-bottom:5px; font-size: 1.5rem;">Поддержать разраба ❤️</h2>
-                <p style="font-size:0.9rem; color:var(--card-muted); margin-bottom:15px;">На сервера, энергетики и новые
+                <h2 id="donate-title" style="color:var(--warm-red); margin-bottom:5px; font-size: 1.5rem;">Поддержать разраба ❤️</h2>
+                <p id="donate-text" style="font-size:0.9rem; color:var(--card-muted); margin-bottom:15px;">На сервера, энергетики и новые
                     режимы!</p>
                 <div class="qr-wrapper">
                     <img src="assets/image_8ea787.png" alt="QR Code"
                         style="width:160px; height:160px; border-radius:10px; display:block;">
                 </div>
-                <div class="copy-wallet" id="btn-copy-wallet">
+                <div class="copy-wallet" id="btn-copy-wallet" data-hint="📋 Нажми, чтобы скопировать">
                     UQDEjFlF7_2RUthpz3enA-T5bJloO5RIeRPVQflsjaL23aTs
                 </div>
                 <button class="clay-btn" id="btn-close-donate" style="margin-top:15px;">Закрыть</button>
@@ -2145,7 +2145,10 @@
                 gameOver: "КОНЕЦ ИГРЫ", winner: "Победитель определён!", victory: "ПОБЕДА!", survived: "🏆 Ты выжил!",
                 menuBack: "← Выйти", burned: n => `💥 ${n} СГОРЕЛ!`, timer: "ВРЕМЯ", actWarn: "Выполни действие вживую, затем жми!",
                 errTxt: "Неверно! Подумай еще.", modeLabels: { answers: "Ответы", actions: "Действия" },
-                nickname: "Ваш ник", nickPh: "Введите ник...", content: "Контент", confirmLeave: "Точно выйти?", yes: "Да", no: "Нет"
+                nickname: "Ваш ник", nickPh: "Введите ник...", content: "Контент", confirmLeave: "Точно выйти?", yes: "Да", no: "Нет",
+                supportBtn: "☕ Поддержать разраба", donateTitle: "Поддержать разраба ❤️",
+                donateText: "На сервера, энергетики и новые режимы!", close: "Закрыть",
+                copied: "✅ Скопировано!", copyHint: "📋 Нажми, чтобы скопировать"
             },
             en: {
                 createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
@@ -2159,7 +2162,10 @@
                 gameOver: "GAME OVER", winner: "Winner determined!", victory: "VICTORY!", survived: "🏆 You survived!",
                 menuBack: "← Exit", burned: n => `💥 ${n} IS OUT!`, timer: "TIMER", actWarn: "Do the action in real life, then tap!",
                 errTxt: "Wrong answer! Try again.", modeLabels: { answers: "Answers", actions: "Actions" },
-                nickname: "Your nick", nickPh: "Enter nickname...", content: "Content", confirmLeave: "Are you sure?", yes: "Yes", no: "No"
+                nickname: "Your nick", nickPh: "Enter nickname...", content: "Content", confirmLeave: "Are you sure?", yes: "Yes", no: "No",
+                supportBtn: "☕ Support Dev", donateTitle: "Support Developer ❤️",
+                donateText: "For servers, energy drinks, and new modes!", close: "Close",
+                copied: "✅ Copied!", copyHint: "📋 Click to copy"
             }
         };
 
@@ -2207,6 +2213,12 @@
 
             document.getElementById('btn-confirm-yes').innerText = T('yes');
             document.getElementById('btn-confirm-no').innerText = T('no');
+
+            const _supBtn = document.getElementById('btn-open-donate'); if (_supBtn) _supBtn.innerText = T('supportBtn');
+            const _donTitle = document.getElementById('donate-title'); if (_donTitle) _donTitle.innerText = T('donateTitle');
+            const _donText = document.getElementById('donate-text'); if (_donText) _donText.innerText = T('donateText');
+            const _donClose = document.getElementById('btn-close-donate'); if (_donClose) _donClose.innerText = T('close');
+            const _donWallet = document.getElementById('btn-copy-wallet'); if (_donWallet) _donWallet.setAttribute('data-hint', T('copyHint'));
         }
 
         // ═════ CONFIRM MODAL ═════
@@ -2249,7 +2261,7 @@
                 document.body.removeChild(textArea);
             }
             const originalText = btnCopyWallet.innerHTML;
-            btnCopyWallet.innerHTML = "<b>✅ Скопировано!</b>";
+            btnCopyWallet.innerHTML = `<b>${T('copied')}</b>`;
             haptic('success');
             setTimeout(() => { btnCopyWallet.innerHTML = originalText; }, 2000);
         };

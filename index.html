@@ -1,43 +1,74 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="color-scheme" content="light">
     <title>Wet Potato</title>
     <!-- Preconnect for faster font fetch -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- display=swap: don't block render, use system font first -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    </noscript>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="assets/tasks.js"></script>
     <style>
         :root {
-            /* ── Clay & Warm Palette ── */
-            --bg-color:         #dfc5b7;
-            --card-base:        #fff9f0;
-            --card-rim:         #f0e5da;
-            --card-text:        #4a3424;
-            --card-muted:       #8a7060;
-            
-            --peach:            #f5a87f;
-            --peach-dark:       #db875e;
-            --mint:             #8fd5b8;
-            --mint-dark:        #6bb896;
-            --blue:             #8db4ef;
-            --warm-red:         #e86b62;
-            --lilac:            #d0bcf2;
-            
-            --shadow-light:     rgba(255, 255, 255, 0.6);
-            --shadow-dark:      rgba(110, 80, 70, 0.35);
-            --shadow-darker:    rgba(110, 80, 70, 0.5);
+            /* ── Clay & Warm Palette (Family Friendly) ── */
+            --bg-color: #dfc5b7;
+            --card-base: #fff9f0;
+            --card-rim: #f0e5da;
+            --card-text: #4a3424;
+            --card-muted: #8a7060;
+
+            --peach: #f5a87f;
+            --peach-dark: #db875e;
+            --mint: #8fd5b8;
+            --mint-dark: #6bb896;
+            --blue: #8db4ef;
+            --warm-red: #e86b62;
+            --lilac: #d0bcf2;
+
+            --shadow-light: rgba(255, 255, 255, 0.6);
+            --shadow-dark: rgba(110, 80, 70, 0.35);
+            --shadow-darker: rgba(110, 80, 70, 0.5);
         }
 
-        * { margin:0; padding:0; box-sizing:border-box; 
-            user-select:none; -webkit-user-select:none;
-            -webkit-tap-highlight-color:transparent; }
+        /* ── Dark Mode / 18+ Palette ── */
+        body.dark-mode {
+            --bg-color: #120a0d;
+            --card-base: #23171a;
+            --card-rim: #332226;
+            --card-text: #f5e6e8;
+            --card-muted: #a38c91;
+
+            --peach: #91384e;
+            --peach-dark: #6b2637;
+            --mint: #8b4566;
+            --mint-dark: #5c2c43;
+            --blue: #4a3b5c;
+            --warm-red: #d4263f;
+            --lilac: #5a4066;
+
+            --shadow-light: rgba(40, 20, 25, 0.6);
+            --shadow-dark: rgba(5, 2, 4, 0.9);
+            --shadow-darker: rgba(0, 0, 0, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         body {
             background-color: var(--bg-color);
@@ -45,7 +76,7 @@
             background-size: cover;
             background-position: center;
             color: var(--card-text);
-            font-family: 'Fredoka', sans-serif; 
+            font-family: 'Fredoka', sans-serif;
             overflow: hidden;
             width: 100vw;
             /* Use dvh so iOS toolbar doesn't count */
@@ -54,41 +85,133 @@
             touch-action: none;
             /* Prevent iOS rubber-band / bounce */
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        /* Плавное затемнение фона через псевдоэлемент (максимальная оптимизация без лагов) */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 5, 10, 0.95);
+            opacity: 0;
+            z-index: -2;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        body.dark-mode::before {
+            opacity: 1;
+        }
+
+        /* Emoji Rain for 18+ mode (Оптимизировано, не лагает) */
+        .emoji-rain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease;
+        }
+
+        body.dark-mode .emoji-rain-container {
+            opacity: 0.25;
+            visibility: visible;
+        }
+
+        .falling-emoji {
+            position: absolute;
+            font-size: 2.5rem;
+            top: -10vh;
+            animation: fall linear infinite;
+            filter: drop-shadow(0px 0px 8px rgba(255, 30, 30, 0.8));
+            will-change: transform;
+            /* Аппаратное ускорение */
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translate3d(0, 0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate3d(0, 120vh, 0) rotate(360deg);
+            }
+        }
+
+        /* Elements transitions for dark mode */
+        .clay-card,
+        .clay-btn,
+        .answer-input,
+        .input-code,
+        .nick-input,
+        .seg-group,
+        .p-mini,
+        .player-row,
+        .chat-sheet,
+        .chat-msg {
+            transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease;
         }
 
         /* ─── Wave Curtain ─── */
         .curtain {
             position: fixed;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 100%;
             z-index: 2000;
             pointer-events: none;
             background: linear-gradient(180deg, #d6bdb0 0%, #e2cbbc 100%);
             transform: translateY(-110%);
             overflow: visible;
+            transition: background 0.5s ease;
         }
+
+        body.dark-mode .curtain {
+            background: linear-gradient(180deg, #120a0d 0%, #332226 100%);
+        }
+
         .curtain::after {
             content: '';
             position: absolute;
-            bottom: -58px; left: -1px;
-            width: calc(100% + 2px); height: 60px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath fill='%23d6bdb0' d='M0,30 C160,0 320,60 480,28 C640,0 800,55 960,25 C1120,0 1280,55 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E") no-repeat center top;
-            background-size: 100% 100%;
+            bottom: -58px;
+            left: -1px;
+            width: calc(100% + 2px);
+            height: 60px;
+            background-color: var(--card-rim);
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0,30 C160,0 320,60 480,28 C640,0 800,55 960,25 C1120,0 1280,55 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0,30 C160,0 320,60 480,28 C640,0 800,55 960,25 C1120,0 1280,55 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E");
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+            transition: background-color 0.5s ease;
         }
 
         /* ─── App Layout ─── */
         #app {
             position: fixed;
             inset: 0;
-            display: flex; justify-content: center; align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* ─── Desktop: game card floats on desk ─── */
         @media (min-width: 600px) {
             #app {
-                top: 50%; left: 50%;
-                bottom: auto; right: auto;
+                top: 50%;
+                left: 50%;
+                bottom: auto;
+                right: auto;
                 transform: translate(-50%, -50%);
                 width: 420px;
                 height: min(780px, 96dvh);
@@ -98,18 +221,31 @@
                     0 0 0 2px rgba(255, 255, 255, 0.3);
                 overflow: hidden;
                 flex-shrink: 0;
+                transition: box-shadow 0.8s ease;
             }
+
+            body.dark-mode #app {
+                box-shadow:
+                    0 30px 80px rgba(0, 0, 0, 0.95),
+                    0 0 0 2px rgba(212, 38, 63, 0.2);
+            }
+
             .curtain {
                 width: 420px;
                 left: 50%;
                 margin-left: -210px;
             }
         }
+
         .screen {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-start;
-            opacity: 0; pointer-events: none;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity .35s ease;
             padding: 16px 16px env(safe-area-inset-bottom, 16px);
             padding-top: calc(16px + env(safe-area-inset-top, 0px));
@@ -117,380 +253,952 @@
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
         }
-        .screen.active { opacity: 1; pointer-events: auto; }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .screen-inner {
-            display: flex; flex-direction: column; align-items: center;
-            width: 100%; gap: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 16px;
             min-height: 100%;
             justify-content: center;
         }
 
-        /* ─── Nickname Input ─── */
-        .nick-input {
+        /* ─── Nickname Input (Pill Design) ─── */
+        .nick-row {
+            display: flex;
+            gap: 4px;
             width: 100%;
+            align-items: stretch;
+        }
+
+        .nick-input {
+            flex: 1;
             padding: 12px 16px;
             font-family: 'Fredoka', sans-serif;
-            font-size: 1.1rem; font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 600;
             color: var(--card-text);
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
             border: 4px solid var(--card-rim);
-            border-radius: 18px 22px 16px 20px / 20px 16px 22px 18px;
+            border-radius: 18px 8px 8px 18px;
             outline: none;
             text-align: center;
-            box-shadow: inset 2px 3px 8px rgba(180,160,150,0.3);
+            box-shadow: inset 2px 3px 8px rgba(180, 160, 150, 0.3);
             transition: border-color .2s, box-shadow .2s;
         }
+
+        body.dark-mode .nick-input {
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: inset 2px 3px 8px rgba(0, 0, 0, 0.8);
+        }
+
         .nick-input:focus {
             border-color: var(--peach);
-            box-shadow: inset 2px 3px 8px rgba(180,160,150,0.3), 0 0 0 3px rgba(245,168,127,0.3);
+            box-shadow: inset 2px 3px 8px rgba(180, 160, 150, 0.3), 0 0 0 3px rgba(245, 168, 127, 0.3);
         }
+
+        body.dark-mode .nick-input:focus {
+            box-shadow: inset 2px 3px 8px rgba(0, 0, 0, 0.8), 0 0 0 3px rgba(212, 38, 63, 0.4);
+        }
+
+        .btn-save-nick {
+            width: 56px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px 18px 18px 8px;
+            background: var(--card-rim);
+            color: var(--card-muted);
+            margin: 0 !important;
+        }
+
+        body.dark-mode .btn-save-nick {
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--card-muted);
+        }
+
+        .btn-save-nick.saved {
+            background: var(--mint) !important;
+            color: white !important;
+            border-color: var(--mint-dark) !important;
+            box-shadow: inset 2px 2px 6px rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark-mode .btn-save-nick.saved {
+            background: var(--mint-dark) !important;
+        }
+
         .clay-card {
             background: var(--card-base);
             border: 12px solid var(--card-rim);
             border-radius: 35px 25px 30px 20px / 25px 35px 20px 30px;
             padding: 24px;
-            box-shadow: 
+            box-shadow:
                 15px 20px 35px var(--shadow-dark),
                 -10px -15px 25px var(--shadow-light),
-                inset 8px 8px 15px rgba(255,255,255,1),
-                inset -6px -8px 20px rgba(180,160,150,0.5),
-                inset 0 0 60px rgba(255,210,130,0.25);
-            width:100%; max-width:350px;
-            text-align:center;
-            display:flex; flex-direction:column; gap:14px;
+                inset 8px 8px 15px rgba(255, 255, 255, 0.8),
+                inset -6px -8px 20px rgba(180, 160, 150, 0.3),
+                inset 0 0 60px rgba(255, 210, 130, 0.15);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
             position: relative;
+        }
+
+        body.dark-mode .clay-card {
+            box-shadow:
+                15px 20px 35px var(--shadow-dark),
+                -10px -15px 25px rgba(30, 15, 20, 0.5),
+                inset 4px 4px 10px rgba(255, 255, 255, 0.03),
+                inset -6px -8px 20px rgba(0, 0, 0, 0.6),
+                inset 0 0 60px rgba(145, 56, 78, 0.1);
         }
 
         /* ─── Explosion Flash Overlay ─── */
         .explosion-flash {
-            position: fixed; inset: 0; z-index: 1999;
-            background: radial-gradient(circle at center, rgba(255,220,150,0.9) 0%, rgba(255,100,80,0.6) 40%, transparent 75%);
+            position: fixed;
+            inset: 0;
+            z-index: 1999;
+            background: radial-gradient(circle at center, rgba(255, 220, 150, 0.9) 0%, rgba(255, 100, 80, 0.6) 40%, transparent 75%);
             pointer-events: none;
             animation: flashBoom 0.7s ease-out forwards;
         }
+
+        body.dark-mode .explosion-flash {
+            background: radial-gradient(circle at center, rgba(212, 38, 63, 0.9) 0%, rgba(100, 20, 30, 0.6) 40%, transparent 75%);
+        }
+
         @keyframes flashBoom {
-            0%   { opacity: 0; transform: scale(0.3); }
-            20%  { opacity: 1; transform: scale(1.1); }
-            100% { opacity: 0; transform: scale(1.5); }
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+
+            20% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.5);
+            }
         }
 
         /* ─── Clay Button ─── */
         .clay-btn {
-            border:none; 
-            background: #d6b8a6;
-            border: 6px solid #ecdbcf;
+            border: none;
+            background: var(--card-rim);
+            border: 6px solid var(--card-base);
             border-radius: 20px 25px 18px 24px / 25px 18px 24px 20px;
-            padding:12px 18px;
-            font-size:1.05rem; font-weight:700;
-            color: #4a3424; cursor:pointer;
-            text-transform:uppercase; letter-spacing:1px;
-            font-family:'Fredoka',sans-serif;
-            transition:transform .12s ease, box-shadow .12s ease;
+            padding: 12px 18px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--card-text);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Fredoka', sans-serif;
+            transition: transform .12s ease, box-shadow .12s ease, background-color 0.5s ease, border-color 0.5s ease;
             box-shadow:
                 8px 10px 20px var(--shadow-dark),
                 -5px -8px 15px var(--shadow-light),
-                inset 3px 4px 8px rgba(255,255,255,0.8),
-                inset -2px -4px 8px rgba(110,80,70,0.2);
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+                inset 3px 4px 8px rgba(255, 255, 255, 0.4),
+                inset -2px -4px 8px rgba(110, 80, 70, 0.1);
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.2);
             width: 100%;
             display: block;
         }
-        .clay-btn + .clay-btn { margin-top: 10px; }
+
+        body.dark-mode .clay-btn {
+            box-shadow:
+                8px 10px 20px var(--shadow-dark),
+                -5px -8px 15px rgba(30, 15, 20, 0.5),
+                inset 2px 2px 6px rgba(255, 255, 255, 0.05),
+                inset -2px -4px 8px rgba(0, 0, 0, 0.4);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .clay-btn+.clay-btn {
+            margin-top: 10px;
+        }
+
         .clay-btn:active {
-            transform:scale(0.95) translateY(2px);
+            transform: scale(0.95) translateY(2px);
             box-shadow:
                 2px 4px 8px var(--shadow-dark),
                 -2px -3px 6px var(--shadow-light),
-                inset 4px 6px 12px rgba(110,80,70,0.3),
-                inset -2px -2px 4px rgba(255,255,255,0.8);
+                inset 4px 6px 12px rgba(110, 80, 70, 0.3),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.4);
         }
 
         /* ─── Segmented selector ─── */
-        .seg-group { display:flex; gap:8px; background: rgba(180, 150, 140, 0.2); border-radius: 18px; padding:6px; 
-            box-shadow: inset 4px 4px 8px rgba(110,80,70,0.2), inset -2px -2px 5px rgba(255,255,255,0.6); }
+        .seg-group {
+            display: flex;
+            gap: 8px;
+            background: rgba(180, 150, 140, 0.2);
+            border-radius: 18px;
+            padding: 6px;
+            box-shadow: inset 4px 4px 8px rgba(110, 80, 70, 0.2), inset -2px -2px 5px rgba(255, 255, 255, 0.6);
+        }
+
+        body.dark-mode .seg-group {
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.8), inset -2px -2px 5px rgba(100, 50, 60, 0.2);
+        }
+
         .seg-btn {
-            flex:1; border:none; border-radius:14px;
-            padding:10px 4px; background:transparent;
-            color:var(--card-muted); font-size:0.9rem;
-            font-weight:700; cursor:pointer; transition:all .2s;
-            text-transform:uppercase; font-family:'Fredoka',sans-serif;
+            flex: 1;
+            border: none;
+            border-radius: 14px;
+            padding: 10px 4px;
+            background: transparent;
+            color: var(--card-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            text-transform: uppercase;
+            font-family: 'Fredoka', sans-serif;
         }
+
         .seg-btn.active {
-            background:#fdf9f4; color:var(--card-text);
-            box-shadow: 2px 4px 10px rgba(110,80,70,0.2), -2px -2px 6px rgba(255,255,255,0.6);
+            background: var(--card-base);
+            color: var(--card-text);
+            box-shadow: 2px 4px 10px rgba(110, 80, 70, 0.2), -2px -2px 6px rgba(255, 255, 255, 0.6);
         }
+
+        body.dark-mode .seg-btn.active {
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), -1px -1px 4px rgba(100, 50, 60, 0.3);
+        }
+
         .seg-label {
-            font-size:0.85rem; font-weight:700; color:var(--card-muted);
-            text-transform:uppercase; text-align:left; margin-bottom:4px; margin-left: 4px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--card-muted);
+            text-transform: uppercase;
+            text-align: left;
+            margin-bottom: 4px;
+            margin-left: 4px;
+        }
+
+        /* 18+ Button specific styling */
+        #mode-adult.active {
+            background: var(--warm-red);
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Story Button specific styling */
+        #diff-story {
+            flex-basis: 100%;
+            margin-top: 4px;
+        }
+
+        #diff-story.active {
+            background: var(--lilac);
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode #diff-story.active {
+            background: #5a4066;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), -1px -1px 4px rgba(100, 50, 60, 0.3);
         }
 
         /* ─── Input ─── */
-        .input-code {
-            background:#ebe0d7; border:none; outline:none;
-            border-radius:18px 16px 20px 18px; padding:16px;
-            font-size:1.6rem; font-weight:700;
-            color:var(--card-text); text-align:center;
-            text-transform:uppercase; letter-spacing:5px; width:100%;
-            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -4px 6px rgba(255,255,255,0.8);
-            font-family:'Fredoka',sans-serif;
+        .input-code,
+        .answer-input,
+        .chat-input {
+            background: var(--card-rim);
+            border: none;
+            outline: none;
+            border-radius: 18px 16px 20px 18px;
+            padding: 16px;
+            color: var(--card-text);
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: inset 4px 6px 12px rgba(110, 80, 70, 0.25), inset -2px -4px 6px rgba(255, 255, 255, 0.6);
+            transition: background-color 0.5s, box-shadow 0.25s, color 0.5s;
         }
-        .input-code::placeholder { color: rgba(150,130,115,0.5); }
+
+        body.dark-mode .input-code,
+        body.dark-mode .answer-input,
+        body.dark-mode .chat-input {
+            box-shadow: inset 4px 6px 12px rgba(0, 0, 0, 0.8), inset -2px -4px 6px rgba(100, 50, 60, 0.2);
+        }
+
+        .input-code {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            width: 100%;
+        }
+
+        .input-code::placeholder {
+            color: rgba(150, 130, 115, 0.5);
+        }
+
+        body.dark-mode .input-code::placeholder {
+            color: rgba(200, 180, 190, 0.2);
+        }
 
         .answer-input {
-            background:#ebe0d7; border:none;
-            outline:none; border-radius:18px 16px 20px 18px; padding:15px;
-            font-size:1.1rem; font-weight:600; color:var(--card-text);
-            width:100%;
-            box-shadow:inset 4px 6px 12px rgba(110,80,70,0.25), inset -2px -2px 6px rgba(255,255,255,0.8);
-            font-family:'Fredoka',sans-serif;
-            transition: box-shadow .25s;
-            -webkit-user-select:text; user-select:text;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            padding: 15px;
+            -webkit-user-select: text;
+            user-select: text;
         }
+
         .answer-input:focus {
-            box-shadow:inset 6px 8px 16px rgba(110,80,70,0.4), 0 0 0 3px rgba(143, 213, 184, 0.6);
+            box-shadow: inset 6px 8px 16px rgba(110, 80, 70, 0.4), 0 0 0 3px rgba(143, 213, 184, 0.6);
         }
+
+        body.dark-mode .answer-input:focus {
+            box-shadow: inset 6px 8px 16px rgba(0, 0, 0, 0.9), 0 0 0 3px rgba(212, 38, 63, 0.6);
+        }
+
         .answer-input.error {
-            box-shadow:inset 6px 8px 16px rgba(110,80,70,0.4), 0 0 0 3px rgba(232, 107, 98, 0.7);
+            box-shadow: inset 6px 8px 16px rgba(110, 80, 70, 0.4), 0 0 0 3px rgba(232, 107, 98, 0.7);
             animation: shakeInput 0.4s;
         }
-        @keyframes shakeInput { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+
+        body.dark-mode .answer-input.error {
+            box-shadow: inset 6px 8px 16px rgba(0, 0, 0, 0.9), 0 0 0 3px rgba(232, 107, 98, 0.9);
+        }
+
+        @keyframes shakeInput {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            20%,
+            60% {
+                transform: translateX(-5px)
+            }
+
+            40%,
+            80% {
+                transform: translateX(5px)
+            }
+        }
 
         /* ─── Typography ─── */
         .logo-title {
-            font-size:3.6rem; font-weight:700; color:#5c4033;
-            text-shadow: 2px 4px 0px rgba(255,255,255,0.5), -2px -2px 0px rgba(110,80,70,0.3);
-            line-height:1; letter-spacing:2px; text-align:center;
-            margin-bottom:20px;
+            font-size: 3.6rem;
+            font-weight: 700;
+            color: var(--card-text);
+            text-shadow: 2px 4px 0px rgba(255, 255, 255, 0.5), -2px -2px 0px rgba(110, 80, 70, 0.3);
+            line-height: 1;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        /* ─── Lobby Players ─── */
+        body.dark-mode .logo-title {
+            text-shadow: 2px 4px 0px rgba(0, 0, 0, 0.9), -2px -2px 0px rgba(200, 50, 80, 0.3);
+        }
+
+        /* ─── Lobby Players (Смягченные края) ─── */
+        #lobby-players-container {
+            max-height: 35vh;
+            overflow-y: auto;
+            padding: 10px 5px;
+            margin: -10px -5px;
+            scrollbar-width: none;
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+        }
+
+        #lobby-players-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        #lobby-players {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 50px;
+        }
+
+        #lobby-players.grid-layout {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
         .player-row {
-            display:flex; align-items:center; gap:14px;
-            padding:12px 16px;
-            background:var(--bg-color); 
-            border-radius:18px 20px 16px 22px;
-            margin-bottom:10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: var(--bg-color);
+            border-radius: 18px 20px 16px 22px;
             box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+            flex-shrink: 0;
         }
+
+        body.dark-mode .player-row {
+            box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.8), inset -2px -2px 5px rgba(100, 40, 50, 0.2);
+        }
+
+        .player-row.grid-item {
+            flex-direction: column;
+            width: 70px;
+            padding: 10px 5px;
+            gap: 6px;
+            border-radius: 14px;
+        }
+
         .player-avatar {
-            width:46px; height:46px; border-radius:50%;
-            background:var(--card-base); color:var(--card-text);
-            font-weight:700; font-size:1.1rem;
-            display:flex; justify-content:center; align-items:center;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--card-base);
+            color: var(--card-text);
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             box-shadow: 3px 4px 8px var(--shadow-dark), -2px -2px 5px var(--shadow-light);
-            flex-shrink:0;
-            border: 2px solid white;
+            flex-shrink: 0;
+            border: 2px solid var(--card-rim);
+            transition: background-color 0.5s, color 0.5s, border-color 0.5s;
         }
-        .player-name { font-weight:600; font-size:1.05rem; }
+
+        body.dark-mode .player-avatar {
+            box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.9), -1px -1px 3px rgba(100, 50, 60, 0.2);
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .grid-item .player-name {
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
 
         /* ─── Game HUD ─── */
         .players-bar {
-            display:flex; justify-content:center; flex-wrap:wrap;
-            gap:14px; margin-bottom:16px; width:100%;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 16px;
+            width: 100%;
+            align-items: center;
+            /* FIX: Участники не скачут */
+            min-height: 65px;
         }
+
         .p-mini {
-            width:48px; height:48px; border-radius:50%;
-            background:var(--bg-color); color:var(--card-muted);
-            font-size:1.1rem; font-weight:700;
-            display:flex; justify-content:center; align-items:center;
-            box-shadow:inset 3px 3px 8px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
-            transition:all .3s ease; position:relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            color: var(--card-muted);
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 3px 3px 8px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+            transition: all .3s ease;
+            position: relative;
             border: 2px solid transparent;
         }
+
+        body.dark-mode .p-mini {
+            box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.9), inset -1px -1px 3px rgba(100, 40, 50, 0.2);
+        }
+
         .p-mini.active {
             box-shadow: 4px 6px 12px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
-            background:var(--card-base); color:var(--card-text); transform:scale(1.18); z-index:5;
-            border: 2px solid #fff;
+            background: var(--card-base);
+            color: var(--card-text);
+            transform: scale(1.18);
+            z-index: 5;
+            border: 2px solid var(--card-rim);
         }
-        .p-mini.dead { opacity:.4; transform:scale(0.85); filter:grayscale(1); }
-        .p-mini.dead::after { content:"✖"; position:absolute; color:var(--warm-red); font-size:1.6rem; font-weight:700; }
+
+        body.dark-mode .p-mini.active {
+            box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.9), -1px -1px 4px rgba(100, 40, 50, 0.2);
+        }
+
+        .p-mini.dead {
+            opacity: .4;
+            transform: scale(0.85);
+            filter: grayscale(1);
+        }
+
+        .p-mini.dead::after {
+            content: "✖";
+            position: absolute;
+            color: var(--warm-red);
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
 
         .status-text {
-            color:var(--card-text); font-size:1.1rem;
-            font-weight:700; text-transform:uppercase; letter-spacing:1px;
-            text-align:center; margin-bottom:10px; min-height:24px;
-            transition:color .3s;
-            text-shadow: 1px 2px 2px rgba(255,255,255,0.7);
+            color: var(--card-text);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 10px;
+            min-height: 24px;
+            transition: color .3s;
+            text-shadow: 1px 2px 2px rgba(255, 255, 255, 0.5);
         }
 
+        body.dark-mode .status-text {
+            text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.9);
+        }
+
+        /* ─── TASK CARD FIX ─── */
         .task-card {
-            color:var(--card-text); font-size:1.2rem; font-weight:600;
-            transition:opacity .3s; min-height:90px;
-            display:flex; flex-direction:column;
-            align-items:center; justify-content:center;
-            line-height:1.3; margin-bottom:0px;
-            padding:18px 22px; text-align:center;
-            /* fix overflow */
-            word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;
+            color: var(--card-text);
+            font-weight: 600;
+            transition: opacity .3s, background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
+            height: auto;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            line-height: 1.3;
+            margin-bottom: 0px;
+            padding: 18px 15px;
+            text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         /* Top Panel - Game screen */
         .game-top-panel {
-            display: flex; justify-content: space-between; align-items: center; width: 100%;
-            margin-bottom: 5px; padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 0 15px;
             padding-top: env(safe-area-inset-top, 0);
+            min-height: 70px;
         }
+
         .timer-container {
-            display: flex; flex-direction: column; align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+            justify-content: center;
         }
-        .timer-title { font-size: 0.75rem; color: var(--card-muted); font-weight: 700; text-transform: uppercase; }
+
+        .timer-title {
+            font-size: 0.75rem;
+            color: var(--card-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
         .personal-timer {
-            font-size:3rem; font-weight:700; color:var(--card-text);
-            text-shadow: 2px 3px 5px rgba(150,130,115,0.3), -1px -1px 2px rgba(255,255,255,0.8);
-            margin:0px 0 0px; font-variant-numeric:tabular-nums;
-            letter-spacing: -2px; transition:color .3s, transform .3s;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--card-text);
+            text-shadow: 2px 3px 5px rgba(150, 130, 115, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8);
+            margin: 0;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+            transition: color .3s;
+            transform-origin: center right;
         }
-        .personal-timer.urgent { color:var(--warm-red); animation:tpulse .38s ease-in-out infinite alternate; }
-        @keyframes tpulse { from{transform:scale(1)} to{transform:scale(1.1)} }
+
+        body.dark-mode .personal-timer {
+            text-shadow: 2px 3px 5px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(200, 50, 80, 0.3);
+        }
+
+        .personal-timer.urgent {
+            color: var(--warm-red);
+            animation: tpulse .38s ease-in-out infinite alternate;
+        }
+
+        @keyframes tpulse {
+            from {
+                transform: scale(1)
+            }
+
+            to {
+                transform: scale(1.1)
+            }
+        }
 
         /* ─── Potato ─── */
         #potato-area {
-            flex:1; width:100%;
-            display:flex; justify-content:center; align-items:center;
-            flex-direction:column; gap:20px;
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
         }
+
         #potato-container {
-            width:240px; height:240px;
-            display:flex; justify-content:center; align-items:center;
-            z-index:50; position:relative;
+            width: 240px;
+            height: 240px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            position: relative;
         }
+
         #potato-pulse-wrapper {
-            width:100%; height:100%;
-            display:flex; justify-content:center; align-items:center;
-            will-change:transform; cursor:grab;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            will-change: transform;
+            cursor: grab;
         }
-        #potato-pulse-wrapper:active { cursor:grabbing; }
+
+        #potato-pulse-wrapper:active {
+            cursor: grabbing;
+        }
 
         .potato-img {
-            width:220px;
-            filter:drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.5));
-            animation:floatP 4s ease-in-out infinite, morphP 10s ease-in-out infinite;
-            transition:filter .4s ease;
-            pointer-events:none; user-select:none;
+            width: 220px;
+            filter: drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.5));
+            /* FIX: Убрана анимация floatP/morphP, чтобы не конфликтовать с pulsePhase, дерганий нет */
+            transition: filter .4s ease;
+            pointer-events: none;
+            user-select: none;
         }
+
+        body.dark-mode .potato-img {
+            filter: drop-shadow(6px 16px 18px rgba(0, 0, 0, 0.9)) brightness(0.85);
+        }
+
         .potato-img.locked {
-            filter:drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.4)) brightness(0.6) saturate(0.5);
+            filter: drop-shadow(6px 16px 18px rgba(120, 100, 85, 0.4)) brightness(0.6) saturate(0.5);
         }
-        .potato-img.shaking {
-            animation:floatP 4s ease-in-out infinite, morphP 10s ease-in-out infinite, shake .14s ease-in-out infinite;
+
+        body.dark-mode .potato-img.locked {
+            filter: drop-shadow(6px 16px 18px rgba(0, 0, 0, 0.7)) brightness(0.4) saturate(0.5);
         }
-        @keyframes floatP  { 0%{transform:translateY(0)} 50%{transform:translateY(-15px)} 100%{transform:translateY(0)} }
-        @keyframes morphP  { 0%{border-radius:60% 40% 55% 45%/50% 60% 40% 50%} 25%{border-radius:50% 50% 40% 60%/60% 40% 60% 40%} 50%{border-radius:40% 60% 60% 40%/40% 55% 45% 60%} 75%{border-radius:55% 45% 50% 50%/50% 45% 55% 50%} 100%{border-radius:60% 40% 55% 45%/50% 60% 40% 50%} }
-        @keyframes shake   { 0%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-2px) rotate(2deg)} 100%{transform:translateY(0) rotate(-1deg)} }
 
         /* Lock overlay */
         #lock-overlay {
-            position:absolute; inset:0; border-radius:50%;
-            background:rgba(255, 253, 245, 0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-            display:flex; flex-direction:column;
-            align-items:center; justify-content:center;
-            z-index:10; transition:opacity .3s ease;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(255, 253, 245, 0.5);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: opacity .3s ease;
         }
-        .lock-icon { font-size:3rem; animation:lbounce 1.8s ease-in-out infinite; filter: drop-shadow(2px 4px 6px rgba(150,130,115,0.4));}
-        .lock-hint { font-size:.8rem; font-weight:700; color:var(--card-text); text-transform:uppercase; margin-top:8px; 
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
-        @keyframes lbounce { 0%,100%{transform:scale(1) rotate(-6deg)} 50%{transform:scale(1.1) rotate(6deg)} }
+
+        body.dark-mode #lock-overlay {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .lock-icon {
+            font-size: 3rem;
+            animation: lbounce 1.8s ease-in-out infinite;
+            filter: drop-shadow(2px 4px 6px rgba(150, 130, 115, 0.4));
+        }
+
+        .lock-hint {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--card-text);
+            text-transform: uppercase;
+            margin-top: 8px;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        body.dark-mode .lock-hint {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+        }
+
+        @keyframes lbounce {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(-6deg)
+            }
+
+            50% {
+                transform: scale(1.1) rotate(6deg)
+            }
+        }
 
         /* Unlock flash */
-        @keyframes unlockFlash { 0%{opacity:0;transform:scale(.8)} 40%{opacity:1;transform:scale(1.3)} 100%{opacity:0;transform:scale(1.8)} }
+        @keyframes unlockFlash {
+            0% {
+                opacity: 0;
+                transform: scale(.8)
+            }
+
+            40% {
+                opacity: 1;
+                transform: scale(1.3)
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.8)
+            }
+        }
+
         .unlock-flash {
-            position:absolute; inset:-18px; border-radius:50%;
-            background:radial-gradient(circle, rgba(255,255,255,.9) 0%, transparent 70%);
-            pointer-events:none; z-index:20;
-            animation:unlockFlash .5s ease-out forwards;
+            position: absolute;
+            inset: -18px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, .9) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 20;
+            animation: unlockFlash .5s ease-out forwards;
+        }
+
+        body.dark-mode .unlock-flash {
+            background: radial-gradient(circle, rgba(200, 50, 80, .9) 0%, transparent 70%);
         }
 
         /* ─── Combo Panel ─── */
         #combo-panel {
-            width:100%; max-width:340px;
-            display:none; flex-direction:column; gap:12px;
-            background: var(--card-base); padding: 18px; border-radius: 24px;
+            width: 100%;
+            max-width: 340px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--card-base);
+            padding: 18px;
+            border-radius: 24px;
             box-shadow: 6px 8px 16px var(--shadow-dark), -4px -6px 12px var(--shadow-light);
-            border: 2px solid white;
+            border: 2px solid var(--card-rim);
+            transition: background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
         }
-        #combo-panel.visible { display:flex; animation:slideUp .35s cubic-bezier(.175,.885,.32,1.275) forwards; }
-        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        body.dark-mode #combo-panel {
+            box-shadow: 6px 8px 16px rgba(0, 0, 0, 0.9), -2px -2px 10px rgba(100, 40, 50, 0.2);
+        }
+
+        #combo-panel.visible {
+            display: flex;
+            animation: slideUp .35s cubic-bezier(.175, .885, .32, 1.275) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
 
         .swipe-hint {
-            display:none; align-items:center; justify-content:center; gap:8px;
-            font-size:.85rem; font-weight:700; color:var(--card-text);
-            text-transform:uppercase;
-            animation:hintP 1.2s ease-in-out infinite;
-        }
-        @keyframes hintP { 0%,100%{opacity:.5} 50%{opacity:1} }
-        
-        .action-warn {
-            color: var(--card-muted); font-size: 0.85rem; text-align: center; line-height: 1.2;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--card-text);
+            text-transform: uppercase;
+            animation: hintP 1.2s ease-in-out infinite;
         }
 
-        #btn-submit-answer, #btn-submit-action {
-            background:var(--mint);
-            color:var(--card-text);
+        @keyframes hintP {
+
+            0%,
+            100% {
+                opacity: .5
+            }
+
+            50% {
+                opacity: 1
+            }
         }
-        
+
+        .action-warn {
+            color: var(--card-muted);
+            font-size: 0.85rem;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        #btn-submit-answer,
+        #btn-submit-action {
+            background: var(--mint);
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
         /* ─── Mode badge ─── */
         .mode-badge {
-            display:inline-flex; align-items:center; gap:5px;
-            padding:6px 14px; border-radius:20px;
-            font-size:.8rem; font-weight:700;
-            text-transform:uppercase; letter-spacing:0.5px;
-            margin-bottom:6px; box-shadow: inset 2px 2px 4px rgba(255,255,255,0.7), 2px 3px 5px rgba(150,130,115,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.4), 2px 3px 5px rgba(0, 0, 0, 0.1);
         }
-        .mode-badge.answers { background:var(--peach); color:#fffdf5; text-shadow: 1px 1px 2px rgba(150,100,80,0.4); }
-        .mode-badge.actions { background:var(--blue); color:#fffdf5; text-shadow: 1px 1px 2px rgba(100,120,150,0.4); }
+
+        body.dark-mode .mode-badge {
+            box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.1), 2px 3px 5px rgba(0, 0, 0, 0.6);
+        }
+
+        .mode-badge.answers {
+            background: var(--peach);
+            color: #fffdf5;
+        }
+
+        .mode-badge.actions {
+            background: var(--blue);
+            color: #fffdf5;
+        }
 
         /* VoteKick */
         .votekick-btn {
-            margin-top:12px; background:var(--bg-color);
-            border:none; border-radius:20px;
-            padding:12px 18px; color:var(--warm-red);
-            font-weight:700; font-size:.9rem; cursor:pointer;
-            text-transform:uppercase;
-            transition:all .2s; font-family:'Fredoka',sans-serif;
+            margin-top: 12px;
+            background: var(--bg-color);
+            border: none;
+            border-radius: 20px;
+            padding: 12px 18px;
+            color: var(--warm-red);
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all .2s;
+            font-family: 'Fredoka', sans-serif;
             box-shadow: 4px 4px 10px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
         }
-        .votekick-btn:active { transform:scale(.96); box-shadow: 2px 2px 5px var(--shadow-dark); }
+
+        body.dark-mode .votekick-btn {
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.9), -1px -1px 4px rgba(100, 40, 50, 0.2);
+        }
+
+        .votekick-btn:active {
+            transform: scale(.96);
+            box-shadow: 2px 2px 5px var(--shadow-dark);
+        }
 
         /* ─── Helpers ─── */
-        .divider { height:2px; background:rgba(150,130,115,0.1); width:100%; border-radius: 2px; }
+        .divider {
+            height: 2px;
+            background: rgba(150, 130, 115, 0.1);
+            width: 100%;
+            border-radius: 2px;
+        }
+
+        body.dark-mode .divider {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
         .top-btn {
-            position: absolute; 
-            top: max(8px, env(safe-area-inset-top)); 
+            position: absolute;
+            top: max(8px, env(safe-area-inset-top));
             left: 12px;
-            z-index: 100; 
-            padding: 8px 14px; 
+            z-index: 100;
+            padding: 8px 14px;
             font-size: 0.8rem;
             width: auto;
             min-width: 80px;
         }
 
         /* ─── 1. Lives Dots ─── */
-        .p-mini-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .lives-dots { display: flex; gap: 3px; }
+        .p-mini-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .lives-dots {
+            display: flex;
+            gap: 3px;
+        }
+
         .life-dot {
-            width: 7px; height: 7px; border-radius: 50%;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
             background: var(--mint);
-            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6), 1px 2px 3px rgba(100,80,70,0.3);
+            box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.6), 1px 2px 3px rgba(0, 0, 0, 0.2);
             transition: background .4s, box-shadow .4s;
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
+
         .life-dot.lost {
-            background: #6b4a3a;
-            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4);
+            background: var(--card-muted);
+            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.7);
+            border-color: transparent;
         }
+
         @media (max-width: 599px) {
-            .life-dot { width: 5px; height: 5px; }
-            .lives-dots { gap: 2px; }
+            .life-dot {
+                width: 5px;
+                height: 5px;
+            }
+
+            .lives-dots {
+                gap: 2px;
+            }
         }
 
         /* ─── 2. Emotes ─── */
-        .emote-btn {
+        .emote-btn,
+        .chat-btn {
             position: fixed;
             right: 14px;
-            bottom: calc(70px + env(safe-area-inset-bottom, 0px));
             z-index: 500;
-            width: 50px; height: 50px;
+            width: 50px;
+            height: 50px;
             border-radius: 50% 50% 40% 50% / 50% 50% 50% 40%;
             background: var(--card-base);
             border: 4px solid var(--card-rim);
@@ -498,160 +1206,358 @@
             font-size: 1.4rem;
             cursor: pointer;
             display: none;
-            align-items: center; justify-content: center;
-            transition: transform .15s;
+            align-items: center;
+            justify-content: center;
+            transition: transform .15s, background-color 0.5s, border-color 0.5s;
         }
-        .emote-btn:active { transform: scale(0.9); }
-        #screen-game.active .emote-btn { display: flex; }
+
+        body.dark-mode .emote-btn,
+        body.dark-mode .chat-btn {
+            box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.9), -1px -1px 5px rgba(100, 40, 50, 0.2);
+        }
+
+        .emote-btn {
+            bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .chat-btn {
+            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .emote-btn:active,
+        .chat-btn:active {
+            transform: scale(0.9);
+        }
+
+        #screen-game.active .emote-btn,
+        #screen-game.active .chat-btn {
+            display: flex;
+        }
+
         .emote-fan {
-            position: fixed; right: 14px;
+            position: fixed;
+            right: 14px;
             bottom: calc(128px + env(safe-area-inset-bottom, 0px));
             z-index: 501;
-            display: flex; flex-direction: column; gap: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             align-items: center;
-            opacity: 0; pointer-events: none;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity .2s;
         }
-        .emote-fan.open { opacity: 1; pointer-events: auto; }
+
+        .emote-fan.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .emote-opt {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: var(--card-base); border: 3px solid var(--card-rim);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-base);
+            border: 3px solid var(--card-rim);
             box-shadow: 3px 4px 10px var(--shadow-dark);
             font-size: 1.3rem;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transform: scale(0); transition: transform .2s cubic-bezier(.175,.885,.32,1.275);
+            transform: scale(0);
+            transition: transform .2s cubic-bezier(.175, .885, .32, 1.275);
         }
-        .emote-fan.open .emote-opt { transform: scale(1); }
-        .emote-fan.open .emote-opt:nth-child(1) { transition-delay: 0ms; }
-        .emote-fan.open .emote-opt:nth-child(2) { transition-delay: 40ms; }
-        .emote-fan.open .emote-opt:nth-child(3) { transition-delay: 80ms; }
-        .emote-fan.open .emote-opt:nth-child(4) { transition-delay: 120ms; }
-        .emote-fan.open .emote-opt:nth-child(5) { transition-delay: 160ms; }
+
+        body.dark-mode .emote-opt {
+            box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.9);
+        }
+
+        .emote-fan.open .emote-opt {
+            transform: scale(1);
+        }
+
+        .emote-fan.open .emote-opt:nth-child(1) {
+            transition-delay: 0ms;
+        }
+
+        .emote-fan.open .emote-opt:nth-child(2) {
+            transition-delay: 40ms;
+        }
+
+        .emote-fan.open .emote-opt:nth-child(3) {
+            transition-delay: 80ms;
+        }
+
+        .emote-fan.open .emote-opt:nth-child(4) {
+            transition-delay: 120ms;
+        }
+
+        .emote-fan.open .emote-opt:nth-child(5) {
+            transition-delay: 160ms;
+        }
+
         @keyframes emoteFloat {
-            0%   { opacity: 1; transform: translateY(0) scale(1); }
-            60%  { opacity: 1; transform: translateY(-60px) scale(1.3); }
-            100% { opacity: 0; transform: translateY(-120px) scale(0.8); }
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translateY(-60px) scale(1.3);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-120px) scale(0.8);
+            }
         }
+
         .emote-popup {
-            position: fixed; z-index: 600;
-            font-size: 2.2rem; pointer-events: none;
+            position: fixed;
+            z-index: 600;
+            font-size: 2.2rem;
+            pointer-events: none;
             animation: emoteFloat 1.5s ease-out forwards;
         }
 
         /* ─── 3. Chat Bottom Sheet ─── */
-        .chat-btn {
-            position: fixed;
-            right: 14px;
-            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-            z-index: 500;
-            width: 50px; height: 50px;
-            border-radius: 50% 50% 40% 50% / 50% 50% 50% 40%;
-            background: var(--card-base);
-            border: 4px solid var(--card-rim);
-            box-shadow: 4px 6px 14px var(--shadow-dark), -3px -4px 10px var(--shadow-light);
-            font-size: 1.4rem;
-            cursor: pointer;
-            display: none;
-            align-items: center; justify-content: center;
-            transition: transform .15s;
-        }
-        .chat-btn:active { transform: scale(0.9); }
-        #screen-game.active .chat-btn { display: flex; }
         .chat-sheet {
             position: fixed;
-            bottom: 0; left: 0; right: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             height: 42%;
             z-index: 800;
-            background: #f5ede4;
+            background: var(--card-rim);
             border-radius: 28px 28px 0 0;
-            box-shadow: 0 -8px 32px rgba(110,80,70,0.25);
-            display: flex; flex-direction: column;
+            box-shadow: 0 -8px 32px var(--shadow-dark);
+            display: flex;
+            flex-direction: column;
             transform: translateY(110%);
-            transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
+            transition: transform .35s cubic-bezier(.175, .885, .32, 1.275), background-color 0.5s;
             padding-bottom: env(safe-area-inset-bottom, 0px);
         }
-        .chat-sheet.open { transform: translateY(0); }
+
+        body.dark-mode .chat-sheet {
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.95);
+        }
+
+        .chat-sheet.open {
+            transform: translateY(0);
+        }
+
         .chat-handle {
-            width: 40px; height: 5px; border-radius: 3px;
-            background: var(--card-muted); opacity: 0.4;
+            width: 40px;
+            height: 5px;
+            border-radius: 3px;
+            background: var(--card-muted);
+            opacity: 0.4;
             margin: 12px auto 8px;
             flex-shrink: 0;
         }
+
         .chat-messages {
-            flex: 1; overflow-y: auto; padding: 8px 16px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px;
             -webkit-overflow-scrolling: touch;
-            display: flex; flex-direction: column; gap: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .chat-messages::-webkit-scrollbar { width: 4px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--card-muted); border-radius: 4px; opacity: .4; }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--card-muted);
+            border-radius: 4px;
+            opacity: .4;
+        }
+
         .chat-msg {
             background: var(--card-base);
             border-radius: 16px 16px 16px 4px;
             padding: 8px 12px;
-            font-size: 0.88rem; font-weight: 600;
+            font-size: 0.88rem;
+            font-weight: 600;
             box-shadow: 2px 3px 8px var(--shadow-dark);
             max-width: 85%;
             word-break: break-word;
             animation: slideUp .2s ease;
+            color: var(--card-text);
         }
+
+        body.dark-mode .chat-msg {
+            box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.8);
+        }
+
         .chat-msg.mine {
             align-self: flex-end;
             border-radius: 16px 16px 4px 16px;
             background: var(--mint);
+            color: #fff;
         }
-        .chat-msg-name { font-size: 0.72rem; color: var(--card-muted); margin-bottom: 2px; }
+
+        .chat-msg-name {
+            font-size: 0.72rem;
+            color: var(--card-muted);
+            margin-bottom: 2px;
+        }
+
         .chat-input-row {
-            display: flex; gap: 8px; padding: 10px 12px;
-            border-top: 2px solid var(--card-rim);
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            border-top: 2px solid var(--bg-color);
             flex-shrink: 0;
         }
+
         .chat-input {
-            flex: 1; background: #ebe0d7; border: none; outline: none;
-            border-radius: 16px; padding: 10px 14px;
-            font-size: 0.95rem; font-weight: 600;
-            color: var(--card-text); font-family: 'Fredoka', sans-serif;
-            box-shadow: inset 3px 4px 8px rgba(110,80,70,0.2);
-            -webkit-user-select: text; user-select: text;
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
+
         .chat-send-btn {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: var(--peach); border: none; cursor: pointer;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--peach);
+            border: none;
+            cursor: pointer;
             font-size: 1.2rem;
             box-shadow: 3px 4px 10px var(--shadow-dark);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
             transition: transform .12s;
+            color: #fff;
         }
-        .chat-send-btn:active { transform: scale(0.9); }
+
+        body.dark-mode .chat-send-btn {
+            box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.9);
+        }
+
+        .chat-send-btn:active {
+            transform: scale(0.9);
+        }
+
         .chat-overlay {
-            position: fixed; inset: 0; z-index: 799;
+            position: fixed;
+            inset: 0;
+            z-index: 799;
             display: none;
         }
-        .chat-overlay.open { display: block; }
 
-        /* ─── 4. Danger Pulse ─── */
-        @keyframes dangerPulse {
-            0%, 100% { box-shadow: inset 0 0 0px rgba(232, 107, 98, 0); }
-            50%       { box-shadow: inset 0 0 80px 30px rgba(232, 107, 98, 0.55); }
+        .chat-overlay.open {
+            display: block;
         }
-        body.danger-active #app {
-            animation: dangerPulse 0.5s ease-in-out infinite;
+
+        /* ─── Modal Donate / Confirm ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            transform: translateY(50px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 30px 20px;
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: translateY(0);
+        }
+
+        .qr-wrapper {
+            background: #e0d4c8;
+            padding: 12px;
+            border-radius: 18px;
+            display: inline-block;
+            margin: 0 auto 15px;
+            box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        body.dark-mode .qr-wrapper {
+            background: #3d2c31;
+        }
+
+        .copy-wallet {
+            background: var(--card-rim);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--card-text);
+            word-break: break-all;
+            cursor: pointer;
+            position: relative;
+            box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        body.dark-mode .copy-wallet {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .copy-wallet:active {
+            background: var(--peach);
+            color: white;
+        }
+
+        .copy-wallet::after {
+            content: '📋 Нажми, чтобы скопировать';
+            display: block;
+            margin-top: 8px;
+            font-weight: bold;
+            color: var(--peach);
+            transition: color 0.2s;
+        }
+
+        .copy-wallet:active::after {
+            color: white;
         }
 
         /* ─── Mobile: full game screen must fit without scroll ─── */
         @media (max-width: 599px) {
-            /* Start/Lobby/Gameover: allow scroll, justify top */
-            #screen-start, #screen-lobby, #screen-gameover {
+
+            #screen-start,
+            #screen-lobby,
+            #screen-gameover {
                 overflow-y: auto !important;
                 display: block;
             }
-            #screen-start .screen-inner, #screen-lobby .screen-inner, #screen-gameover .screen-inner {
+
+            #screen-start .screen-inner,
+            #screen-lobby .screen-inner,
+            #screen-gameover .screen-inner {
                 justify-content: flex-start;
                 padding-top: 20px;
                 padding-bottom: 40px;
             }
-            /* Game screen: rigid column, no scroll, fits any phone */
+
             #screen-game {
                 padding: 4px 6px !important;
                 padding-top: max(40px, calc(10px + env(safe-area-inset-top))) !important;
@@ -660,74 +1566,206 @@
                 flex-direction: column;
                 justify-content: flex-start;
             }
-            .game-top-panel { 
+
+            .game-top-panel {
                 padding: 2px 8px;
                 margin-bottom: 2px;
                 flex-shrink: 0;
             }
-            .personal-timer { font-size: 2.2rem; letter-spacing: -1px; }
-            .p-mini { width: 36px; height: 36px; font-size: 0.8rem; }
-            .players-bar { gap: 6px; flex-wrap: nowrap; overflow-x: auto; max-width: 65%; scrollbar-width: none; }
-            .players-bar::-webkit-scrollbar { display: none; }
-            .status-text { font-size: 0.88rem; margin-bottom: 3px; letter-spacing: 0; min-height: 16px; }
-            .task-card { 
-                font-size: 1rem; padding: 12px 14px; border-width: 4px;
-                min-height: 70px; max-height: 130px;
-                overflow-y: auto; margin-bottom: 0;
+
+            .personal-timer {
+                font-size: 2.2rem;
+                letter-spacing: -1px;
+            }
+
+            .p-mini {
+                width: 36px;
+                height: 36px;
+                font-size: 0.8rem;
+            }
+
+            .players-bar {
+                gap: 6px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                max-width: 65%;
+                scrollbar-width: none;
+                align-items: center;
+                min-height: 50px;
+            }
+
+            .players-bar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .status-text {
+                font-size: 0.88rem;
+                margin-bottom: 3px;
+                letter-spacing: 0;
+                min-height: 16px;
+            }
+
+            .task-card {
+                padding: 12px 10px;
+                border-width: 4px;
+                min-height: 80px;
+                height: auto;
+                margin-bottom: 0;
                 flex-shrink: 0;
                 justify-content: flex-start;
             }
-            /* Potato area: takes remaining vertical space, never overflows */
-            #potato-area { gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
-            #potato-container { width: 150px; height: 150px; flex-shrink: 0; }
-            .potato-img { width: 135px; }
-            #combo-panel { padding: 10px 12px; border-radius: 18px; gap: 6px; flex-shrink: 0; max-width: 100%; }
-            .clay-btn { padding: 10px 14px; font-size: 0.9rem; }
-            .logo-title { font-size: 2.8rem; margin-bottom: 8px; }
-            .clay-card { padding: 16px; border-width: 8px; }
-            .seg-btn { font-size: 0.8rem; padding: 8px 4px; }
+
+            #potato-area {
+                gap: 6px;
+                flex: 1;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            #potato-container {
+                width: 150px;
+                height: 150px;
+                flex-shrink: 0;
+            }
+
+            .potato-img {
+                width: 135px;
+            }
+
+            #combo-panel {
+                padding: 10px 12px;
+                border-radius: 18px;
+                gap: 6px;
+                flex-shrink: 0;
+                max-width: 100%;
+            }
+
+            .clay-btn {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+
+            .logo-title {
+                font-size: 2.8rem;
+                margin-bottom: 8px;
+            }
+
+            .clay-card {
+                padding: 16px;
+                border-width: 8px;
+            }
+
+            .seg-btn {
+                font-size: 0.8rem;
+                padding: 8px 4px;
+            }
         }
+
         @media (max-width: 380px) {
-            .personal-timer { font-size: 1.9rem; }
-            #potato-container { width: 130px; height: 130px; }
-            .potato-img { width: 115px; }
-            .task-card { font-size: 0.9rem; padding: 6px 10px; max-height: 80px; }
-            .logo-title { font-size: 2.4rem; }
-            .p-mini { width: 32px; height: 32px; font-size: 0.75rem; }
+            .personal-timer {
+                font-size: 1.9rem;
+            }
+
+            #potato-container {
+                width: 130px;
+                height: 130px;
+            }
+
+            .potato-img {
+                width: 115px;
+            }
+
+            .task-card {
+                padding: 10px 8px;
+            }
+
+            .logo-title {
+                font-size: 2.4rem;
+            }
+
+            .p-mini {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
         }
 
         /* ─── Initial Loader ─── */
         #initial-loader {
-            position: fixed; inset: 0; z-index: 3000;
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
             background: var(--bg-color);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             transition: opacity 0.4s ease;
         }
+
         .loader-potato {
-            width: 70px; height: 70px;
+            width: 70px;
+            height: 70px;
             background: #d4a76a;
             border-radius: 40% 50% 45% 42% / 50% 45% 42% 40%;
             animation: bounceL 0.8s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2), 5px 10px 20px rgba(0,0,0,0.1);
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.2), 5px 10px 20px rgba(0, 0, 0, 0.1);
             border: 4px solid #ecdbcf;
         }
-        @keyframes bounceL { 
-            from { transform: translateY(0) scaleX(1); } 
-            to { transform: translateY(-30px) scaleX(0.95); } 
+
+        @keyframes bounceL {
+            from {
+                transform: translateY(0) scaleX(1);
+            }
+
+            to {
+                transform: translateY(-30px) scaleX(0.95);
+            }
         }
+
         .loader-text {
-            margin-top: 24px; font-weight: 700; color: var(--card-text);
-            letter-spacing: 2px; font-size: 1.1rem;
+            margin-top: 24px;
+            font-weight: 700;
+            color: var(--card-text);
+            letter-spacing: 2px;
+            font-size: 1.1rem;
             animation: pulseL 1.5s infinite;
         }
-        @keyframes pulseL { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        @keyframes pulseL {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
 
         @media (max-width: 350px) {
-            .personal-timer { font-size: 1.7rem; }
-            #potato-container { width: 110px; height: 110px; }
-            .potato-img { width: 95px; }
-            .players-bar { gap: 4px; }
-            .input-code { font-size: 1.3rem; padding: 12px; }
+            .personal-timer {
+                font-size: 1.7rem;
+            }
+
+            #potato-container {
+                width: 110px;
+                height: 110px;
+            }
+
+            .potato-img {
+                width: 95px;
+            }
+
+            .players-bar {
+                gap: 4px;
+            }
+
+            .input-code {
+                font-size: 1.3rem;
+                padding: 12px;
+            }
         }
 
         /* Fix for tall screens / viewport fit */
@@ -738,957 +1776,1178 @@
             }
         }
 
-        /* When keyboard is open (JS adds .kb-open to body), shrink game screen */
+        /* When keyboard is open */
         body.kb-open #screen-game #potato-area {
             flex: 0 0 auto;
         }
+
         body.kb-open #screen-game #potato-container {
-            width: 80px; height: 80px;
+            width: 80px;
+            height: 80px;
         }
+
         body.kb-open #screen-game .potato-img {
             width: 70px;
         }
+
         body.kb-open #screen-game .status-text,
         body.kb-open #screen-game .players-bar {
             display: none;
         }
+
         body.kb-open #screen-game .task-card {
-            max-height: 70px;
+            max-height: 90px;
         }
-        /* hide emote/chat buttons when keyboard open */
-        body.kb-open .emote-btn, body.kb-open .chat-btn { display: none !important; }
+
+        body.kb-open .emote-btn,
+        body.kb-open .chat-btn {
+            display: none !important;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="initial-loader">
-    <div class="loader-potato"></div>
-    <div class="loader-text">WET POTATO...</div>
-</div>
-
-<div class="curtain" id="curtain"></div>
-
-<div id="app">
-
-    <!-- ══════ START ══════ -->
-    <div id="screen-start" class="screen active">
-        <div class="screen-inner">
-        <h1 class="logo-title">WET POTATO</h1>
-
-        <div class="clay-card">
-            <!-- Nickname -->
-            <div>
-                <div class="seg-label" id="lbl-nickname">Ваш ник</div>
-                <input type="text" id="nickname-input" class="nick-input" placeholder="Введите ник..." maxlength="16">
-            </div>
-
-            <div class="divider"></div>
-
-            <!-- Language -->
-            <div>
-                <div class="seg-label" id="lbl-lang">Language</div>
-                <div class="seg-group">
-                    <button class="seg-btn active" data-lang="ru" id="lang-ru">RU</button>
-                    <button class="seg-btn"        data-lang="en" id="lang-en">EN</button>
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <button class="clay-btn" id="btn-create-lobby" style="background:var(--peach); color: white; text-shadow: 1px 1px 2px rgba(150,100,80,0.4);">
-                Создать лобби
-            </button>
-
-            <div style="font-weight:600; font-size:.9rem; color:var(--card-muted);" id="lbl-or">Или введите код</div>
-            <input type="text" id="join-code-input" class="input-code" placeholder="____" maxlength="5">
-            <button class="clay-btn" id="btn-join-code" style="background:var(--blue); color: white; text-shadow: 1px 1px 2px rgba(100,120,150,0.4);">
-                Войти по коду
-            </button>
-        </div>
-        </div>
+    <div id="initial-loader">
+        <div class="loader-potato"></div>
+        <div class="loader-text">WET POTATO...</div>
     </div>
 
-    <!-- ══════ LOBBY ══════ -->
-    <div id="screen-lobby" class="screen">
-        <div class="screen-inner">
-        <div class="clay-card">
-            <h2 style="color:var(--card-muted); font-size:.95rem; text-transform:uppercase;" id="lbl-lobby-code">Код лобби</h2>
-            <h1 id="lobby-id-display" style="font-size:3.5rem; letter-spacing:4px; margin:0 0 10px; color:var(--card-text); text-shadow: 2px 2px 0px white;"></h1>
+    <div class="curtain" id="curtain"></div>
 
-            <div id="lobby-players" style="margin-bottom:6px;"></div>
+    <div id="app">
 
-            <button class="clay-btn" id="btn-invite">Пригласить</button>
+        <!-- ══════ START ══════ -->
+        <div id="screen-start" class="screen active">
+            <div class="screen-inner">
+                <h1 class="logo-title">WET POTATO</h1>
 
-            <!-- Settings for host only -->
-            <div id="host-settings" style="display:none; text-align: left;">
-                <div class="divider" style="margin: 6px 0;"></div>
+                <div class="clay-card">
+                    <!-- Nickname -->
+                    <div>
+                        <div class="seg-label" id="lbl-nickname">Ваш ник</div>
+                        <div class="nick-row">
+                            <input type="text" id="nickname-input" class="nick-input" placeholder="Введите ник..."
+                                maxlength="16">
+                            <button class="clay-btn btn-save-nick" id="btn-save-nick" title="Сохранить ник">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
 
-                <div class="seg-label" id="lbl-lobby-lang">Язык</div>
-                <div class="seg-group" style="margin-bottom: 12px;">
-                    <button class="seg-btn active" data-lobby-lang="ru">RU</button>
-                    <button class="seg-btn"        data-lobby-lang="en">EN</button>
+                    <div class="divider"></div>
+
+                    <!-- Language -->
+                    <div>
+                        <div class="seg-label" id="lbl-lang">Language</div>
+                        <div class="seg-group">
+                            <button class="seg-btn active" data-lang="ru" id="lang-ru">RU</button>
+                            <button class="seg-btn" data-lang="en" id="lang-en">EN</button>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <button class="clay-btn" id="btn-create-lobby"
+                        style="background:var(--peach); color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+                        Создать лобби
+                    </button>
+
+                    <div style="font-weight:600; font-size:.9rem; color:var(--card-muted);" id="lbl-or">Или введите код
+                    </div>
+                    <input type="text" id="join-code-input" class="input-code" placeholder="____" maxlength="5">
+                    <button class="clay-btn" id="btn-join-code"
+                        style="background:var(--blue); color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+                        Войти по коду
+                    </button>
+
+                    <button class="clay-btn" id="btn-open-donate"
+                        style="margin-top: 8px; font-size: 0.9rem; background: var(--card-rim); color: var(--card-muted); border-color: var(--card-base);">
+                        ☕ Поддержать разраба
+                    </button>
                 </div>
-
-                <div class="seg-label" id="lbl-mode">Режим</div>
-                <div class="seg-group" style="margin-bottom: 12px;">
-                    <button class="seg-btn active" data-mode="answers" id="mode-answers">✏️ Ответы</button>
-                    <button class="seg-btn"        data-mode="actions" id="mode-actions">🎭 Действия</button>
-                    <button class="seg-btn"        data-mode="mix"     id="mode-mix">🔀 Микс</button>
-                </div>
-
-                <div class="seg-label" id="lbl-diff">Сложность</div>
-                <div class="seg-group" style="margin-bottom: 12px;">
-                    <button class="seg-btn active" data-diff="easy"   id="diff-easy">Лёгкая</button>
-                    <button class="seg-btn"        data-diff="medium" id="diff-medium">Средняя</button>
-                    <button class="seg-btn"        data-diff="hard"   id="diff-hard">Сложная</button>
-                </div>
-
-                <button class="clay-btn" id="btn-start-game" style="background:var(--mint); width:100%; color: white; text-shadow: 1px 1px 2px rgba(100,150,120,0.4);">
-                    Начать игру
-                </button>
-            </div>
-
-            <div id="wait-host-msg" style="display:none; color:var(--card-muted); font-size:.9rem; margin-top:8px; text-align: center;">
-                Ожидание хоста...
-            </div>
-        </div>
-        </div>
-    </div>
-
-    <!-- ══════ GAME ══════ -->
-    <div id="screen-game" class="screen" style="justify-content:flex-start; padding: 8px; overflow:hidden;">
-        <button class="clay-btn top-btn" id="btn-leave-spectate" style="display:none;">← Меню</button>
-
-        <div class="game-top-panel">
-            <div id="players-bar" class="players-bar" style="margin: 0; justify-content: flex-start; flex:1;"></div>
-            <div class="timer-container">
-                <div class="timer-title" id="lbl-timer">Таймер</div>
-                <div id="personal-timer" class="personal-timer" style="opacity:0;">10.0</div>
             </div>
         </div>
 
-        <!-- Emote Button -->
-        <button class="emote-btn" id="btn-emote">😊</button>
-        <div class="emote-fan" id="emote-fan">
-            <div class="emote-opt" data-emote="😂">😂</div>
-            <div class="emote-opt" data-emote="😱">😱</div>
-            <div class="emote-opt" data-emote="💩">💩</div>
-            <div class="emote-opt" data-emote="🔥">🔥</div>
-            <div class="emote-opt" data-emote="🤦">🤦</div>
-        </div>
+        <!-- ══════ LOBBY ══════ -->
+        <div id="screen-lobby" class="screen">
+            <button class="clay-btn top-btn" id="btn-leave-lobby">← Выйти</button>
+            <div class="screen-inner">
+                <div class="clay-card" style="max-height: 90vh; display: flex; flex-direction: column;">
+                    <div>
+                        <h2 style="color:var(--card-muted); font-size:.95rem; text-transform:uppercase;"
+                            id="lbl-lobby-code">Код лобби</h2>
+                        <h1 id="lobby-id-display"
+                            style="font-size:3.5rem; letter-spacing:4px; margin:0 0 10px; color:var(--card-text); text-shadow: 2px 2px 0px rgba(255,255,255,0.4);">
+                        </h1>
+                    </div>
 
-        <!-- Chat Button + Sheet -->
-        <button class="chat-btn" id="btn-chat">💬</button>
-        <div class="chat-overlay" id="chat-overlay"></div>
-        <div class="chat-sheet" id="chat-sheet">
-            <div class="chat-handle"></div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-row">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Сообщение..." maxlength="80">
-                <button class="chat-send-btn" id="chat-send">→</button>
-            </div>
-        </div>
-        
-        <div id="status-text" class="status-text">...</div>
-        <div id="task-display" class="clay-card task-card" style="opacity:0;"></div>
+                    <div id="lobby-players-container">
+                        <div id="lobby-players"></div>
+                    </div>
 
-        <div id="potato-area">
-            <div id="potato-container" style="opacity:0; transform:scale(0);">
-                <div id="potato-pulse-wrapper">
-                    <img src="assets/image-Photoroom.png" class="potato-img locked" id="potato-img" alt="Potato" draggable="false">
-                    <div id="lock-overlay">
-                        <span class="lock-icon">🔒</span>
-                        <span class="lock-hint" id="lbl-tap-unlock">Tap to unlock</span>
+                    <button class="clay-btn" id="btn-invite" style="margin-bottom: 6px;">Пригласить</button>
+
+                    <!-- Settings for host only -->
+                    <div id="host-settings"
+                        style="display:none; text-align: left; overflow-y: auto; padding-right: 5px;">
+                        <div class="divider" style="margin: 6px 0;"></div>
+
+                        <div class="seg-label" id="lbl-lobby-lang">Язык</div>
+                        <div class="seg-group" style="margin-bottom: 12px;">
+                            <button class="seg-btn active" data-lobby-lang="ru">RU</button>
+                            <button class="seg-btn" data-lobby-lang="en">EN</button>
+                        </div>
+
+                        <!-- 18+ Content Toggle -->
+                        <div class="seg-label" id="lbl-content">Контент</div>
+                        <div class="seg-group" style="margin-bottom: 12px;">
+                            <button class="seg-btn active" data-adult="false" id="mode-family">🟢 0+</button>
+                            <button class="seg-btn" data-adult="true" id="mode-adult">🔞 18+</button>
+                        </div>
+
+                        <div class="seg-label" id="lbl-mode">Режим</div>
+                        <div class="seg-group" style="margin-bottom: 12px;">
+                            <button class="seg-btn active" data-mode="answers" id="mode-answers">✏️ Ответы</button>
+                            <button class="seg-btn" data-mode="actions" id="mode-actions">🎭 Действия</button>
+                            <button class="seg-btn" data-mode="mix" id="mode-mix">🔀 Микс</button>
+                        </div>
+
+                        <div class="seg-label" id="lbl-diff">Сложность (или Story)</div>
+                        <div class="seg-group" style="margin-bottom: 12px; flex-wrap: wrap;">
+                            <button class="seg-btn active" data-diff="easy" id="diff-easy">Лёгкая</button>
+                            <button class="seg-btn" data-diff="medium" id="diff-medium">Средняя</button>
+                            <button class="seg-btn" data-diff="hard" id="diff-hard">Сложная</button>
+                            <button class="seg-btn" data-diff="story" id="diff-story">📖 Story (1 мин)</button>
+                        </div>
+
+                        <button class="clay-btn" id="btn-start-game"
+                            style="background:var(--mint); width:100%; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);">
+                            Начать игру
+                        </button>
+                    </div>
+
+                    <div id="wait-host-msg"
+                        style="display:none; color:var(--card-muted); font-size:.9rem; margin-top:8px; text-align: center;">
+                        Ожидание хоста...
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div id="combo-panel">
-                <!-- Shown for text answers -->
-                <div id="combo-text-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
-                    <input type="text" id="answer-input" class="answer-input" placeholder="Ответ...">
-                    <button class="clay-btn" id="btn-submit-answer">✓ Готово</button>
-                    <div id="input-error" style="color: var(--warm-red); font-size: 0.85rem; font-weight: 600; display: none;">Неверно! Ищи лучше.</div>
+        <!-- ══════ GAME ══════ -->
+        <div id="screen-game" class="screen" style="justify-content:flex-start; padding: 8px; overflow:hidden;">
+            <button class="clay-btn top-btn" id="btn-leave-game">← Меню</button>
+
+            <div class="game-top-panel">
+                <div id="players-bar" class="players-bar" style="margin: 0; justify-content: flex-start; flex:1;"></div>
+                <div class="timer-container">
+                    <div class="timer-title" id="lbl-timer">Таймер</div>
+                    <div id="personal-timer" class="personal-timer" style="opacity:0;">10.0</div>
                 </div>
-                
-                <!-- Shown for physical actions -->
-                <div id="combo-action-wrapper" style="display: none; flex-direction: column; gap: 10px;">
-                    <div class="action-warn" id="lbl-action-warn">Выполни действие вживую, затем нажми кнопку!</div>
-                    <button class="clay-btn" id="btn-submit-action">✓ Выполнил</button>
+            </div>
+
+            <!-- Emote Button -->
+            <button class="emote-btn" id="btn-emote">😊</button>
+            <div class="emote-fan" id="emote-fan">
+                <div class="emote-opt" data-emote="😂">😂</div>
+                <div class="emote-opt" data-emote="😱">😱</div>
+                <div class="emote-opt" data-emote="💩">💩</div>
+                <div class="emote-opt" data-emote="🔥">🔥</div>
+                <div class="emote-opt" data-emote="🤦">🤦</div>
+            </div>
+
+            <!-- Chat Button + Sheet -->
+            <button class="chat-btn" id="btn-chat">💬</button>
+            <div class="chat-overlay" id="chat-overlay"></div>
+            <div class="chat-sheet" id="chat-sheet">
+                <div class="chat-handle"></div>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-row">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Сообщение..." maxlength="80">
+                    <button class="chat-send-btn" id="chat-send">→</button>
                 </div>
-                
-                <div class="swipe-hint" id="swipe-hint">
-                    <span id="swipe-hint-text">Теперь свайпни картошку! →</span>
+            </div>
+
+            <div id="status-text" class="status-text">...</div>
+            <div id="task-display" class="clay-card task-card" style="opacity:0;"></div>
+
+            <div id="potato-area">
+                <div id="potato-container" style="opacity:0; transform:scale(0); pointer-events: none;">
+                    <div id="potato-pulse-wrapper">
+                        <img src="assets/image-Photoroom.png" class="potato-img locked" id="potato-img" alt="Potato"
+                            draggable="false">
+                        <div id="lock-overlay">
+                            <span class="lock-icon">🔒</span>
+                            <span class="lock-hint" id="lbl-tap-unlock">Tap to unlock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="combo-panel">
+                    <div id="combo-text-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="answer-input" class="answer-input" placeholder="Ответ..."
+                            enterkeyhint="done">
+                        <button class="clay-btn" id="btn-submit-answer">✓ Готово</button>
+                        <div id="input-error"
+                            style="color: var(--warm-red); font-size: 0.85rem; font-weight: 600; display: none;">
+                            Неверно! Ищи лучше.</div>
+                    </div>
+
+                    <div id="combo-action-wrapper" style="display: none; flex-direction: column; gap: 10px;">
+                        <div class="action-warn" id="lbl-action-warn">Выполни действие вживую, затем нажми кнопку!</div>
+                        <button class="clay-btn" id="btn-submit-action">✓ Выполнил</button>
+                    </div>
+
+                    <div class="swipe-hint" id="swipe-hint">
+                        <span id="swipe-hint-text">Теперь свайпни картошку! →</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- ══════ GAMEOVER ══════ -->
+        <div id="screen-gameover" class="screen">
+            <div class="screen-inner">
+                <div class="clay-card">
+                    <h1 id="go-title"
+                        style="color:var(--warm-red); font-size:4rem; font-weight:700; letter-spacing:2px; text-shadow: 2px 2px 0 rgba(255,255,255,0.8), -2px -2px 0px rgba(150,130,115,0.2);">
+                        BOOM!</h1>
+                    <h2 id="loser-name" style="margin:10px 0 24px; color:var(--card-text); font-size:1.4rem;"></h2>
+                    <button class="clay-btn" id="btn-spectate"
+                        style="background:var(--blue); width:100%; margin-bottom:12px; display:none; color:white;">Следить
+                        за игрой</button>
+                    <button class="clay-btn" id="btn-to-lobby"
+                        style="background:var(--peach); width:100%; color:white;">В меню</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════ DONATE MODAL ══════ -->
+        <div id="donate-modal" class="modal-overlay">
+            <div class="clay-card modal-card">
+                <h2 style="color:var(--warm-red); margin-bottom:5px; font-size: 1.5rem;">Поддержать разраба ❤️</h2>
+                <p style="font-size:0.9rem; color:var(--card-muted); margin-bottom:15px;">На сервера, энергетики и новые
+                    режимы!</p>
+                <div class="qr-wrapper">
+                    <img src="assets/image_8ea787.png" alt="QR Code"
+                        style="width:160px; height:160px; border-radius:10px; display:block;">
+                </div>
+                <div class="copy-wallet" id="btn-copy-wallet">
+                    UQDEjFlF7_2RUthpz3enA-T5bJloO5RIeRPVQflsjaL23aTs
+                </div>
+                <button class="clay-btn" id="btn-close-donate" style="margin-top:15px;">Закрыть</button>
+            </div>
+        </div>
+
+        <!-- ══════ CONFIRM EXIT MODAL ══════ -->
+        <div id="confirm-modal" class="modal-overlay">
+            <div class="clay-card modal-card" style="max-width: 280px; padding: 20px;">
+                <h3 style="color:var(--card-text); margin-bottom:15px; font-size:1.2rem;" id="confirm-text">Точно выйти?
+                </h3>
+                <div style="display:flex; gap:10px;">
+                    <button class="clay-btn" id="btn-confirm-no" style="flex:1;">Нет</button>
+                    <button class="clay-btn" id="btn-confirm-yes"
+                        style="flex:1; background:var(--warm-red); color:white;">Да</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ══════ GAMEOVER ══════ -->
-    <div id="screen-gameover" class="screen">
-        <div class="screen-inner">
-        <div class="clay-card">
-            <h1 id="go-title" style="color:var(--warm-red); font-size:4rem; font-weight:700; letter-spacing:2px; text-shadow: 2px 2px 0 rgba(255,255,255,0.8), -2px -2px 0px rgba(150,130,115,0.2);">BOOM!</h1>
-            <h2 id="loser-name" style="margin:10px 0 24px; color:var(--card-text); font-size:1.4rem;"></h2>
-            <button class="clay-btn" id="btn-spectate" style="background:var(--blue); width:100%; margin-bottom:12px; display:none; color:white;">Следить за игрой</button>
-            <button class="clay-btn" id="btn-to-lobby" style="background:var(--peach); width:100%; color:white;">В меню</button>
-        </div>
-        </div>
-    </div>
+    <script>
+        // Prevent scrolling on game screen
+        document.getElementById('screen-game').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
-</div>
+        const tg = window.Telegram?.WebApp || {};
+        if (tg.initData) { tg.expand(); tg.enableClosingConfirmation(); }
 
-<script>
-// Only block touchmove on the game screen to prevent page scroll during play
-document.getElementById('screen-game').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-
-const tg = window.Telegram?.WebApp || {};
-if (tg.initData) { tg.expand(); tg.enableClosingConfirmation(); }
-
-function haptic(type) {
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        if (['light','medium','heavy','rigid','soft'].includes(type)) tg.HapticFeedback.impactOccurred(type);
-        else if (['success','warning','error'].includes(type)) tg.HapticFeedback.notificationOccurred(type);
-    }
-    if (navigator.vibrate) navigator.vibrate({ light:15, medium:30, heavy:60, rigid:40, soft:12, success:50, warning:40, error:80 }[type] || 20);
-}
-
-function generateCode() {
-    let res = '', c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    for (let i = 0; i < 5; i++) res += c[Math.floor(Math.random() * c.length)];
-    return res;
-}
-
-let initData = tg.initDataUnsafe || {};
-let startParam = initData.start_param || new URLSearchParams(window.location.search).get('startapp');
-let currentUser = initData.user || { id: Math.floor(Math.random() * 100000), first_name: "Вы" };
-currentUser.shortInit = currentUser.first_name.substring(0, 2).toUpperCase();
-
-// ═════ I18N ═════
-const i18n = {
-    ru: {
-        createLobby: "Создать лобби", orEnterCode: "Или введите код", joinByCode: "Войти по коду", lobbyCode: "Код лобби",
-        invite: "Пригласить", lang: "Язык", mode: "Режим", modAnswers: "✏️ Ответы", modActions: "🎭 Действия", modMix: "🔀 Микс",
-        diff: "Сложность", diffEasy: "Лёгкая", diffMed: "Средняя", diffHard: "Сложная", startGame: "Начать игру",
-        waitHost: "Ожидание хоста...", myTurn: "ТВОЙ ХОД!", otherTurn: "ХОД ПРОТИВНИКА", taskLabel: "Задание:",
-        solves: "Решает", answer: "Ответ", voteKick: "Не верим! Сжечь 🔥", votesNeeded: (c,r)=>`Голосов: ${c}/${r}`,
-        voteAccepted: "🔥 СЖЕЧЬ!", flyingAway: "Улетает...", swipeNow: "СВАЙПНИ!", swipeHint: "Свайпни картошку!",
-        tapUnlock: "Tap to unlock", readyAnswer: "✓ Готово", readyAction: "✓ Выполнил", answerPh: "Введи ответ...",
-        boom: "BOOM!", exploded: n=>`💀 ${n} ВЗОРВАЛСЯ!`, watching: "Следить за игрой", toMenu: "В меню",
-        gameOver: "КОНЕЦ ИГРЫ", winner: "Победитель определён!", victory: "ПОБЕДА!", survived: "🏆 Ты выжил!",
-        menuBack: "← Меню", burned: n=>`💥 ${n} СГОРЕЛ!`, timer: "ВРЕМЯ", actWarn: "Выполни действие вживую, затем жми!",
-        errTxt: "Неверно! Подумай еще.", modeLabels: { answers:"Ответы", actions:"Действия" },
-        nickname: "Ваш ник", nickPh: "Введите ник...",
-    },
-    en: {
-        createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
-        invite: "Invite", lang: "Language", mode: "Mode", modAnswers: "✏️ Answers", modActions: "🎭 Actions", modMix: "🔀 Mix",
-        diff: "Difficulty", diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard", startGame: "Start Game",
-        waitHost: "Waiting for host...", myTurn: "YOUR TURN!", otherTurn: "THEIR TURN", taskLabel: "Task:",
-        solves: "Solving", answer: "Answer", voteKick: "Cap! Burn 🔥", votesNeeded: (c,r)=>`Votes: ${c}/${r}`,
-        voteAccepted: "🔥 BURNED!", flyingAway: "Flying away...", swipeNow: "SWIPE!", swipeHint: "Swipe the potato!",
-        tapUnlock: "Tap to unlock", readyAnswer: "✓ Done", readyAction: "✓ Finished", answerPh: "Type answer...",
-        boom: "BOOM!", exploded: n=>`💀 ${n} EXPLODED!`, watching: "Spectate", toMenu: "Menu",
-        gameOver: "GAME OVER", winner: "Winner determined!", victory: "VICTORY!", survived: "🏆 You survived!",
-        menuBack: "← Menu", burned: n=>`💥 ${n} IS OUT!`, timer: "TIMER", actWarn: "Do the action in real life, then tap!",
-        errTxt: "Wrong answer! Try again.", modeLabels: { answers:"Answers", actions:"Actions" },
-        nickname: "Your nick", nickPh: "Enter nickname...",
-    }
-};
-
-let currentLang = 'ru', currentMode = 'answers', currentDiff = 'easy';
-
-function T(key, ...args) {
-    const v = i18n[currentLang][key];
-    return typeof v === 'function' ? v(...args) : v;
-}
-
-function applyI18n() {
-    document.getElementById('btn-create-lobby').innerText = T('createLobby');
-    document.getElementById('lbl-or').innerText = T('orEnterCode');
-    document.getElementById('btn-join-code').innerText = T('joinByCode');
-    document.getElementById('lbl-lang').innerText = T('lang');
-    document.getElementById('lbl-lobby-code').innerText = T('lobbyCode');
-    document.getElementById('btn-invite').innerText = T('invite');
-    document.getElementById('lbl-lobby-lang').innerText = T('lang');
-    document.getElementById('lbl-mode').innerText = T('mode');
-    document.getElementById('lbl-diff').innerText = T('diff');
-    document.getElementById('mode-answers').innerText = T('modAnswers');
-    document.getElementById('mode-actions').innerText = T('modActions');
-    document.getElementById('mode-mix').innerText = T('modMix');
-    document.getElementById('diff-easy').innerText = T('diffEasy');
-    document.getElementById('diff-medium').innerText = T('diffMed');
-    document.getElementById('diff-hard').innerText = T('diffHard');
-    document.getElementById('btn-start-game').innerText = T('startGame');
-    document.getElementById('wait-host-msg').innerText = T('waitHost');
-    document.getElementById('lbl-tap-unlock').innerText = T('tapUnlock');
-    document.getElementById('btn-submit-answer').innerText = T('readyAnswer');
-    document.getElementById('btn-submit-action').innerText = T('readyAction');
-    document.getElementById('answer-input').placeholder = T('answerPh');
-    document.getElementById('swipe-hint-text').innerText = T('swipeHint');
-    document.getElementById('btn-spectate').innerText = T('watching');
-    document.getElementById('btn-to-lobby').innerText = T('toMenu');
-    document.getElementById('btn-leave-spectate').innerText = T('menuBack');
-    document.getElementById('lbl-timer').innerText = T('timer');
-    document.getElementById('lbl-action-warn').innerText = T('actWarn');
-    document.getElementById('input-error').innerText = T('errTxt');
-    const _nickLbl = document.getElementById('lbl-nickname');
-    if (_nickLbl) _nickLbl.innerText = T('nickname');
-    const _nickInp = document.getElementById('nickname-input');
-    if (_nickInp) _nickInp.placeholder = T('nickPh');
-}
-
-function setLang(lang) {
-    currentLang = lang;
-    document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-    document.querySelectorAll('[data-lobby-lang]').forEach(b => b.classList.toggle('active', b.dataset.lobbyLang === lang));
-    applyI18n();
-}
-document.querySelectorAll('.seg-btn').forEach(b => {
-    b.addEventListener('click', () => {
-        if (b.dataset.lang) setLang(b.dataset.lang);
-        if (!network.isHost && (b.dataset.lobbyLang || b.dataset.mode || b.dataset.diff)) return;
-        if (b.dataset.lobbyLang) setLang(b.dataset.lobbyLang);
-        if (b.dataset.mode) {
-            document.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('active'));
-            b.classList.add('active'); currentMode = b.dataset.mode;
+        function haptic(type) {
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                if (['light', 'medium', 'heavy', 'rigid', 'soft'].includes(type)) tg.HapticFeedback.impactOccurred(type);
+                else if (['success', 'warning', 'error'].includes(type)) tg.HapticFeedback.notificationOccurred(type);
+            }
+            if (navigator.vibrate) navigator.vibrate({ light: 15, medium: 30, heavy: 60, rigid: 40, soft: 12, success: 50, warning: 40, error: 80 }[type] || 20);
         }
-        if (b.dataset.diff) {
-            document.querySelectorAll('[data-diff]').forEach(x => x.classList.remove('active'));
-            b.classList.add('active'); currentDiff = b.dataset.diff;
+
+        function generateCode() {
+            let res = '', c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            for (let i = 0; i < 5; i++) res += c[Math.floor(Math.random() * c.length)];
+            return res;
         }
-    });
-});
-applyI18n();
 
-// ═════ NETWORK ═════
-const MAX_LIVES = 3;
-class NetworkManager {
-    constructor() { this.lobbyId=null; this.players=[]; this.isHost=false; this.botTimers=[]; this.botPassBack=null; }
-    connect(lobbyId, isHost=false) {
-        this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
-        this.players.push({ id:currentUser.id, name:currentUser.first_name, initials:currentUser.shortInit, isHost, isDead:false, lives:MAX_LIVES });
-        updateLobbyUI();
-        if (isHost) {
-            this.botTimers.push(setTimeout(() => { this.players.push({ id:2, name:"Иван", initials:"ИВ", isHost:false, isDead:false, lives:MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 1200));
-            this.botTimers.push(setTimeout(() => { this.players.push({ id:3, name:"Оля", initials:"ОЛ", isHost:false, isDead:false, lives:MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 2800));
-        } else {
-            this.players.push({ id:999, name:"Host", initials:"HO", isHost:true, isDead:false, lives:MAX_LIVES });
-            updateLobbyUI();
-            this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 4000));
+        let initData = tg.initDataUnsafe || {};
+        let startParam = initData.start_param || new URLSearchParams(window.location.search).get('startapp');
+        let currentUser = { id: Math.floor(Math.random() * 100000), first_name: "Вы", shortInit: "ВЫ" };
+
+        if (initData.user) {
+            currentUser.id = initData.user.id;
+            currentUser.first_name = initData.user.first_name;
+            currentUser.shortInit = currentUser.first_name.substring(0, 2).toUpperCase();
         }
-    }
-    startBotTimer(botId) {
-        const cfg = { easy:{min:6}, medium:{min:9}, hard:{min:13} }[currentDiff] || {min:6};
-        const delay = (cfg.min * 0.45 + Math.random() * cfg.min * 0.35) * 1000;
-        this.botPassBack = setTimeout(() => { if (currentScreen==='GAME' && !isGameOver && currentTurnPlayerId===botId) this.sendPotato(); }, delay);
-    }
-    sendPotato() {
-        let alive = this.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId);
-        if (!alive.length) return;
-        let target = alive[Math.floor(Math.random() * alive.length)];
-        triggerCurtain(() => { isProcessingTurn = false; passPotato(target.id); });
-    }
-    clearBotTimers() { this.botTimers.forEach(clearTimeout); clearTimeout(this.botPassBack); }
-}
 
-// ═════ STATE ═════
-let network = new NetworkManager();
-let currentScreen = 'START', isGameOver = false, isCurtainActive = false, isSpectating = false;
-let globalTimer = 0, personalTimer = 0, gameStartTime = null, currentTurnPlayerId = null;
-let currentTaskObj = { q: "", a: "", type: "answer" };
-let pulsePhase = 0, gameLoopId = null;
-let isLocked = true, isAnswered = false, isProcessingTurn = false, isExploding = false;
-let currentVotes = 0, requiredVotes = 1;
+        // ═════ NICKNAME LOGIC ═════
+        const nickInput = document.getElementById('nickname-input');
+        const savedNick = localStorage.getItem('wet_potato_nick');
+        if (savedNick) {
+            nickInput.value = savedNick;
+            currentUser.first_name = savedNick;
+            currentUser.shortInit = savedNick.substring(0, 2).toUpperCase();
+        }
 
-const ui = {
-    curtain:   document.getElementById('curtain'), status: document.getElementById('status-text'),
-    task:      document.getElementById('task-display'), timer: document.getElementById('personal-timer'),
-    wrapper:   document.getElementById('potato-pulse-wrapper'), container: document.getElementById('potato-container'),
-    pBar:      document.getElementById('players-bar'), img: document.getElementById('potato-img'),
-    lockOvr:   document.getElementById('lock-overlay'), combo: document.getElementById('combo-panel'),
-    input:     document.getElementById('answer-input'), hint: document.getElementById('swipe-hint'),
-    err:       document.getElementById('input-error'), txtWrap: document.getElementById('combo-text-wrapper'),
-    actWrap:   document.getElementById('combo-action-wrapper')
-};
+        document.getElementById('btn-save-nick').onclick = () => {
+            const val = nickInput.value.trim();
+            if (val) {
+                localStorage.setItem('wet_potato_nick', val);
+                currentUser.first_name = val;
+                currentUser.shortInit = val.substring(0, 2).toUpperCase();
+                haptic('success');
 
-function showScreen(name) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(`screen-${name.toLowerCase()}`).classList.add('active');
-    currentScreen = name;
-}
-function triggerCurtain(cb) {
-    if (isCurtainActive) return;
-    isCurtainActive = true;
-    const c = ui.curtain;
-    const dur = 520;
-    const ease = 'cubic-bezier(0.76, 0, 0.24, 1)';
+                // Визуальный фидбэк
+                const btn = document.getElementById('btn-save-nick');
+                btn.classList.add('saved');
+                setTimeout(() => btn.classList.remove('saved'), 1500);
+            }
+        };
 
-    // Phase 1: sweep DOWN to cover
-    c.style.transition = `transform ${dur}ms ${ease}`;
-    c.style.transform = 'translateY(0)';
+        function applyNickname() {
+            const val = nickInput.value.trim();
+            if (val) {
+                currentUser.first_name = val;
+                currentUser.shortInit = val.substring(0, 2).toUpperCase();
+            }
+        }
 
-    setTimeout(() => {
-        cb(); // do work while hidden
+        function lifeDots(p) {
+            const total = MAX_LIVES;
+            const lost = total - (p.lives ?? total);
+            let dots = '';
+            for (let i = 0; i < total; i++) {
+                dots += `<div class="life-dot${i >= (total - lost) ? ' lost' : ''}"></div>`;
+            }
+            return dots;
+        }
 
-        // Phase 2: continue sweeping DOWN to exit (no bounce!)
-        c.style.transform = 'translateY(115%)';
+        // ═════ I18N ═════
+        const i18n = {
+            ru: {
+                createLobby: "Создать лобби", orEnterCode: "Или введите код", joinByCode: "Войти по коду", lobbyCode: "Код лобби",
+                invite: "Пригласить", lang: "Язык", mode: "Режим", modAnswers: "✏️ Ответы", modActions: "🎭 Действия", modMix: "🔀 Микс",
+                diff: "Сложность", diffEasy: "Лёгкая", diffMed: "Средняя", diffHard: "Сложная", startGame: "Начать игру",
+                waitHost: "Ожидание хоста...", myTurn: "ТВОЙ ХОД!", otherTurn: "ХОД ПРОТИВНИКА", taskLabel: "Задание:",
+                solves: "Решает", answer: "Ответ", voteKick: "Сжечь 🔥", votesNeeded: (c, r) => `Голосов: ${c}/${r}`,
+                voteAccepted: "🔥 СЖЕЧЬ!", flyingAway: "Улетает...", swipeNow: "СВАЙПНИ!", swipeHint: "Свайпни картошку!",
+                tapUnlock: "Tap to unlock", readyAnswer: "✓ Готово", readyAction: "✓ Выполнил", answerPh: "Введи ответ...",
+                boom: "BOOM!", exploded: n => `💀 ${n} ВЗОРВАЛСЯ!`, watching: "Следить за игрой", toMenu: "В меню",
+                gameOver: "КОНЕЦ ИГРЫ", winner: "Победитель определён!", victory: "ПОБЕДА!", survived: "🏆 Ты выжил!",
+                menuBack: "← Выйти", burned: n => `💥 ${n} СГОРЕЛ!`, timer: "ВРЕМЯ", actWarn: "Выполни действие вживую, затем жми!",
+                errTxt: "Неверно! Подумай еще.", modeLabels: { answers: "Ответы", actions: "Действия" },
+                nickname: "Ваш ник", nickPh: "Введите ник...", content: "Контент", confirmLeave: "Точно выйти?", yes: "Да", no: "Нет"
+            },
+            en: {
+                createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
+                invite: "Invite", lang: "Language", mode: "Mode", modAnswers: "✏️ Answers", modActions: "🎭 Actions", modMix: "🔀 Mix",
+                diff: "Difficulty", diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard", startGame: "Start Game",
+                waitHost: "Waiting for host...", myTurn: "YOUR TURN!", otherTurn: "THEIR TURN", taskLabel: "Task:",
+                solves: "Solving", answer: "Answer", voteKick: "Burn 🔥", votesNeeded: (c, r) => `Votes: ${c}/${r}`,
+                voteAccepted: "🔥 BURNED!", flyingAway: "Flying away...", swipeNow: "SWIPE!", swipeHint: "Swipe the potato!",
+                tapUnlock: "Tap to unlock", readyAnswer: "✓ Done", readyAction: "✓ Finished", answerPh: "Type answer...",
+                boom: "BOOM!", exploded: n => `💀 ${n} EXPLODED!`, watching: "Spectate", toMenu: "Menu",
+                gameOver: "GAME OVER", winner: "Winner determined!", victory: "VICTORY!", survived: "🏆 You survived!",
+                menuBack: "← Exit", burned: n => `💥 ${n} IS OUT!`, timer: "TIMER", actWarn: "Do the action in real life, then tap!",
+                errTxt: "Wrong answer! Try again.", modeLabels: { answers: "Answers", actions: "Actions" },
+                nickname: "Your nick", nickPh: "Enter nickname...", content: "Content", confirmLeave: "Are you sure?", yes: "Yes", no: "No"
+            }
+        };
 
-        setTimeout(() => {
-            // Silent reset back above screen
-            c.style.transition = 'none';
-            c.style.transform = 'translateY(-110%)';
-            isCurtainActive = false;
-        }, dur + 30);
-    }, dur + 20);
-}
+        let currentLang = 'ru', currentMode = 'answers', currentDiff = 'easy', isAdultMode = false;
 
-function applyNickname() {
-    const inp = document.getElementById('nickname-input');
-    if (inp && inp.value.trim().length > 0) {
-        currentUser.first_name = inp.value.trim();
-        currentUser.shortInit = currentUser.first_name.substring(0, 2).toUpperCase();
-    }
-}
-if (startParam) joinLobby(startParam, false); else showScreen('START');
+        function T(key, ...args) {
+            const v = i18n[currentLang][key];
+            return typeof v === 'function' ? v(...args) : v;
+        }
 
-function lifeDots(p) {
-    const total = MAX_LIVES;
-    const lost = total - (p.lives ?? total);
-    let dots = '';
-    for (let i = 0; i < total; i++) {
-        dots += `<div class="life-dot${i >= (total - lost) ? ' lost' : ''}"></div>`;
-    }
-    return dots;
-}
+        function applyI18n() {
+            document.getElementById('btn-create-lobby').innerText = T('createLobby');
+            document.getElementById('lbl-or').innerText = T('orEnterCode');
+            document.getElementById('btn-join-code').innerText = T('joinByCode');
+            document.getElementById('lbl-lang').innerText = T('lang');
+            document.getElementById('lbl-lobby-code').innerText = T('lobbyCode');
+            document.getElementById('btn-invite').innerText = T('invite');
+            document.getElementById('lbl-lobby-lang').innerText = T('lang');
+            document.getElementById('lbl-mode').innerText = T('mode');
+            document.getElementById('lbl-diff').innerText = T('diff');
+            document.getElementById('mode-answers').innerText = T('modAnswers');
+            document.getElementById('mode-actions').innerText = T('modActions');
+            document.getElementById('mode-mix').innerText = T('modMix');
+            document.getElementById('diff-easy').innerText = T('diffEasy');
+            document.getElementById('diff-medium').innerText = T('diffMed');
+            document.getElementById('diff-hard').innerText = T('diffHard');
+            document.getElementById('btn-start-game').innerText = T('startGame');
+            document.getElementById('wait-host-msg').innerText = T('waitHost');
+            document.getElementById('lbl-tap-unlock').innerText = T('tapUnlock');
+            document.getElementById('btn-submit-answer').innerText = T('readyAnswer');
+            document.getElementById('btn-submit-action').innerText = T('readyAction');
+            document.getElementById('answer-input').placeholder = T('answerPh');
+            document.getElementById('swipe-hint-text').innerText = T('swipeHint');
+            document.getElementById('btn-spectate').innerText = T('watching');
+            document.getElementById('btn-to-lobby').innerText = T('toMenu');
+            document.getElementById('btn-leave-game').innerText = T('menuBack');
+            document.getElementById('btn-leave-lobby').innerText = T('menuBack');
+            document.getElementById('lbl-timer').innerText = T('timer');
+            document.getElementById('lbl-action-warn').innerText = T('actWarn');
+            document.getElementById('input-error').innerText = T('errTxt');
 
-document.getElementById('btn-create-lobby').onclick = () => { applyNickname(); joinLobby(generateCode(), true); };
-const cdInp = document.getElementById('join-code-input');
-cdInp.oninput = function() { this.value = this.value.toUpperCase(); };
-document.getElementById('btn-join-code').onclick = () => { if (cdInp.value.trim().length) { applyNickname(); joinLobby(cdInp.value.trim(), false); } };
+            const _nickLbl = document.getElementById('lbl-nickname'); if (_nickLbl) _nickLbl.innerText = T('nickname');
+            const _nickInp = document.getElementById('nickname-input'); if (_nickInp) _nickInp.placeholder = T('nickPh');
+            const _contentLbl = document.getElementById('lbl-content'); if (_contentLbl) _contentLbl.innerText = T('content');
 
-function joinLobby(id, host=false) {
-    showScreen('LOBBY'); document.getElementById('lobby-id-display').innerText = id;
-    document.getElementById('host-settings').style.display = host ? 'block' : 'none';
-    document.getElementById('wait-host-msg').style.display = host ? 'none' : 'block';
-    network.connect(id, host);
-}
-function updateLobbyUI() {
-    document.getElementById('lobby-players').innerHTML = network.players.map(p => 
-        `<div class="player-row"><div class="player-avatar">${p.initials}</div><div class="player-name">${p.name}${p.isHost?' 👑':''}</div></div>`
-    ).join('');
-}
-document.getElementById('btn-invite').onclick = () => {
-    if (tg.switchInlineQuery) tg.switchInlineQuery(network.lobbyId, ["users","groups"]);
-    else alert("Link: https://t.me/your_bot?startapp=" + network.lobbyId);
-};
-document.getElementById('btn-start-game').onclick = () => startRound();
+            document.getElementById('btn-confirm-yes').innerText = T('yes');
+            document.getElementById('btn-confirm-no').innerText = T('no');
+        }
 
-function updatePlayersBar() {
-    ui.pBar.innerHTML = network.players.map(p =>
-        `<div class="p-mini-wrap">
-            <div class="p-mini${p.id===currentTurnPlayerId?' active':''}${p.isDead?' dead':''}" data-pid="${p.id}">${p.initials}</div>
+        // ═════ CONFIRM MODAL ═════
+        let leaveCallback = null;
+        function showConfirmModal(text, onConfirm) {
+            document.getElementById('confirm-text').innerText = text;
+            leaveCallback = onConfirm;
+            document.getElementById('confirm-modal').classList.add('open');
+            haptic('warning');
+        }
+        document.getElementById('btn-confirm-yes').onclick = () => {
+            document.getElementById('confirm-modal').classList.remove('open');
+            if (leaveCallback) leaveCallback();
+        };
+        document.getElementById('btn-confirm-no').onclick = () => {
+            document.getElementById('confirm-modal').classList.remove('open');
+        };
+
+        document.getElementById('btn-leave-lobby').onclick = () => showConfirmModal(T('confirmLeave'), resetToMenu);
+        document.getElementById('btn-leave-game').onclick = () => showConfirmModal(T('confirmLeave'), resetToMenu);
+
+        // Donate Modal Logic
+        const btnOpenDonate = document.getElementById('btn-open-donate');
+        const btnCloseDonate = document.getElementById('btn-close-donate');
+        const donateModal = document.getElementById('donate-modal');
+        const btnCopyWallet = document.getElementById('btn-copy-wallet');
+
+        btnOpenDonate.onclick = () => { donateModal.classList.add('open'); haptic('light'); };
+        btnCloseDonate.onclick = () => { donateModal.classList.remove('open'); haptic('light'); };
+        btnCopyWallet.onclick = () => {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText("UQDEjFlF7_2RUthpz3enA-T5bJloO5RIeRPVQflsjaL23aTs");
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = "UQDEjFlF7_2RUthpz3enA-T5bJloO5RIeRPVQflsjaL23aTs";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try { document.execCommand('copy'); } catch (err) { }
+                document.body.removeChild(textArea);
+            }
+            const originalText = btnCopyWallet.innerHTML;
+            btnCopyWallet.innerHTML = "<b>✅ Скопировано!</b>";
+            haptic('success');
+            setTimeout(() => { btnCopyWallet.innerHTML = originalText; }, 2000);
+        };
+
+        function createEmojiRain() {
+            const container = document.createElement('div');
+            container.className = 'emoji-rain-container';
+            container.id = 'emoji-rain';
+            document.body.appendChild(container);
+            const emojis = ['🔞'];
+            for (let i = 0; i < 4; i++) { // Уменьшил количество до 4 штук!
+                let el = document.createElement('div');
+                el.className = 'falling-emoji';
+                el.innerText = emojis[0];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                el.style.animationDelay = (Math.random() * 5) + 's';
+                el.style.fontSize = (Math.random() * 1.5 + 2) + 'rem';
+                container.appendChild(el);
+            }
+        }
+        createEmojiRain();
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+            document.querySelectorAll('[data-lobby-lang]').forEach(b => b.classList.toggle('active', b.dataset.lobbyLang === lang));
+            applyI18n();
+        }
+        document.querySelectorAll('.seg-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                if (b.dataset.lang) setLang(b.dataset.lang);
+                if (!network.isHost && (b.dataset.lobbyLang || b.dataset.mode || b.dataset.diff || b.dataset.adult)) return;
+
+                if (b.dataset.lobbyLang) setLang(b.dataset.lobbyLang);
+                if (b.dataset.mode) {
+                    document.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active'); currentMode = b.dataset.mode;
+                    usedQuestions.clear(); // Сбрасываем вопросы при смене режима
+                }
+                if (b.dataset.diff) {
+                    document.querySelectorAll('[data-diff]').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active'); currentDiff = b.dataset.diff;
+                    usedQuestions.clear(); // Сбрасываем вопросы при смене сложности
+                }
+                if (b.dataset.adult) {
+                    document.querySelectorAll('[data-adult]').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    isAdultMode = b.dataset.adult === 'true';
+                    usedQuestions.clear(); // Сбрасываем вопросы при смене контента
+                    if (isAdultMode) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                }
+            });
+        });
+        applyI18n();
+
+        // ═════ NETWORK ═════
+        const MAX_LIVES = 2; // УМЕНЬШЕНО ДО 2Х ЖИЗНЕЙ
+        class NetworkManager {
+            constructor() { this.lobbyId = null; this.players = []; this.isHost = false; this.botTimers = []; this.botPassBack = null; }
+            connect(lobbyId, isHost = false) {
+                this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
+                this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost, isDead: false, lives: MAX_LIVES });
+                updateLobbyUI();
+                if (isHost) {
+                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 2, name: "Иван", initials: "ИВ", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 1200));
+                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 3, name: "Оля", initials: "ОЛ", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 2800));
+                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 4, name: "Макс", initials: "МА", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 4200));
+                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 5, name: "Азалия", initials: "АЗ", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 5800));
+                } else {
+                    this.players.push({ id: 999, name: "Host", initials: "HO", isHost: true, isDead: false, lives: MAX_LIVES });
+                    updateLobbyUI();
+                    this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 4000));
+                }
+            }
+            startBotTimer(botId) {
+                const diffObj = currentTaskObj || { time: 10 };
+                const delay = (diffObj.time * 0.45 + Math.random() * diffObj.time * 0.35) * 1000;
+                this.botPassBack = setTimeout(() => { if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === botId) this.sendPotato(); }, delay);
+            }
+            sendPotato() {
+                let alive = this.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId);
+                if (!alive.length) return;
+                let target = alive[Math.floor(Math.random() * alive.length)];
+                triggerCurtain(() => { isProcessingTurn = false; passPotato(target.id); });
+            }
+            clearBotTimers() { this.botTimers.forEach(clearTimeout); clearTimeout(this.botPassBack); }
+        }
+
+        // ═════ STATE ═════
+        let network = new NetworkManager();
+        let currentScreen = 'START', isGameOver = false, isCurtainActive = false, isSpectating = false;
+        let globalTimer = 0, personalTimer = 0, gameStartTime = null, currentTurnPlayerId = null;
+        let currentTaskObj = { q: "", a: "", type: "answer", time: 10 };
+        let pulsePhase = 0, gameLoopId = null;
+        let isLocked = true, isAnswered = false, isProcessingTurn = false, isExploding = false;
+        let currentVotes = 0, requiredVotes = 1;
+        let usedQuestions = new Set(); // Строгий трекинг вопросов
+
+        const ui = {
+            curtain: document.getElementById('curtain'), status: document.getElementById('status-text'),
+            task: document.getElementById('task-display'), timer: document.getElementById('personal-timer'),
+            wrapper: document.getElementById('potato-pulse-wrapper'), container: document.getElementById('potato-container'),
+            pBar: document.getElementById('players-bar'), img: document.getElementById('potato-img'),
+            lockOvr: document.getElementById('lock-overlay'), combo: document.getElementById('combo-panel'),
+            input: document.getElementById('answer-input'), hint: document.getElementById('swipe-hint'),
+            err: document.getElementById('input-error'), txtWrap: document.getElementById('combo-text-wrapper'),
+            actWrap: document.getElementById('combo-action-wrapper')
+        };
+
+        function showScreen(name) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(`screen-${name.toLowerCase()}`).classList.add('active');
+            currentScreen = name;
+        }
+
+        function triggerCurtain(cb) {
+            if (isCurtainActive) return;
+            isCurtainActive = true;
+            const c = ui.curtain;
+            const dur = 520;
+            const ease = 'cubic-bezier(0.76, 0, 0.24, 1)';
+
+            c.style.transition = `transform ${dur}ms ${ease}, background 0.5s ease`;
+            c.style.transform = 'translateY(0)';
+
+            setTimeout(() => {
+                cb();
+                c.style.transform = 'translateY(115%)';
+                setTimeout(() => {
+                    c.style.transition = 'none';
+                    c.style.transform = 'translateY(-110%)';
+                    isCurtainActive = false;
+                }, dur + 30);
+            }, dur + 20);
+        }
+
+        document.getElementById('btn-create-lobby').onclick = () => { applyNickname(); joinLobby(generateCode(), true); };
+        document.getElementById('btn-join-code').onclick = () => { if (cdInp.value.trim().length) { applyNickname(); joinLobby(cdInp.value.trim(), false); } };
+
+        function joinLobby(id, host = false) {
+            showScreen('LOBBY'); document.getElementById('lobby-id-display').innerText = id;
+            document.getElementById('host-settings').style.display = host ? 'block' : 'none';
+            document.getElementById('wait-host-msg').style.display = host ? 'none' : 'block';
+            network.connect(id, host);
+        }
+
+        function updateLobbyUI() {
+            const container = document.getElementById('lobby-players');
+            const isGrid = network.players.length > 4;
+            container.className = isGrid ? 'grid-layout' : '';
+
+            container.innerHTML = network.players.map(p =>
+                `<div class="player-row ${isGrid ? 'grid-item' : ''}"><div class="player-avatar">${p.initials}</div><div class="player-name">${p.name}${p.isHost ? ' 👑' : ''}</div></div>`
+            ).join('');
+        }
+
+        document.getElementById('btn-invite').onclick = () => {
+            if (tg.switchInlineQuery) tg.switchInlineQuery(network.lobbyId, ["users", "groups"]);
+            else alert("Link: https://t.me/your_bot?startapp=" + network.lobbyId);
+        };
+        document.getElementById('btn-start-game').onclick = () => startRound();
+
+        function updatePlayersBar() {
+            ui.pBar.innerHTML = network.players.map(p =>
+                `<div class="p-mini-wrap">
+            <div class="p-mini${p.id === currentTurnPlayerId ? ' active' : ''}${p.isDead ? ' dead' : ''}" data-pid="${p.id}">${p.initials}</div>
             <div class="lives-dots">${lifeDots(p)}</div>
         </div>`
-    ).join('');
-}
+            ).join('');
+        }
 
-// ═════ GAME LOGIC ═════
-let usedTaskIds = new Set();
+        // ═════ GAME LOGIC ═════
 
-function startRound() {
-    isGameOver = false; isSpectating = false; globalTimer = 30 + Math.random() * 30;
-    network.players.forEach(p => { p.isDead = false; p.lives = MAX_LIVES; });
-    usedTaskIds = new Set();
-    showScreen('GAME'); passPotato(currentUser.id);
-}
+        function startRound() {
+            isGameOver = false; isSpectating = false;
+            globalTimer = 45 + Math.random() * 30;
+            network.players.forEach(p => { p.isDead = false; p.lives = MAX_LIVES; });
 
-function passPotato(playerId) {
-    isExploding = false; isAnswered = false; isProcessingTurn = false; currentVotes = 0;
-    requiredVotes = Math.max(2, network.players.filter(p => !p.isDead).length - 1);
-    currentTurnPlayerId = playerId;
+            // Очищаем чат для нового раунда
+            document.getElementById('chat-messages').innerHTML = '';
 
-    if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-    gameStartTime = null;
+            showScreen('GAME'); passPotato(currentUser.id);
+        }
 
-    const diffs = { easy:{m:6,M:9}, medium:{m:9,M:14}, hard:{m:13,M:18} };
-    const cfg = diffs[currentDiff] || diffs.easy;
-    personalTimer = cfg.m + Math.random() * (cfg.M - cfg.m); pulsePhase = 0;
+        function passPotato(playerId) {
+            isExploding = false; isAnswered = false; isProcessingTurn = false; currentVotes = 0;
+            requiredVotes = Math.max(2, network.players.filter(p => !p.isDead).length - 1);
+            currentTurnPlayerId = playerId;
 
-    const pool = getTaskPool(currentLang, currentMode, currentDiff);
-    const available = pool.filter((_, idx) => !usedTaskIds.has(idx));
-    const src = available.length > 0 ? available : pool;
-    const chosen = src[Math.floor(Math.random() * src.length)];
-    const chosenIdx = pool.indexOf(chosen);
-    if (chosenIdx !== -1) usedTaskIds.add(chosenIdx);
-    currentTaskObj = chosen || { q: "Давай!", a: "", type: "answer" };
+            if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+            gameStartTime = null;
 
-    updatePlayersBar();
+            const pool = getTaskPool(currentLang, currentMode, currentDiff, isAdultMode);
 
-    ui.img.style.transition = 'filter .4s ease'; ui.img.style.transform = 'scale(1)'; ui.img.style.opacity = '1';
+            // СТРОГАЯ фильтрация по тексту вопроса, чтобы 100% не было повторов
+            let available = pool.filter(t => !usedQuestions.has(t.q));
 
-    if (playerId === currentUser.id) {
-        // MY TURN
-        closeChatSheet();
-        isLocked = true; resetComboPanel();
-        ui.task.innerHTML = ''; ui.task.style.opacity = '1';
-        ui.timer.style.opacity = '1'; ui.timer.classList.remove('urgent');
-        ui.status.innerText = T('myTurn'); ui.status.style.color = 'var(--card-text)';
-        haptic('warning');
-        ui.img.classList.add('locked'); ui.img.classList.remove('shaking');
-        ui.lockOvr.style.opacity = '1'; ui.lockOvr.style.pointerEvents = 'auto';
-        ui.wrapper.classList.remove('swipe-ready');
+            if (available.length === 0) {
+                usedQuestions.clear(); // Обнуляем только если кончились ВСЕ вопросы
+                available = pool;
+            }
 
-        ui.container.style.transition = 'none'; ui.container.style.transform = `translate(0, -${window.innerHeight/2}px) scale(0.5)`;
-        ui.container.style.opacity = '0'; void ui.container.offsetWidth;
-        ui.container.style.transition = 'transform .52s cubic-bezier(.175,.885,.32,1.275), opacity .32s ease';
-        ui.container.style.transform = 'translate(0,0) scale(1)'; ui.container.style.opacity = '1';
-    } else {
-        // THEIR TURN
-        isLocked = false; resetComboPanel();
-        let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
-        const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
-        const badge = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>`;
-        ui.task.innerHTML = `
+            const chosen = available[Math.floor(Math.random() * available.length)];
+            usedQuestions.add(chosen.q); // Записываем вопрос в архив
+
+            currentTaskObj = chosen || { q: "ДУМАЙ БЫСТРЕЙ!", a: "ок", type: "answer", time: 10 };
+            // Даем дополнительные 5 секунд на чтение
+            personalTimer = (currentTaskObj.time || 10) + 5;
+            pulsePhase = 0;
+
+            updatePlayersBar();
+
+            ui.img.style.transition = 'filter .4s ease'; ui.img.style.transform = 'scale(1)'; ui.img.style.opacity = '1';
+            ui.container.style.pointerEvents = 'auto';
+
+            if (playerId === currentUser.id) {
+                closeChatSheet();
+                isLocked = true; resetComboPanel();
+                ui.task.innerHTML = '';
+                ui.task.style.opacity = '1';
+                ui.timer.style.opacity = '1'; ui.timer.classList.remove('urgent');
+                ui.status.innerText = T('myTurn'); ui.status.style.color = 'var(--card-text)';
+                haptic('warning');
+                ui.img.classList.add('locked'); ui.img.classList.remove('shaking');
+                ui.lockOvr.style.opacity = '1'; ui.lockOvr.style.pointerEvents = 'auto';
+                ui.wrapper.classList.remove('swipe-ready');
+
+                ui.container.style.transition = 'none'; ui.container.style.transform = `translate(0, -${window.innerHeight / 2}px) scale(0.5)`;
+                ui.container.style.opacity = '0'; void ui.container.offsetWidth;
+                ui.container.style.transition = 'transform .52s cubic-bezier(.175,.885,.32,1.275), opacity .32s ease';
+                ui.container.style.transform = 'translate(0,0) scale(1)'; ui.container.style.opacity = '1';
+            } else {
+                isLocked = false; resetComboPanel();
+                let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
+                const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
+                const badge = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>`;
+
+                ui.task.innerHTML = `
             ${badge}
-            <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
-            <span style="font-size:1.2rem;">${currentTaskObj.q}</span>
-            <div style="margin-top:14px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.5); border-radius:14px; padding:10px;">
-                ${currentTaskObj.type === 'answer' ? T('answer')+': ' : 'Действие: '}<span style="font-weight:700;">${currentTaskObj.a}</span>
+            <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:6px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
+            <span style="font-size: clamp(15px, 5vw, 22px); line-height:1.2; font-weight:700;">${currentTaskObj.q}</span>
+            <div style="margin-top:10px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.2); border-radius:14px; padding:10px; border: 1px solid var(--card-rim);">
+                ${currentTaskObj.type === 'answer' ? T('answer') + ': ' : 'Действие: '}<span style="font-weight:700;">${currentTaskObj.a}</span>
             </div>
             <button class="votekick-btn" onclick="voteKick(this)">${T('voteKick')}</button>`;
-        ui.task.style.opacity = '1';
-        ui.timer.style.opacity = '0.7'; ui.status.innerText = T('otherTurn'); ui.status.style.color = 'var(--card-muted)';
-        ui.img.classList.remove('locked','shaking'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
-        ui.wrapper.classList.remove('swipe-ready');
-        ui.container.style.transition = 'transform .5s ease, opacity .5s ease';
-        ui.container.style.transform = 'scale(0.65)'; ui.container.style.opacity = '0.6';
-    }
-    gameLoopId = requestAnimationFrame(gameLoop);
-}
+                ui.task.style.opacity = '1';
+                ui.timer.style.opacity = '0.7'; ui.status.innerText = T('otherTurn'); ui.status.style.color = 'var(--card-muted)';
+                ui.img.classList.remove('locked', 'shaking'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
+                ui.wrapper.classList.remove('swipe-ready');
+                ui.container.style.transition = 'transform .5s ease, opacity .5s ease';
+                ui.container.style.transform = 'scale(0.65)'; ui.container.style.opacity = '0.6';
+            }
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
 
-function resetComboPanel() {
-    ui.combo.classList.remove('visible'); ui.input.value = ''; ui.input.classList.remove('error'); ui.err.style.display = 'none';
-    ui.hint.style.display = 'none'; ui.input.removeEventListener('input', onTyping);
-}
+        function resetComboPanel() {
+            ui.combo.classList.remove('visible'); ui.input.value = ''; ui.input.classList.remove('error'); ui.err.style.display = 'none';
+            ui.hint.style.display = 'none'; ui.input.removeEventListener('input', onTyping);
+        }
 
-function unlockPotato() {
-    if (!isLocked) return; isLocked = false; haptic('heavy');
-    const flash = document.createElement('div'); flash.className = 'unlock-flash'; ui.container.appendChild(flash); setTimeout(() => flash.remove(), 600);
-    ui.img.classList.remove('locked'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
-    
-    const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
-    ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
+        function unlockPotato() {
+            if (!isLocked) return; isLocked = false; haptic('heavy');
+            const flash = document.createElement('div'); flash.className = 'unlock-flash'; ui.container.appendChild(flash); setTimeout(() => flash.remove(), 600);
+            ui.img.classList.remove('locked'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
+
+            const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
+            ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
         <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:8px; text-transform:uppercase;">${T('taskLabel')}</span>
-        <span style="font-size:1.3rem; font-weight:700;">${currentTaskObj.q}</span>`;
-    
-    ui.combo.classList.add('visible');
-    
-    // Toggle correct combo UI
-    if (currentTaskObj.type === 'action') {
-        ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'flex';
-    } else {
-        ui.actWrap.style.display = 'none'; ui.txtWrap.style.display = 'flex';
-        ui.input.removeEventListener('input', onTyping); ui.input.addEventListener('input', onTyping);
-        setTimeout(() => ui.input.focus(), 100);
-    }
-}
+        <span style="font-size: clamp(16px, 6vw, 26px); font-weight:700; line-height:1.2; padding: 0 4px;">${currentTaskObj.q}</span>`;
 
-function onTyping() {
-    ui.img.classList.add('shaking'); clearTimeout(onTyping._t);
-    onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
-    ui.input.classList.remove('error'); ui.err.style.display = 'none';
-}
-// 5. Input focus → shake potato
-ui.input.addEventListener('focus', () => {
-    if (currentScreen === 'GAME' && !isLocked) ui.img.classList.add('shaking');
-});
-ui.input.addEventListener('blur', () => {
-    clearTimeout(onTyping._t);
-    ui.img.classList.remove('shaking');
-});
+            ui.combo.classList.add('visible');
 
-function validateAnswer() {
-    if (currentTaskObj.type !== 'answer') return true;
-    let expected = currentTaskObj.a.toLowerCase().trim();
-    let given = ui.input.value.toLowerCase().trim();
-    
-    if (given.length < 1) return false;
-    if (expected.includes('любо') || expected.includes('any')) return true;
-    
-    // Match numbers exactly
-    if (/^\d+$/.test(expected)) {
-        let nums = given.match(/\d+/g);
-        return (nums && nums.includes(expected));
-    }
-    
-    let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
-    if (expWords.length === 0) return given === expected || given.includes(expected);
-    
-    // given must contain a word that matches an expected word
-    let givenWords = given.split(/\s+/);
-    let match = expWords.some(ew => {
-        return givenWords.some(gw => {
-            if (gw.length < 3 && ew.length >= 3) return false;
-            if (gw === ew) return true;
-            if (gw.length >= 4 && ew.length >= 4) {
-               return ew.includes(gw.substring(0, 4)) || gw.includes(ew.substring(0, 4));
-            }
-            return false;
-        });
-    });
-    if (match || given === expected || given.includes(expected)) return true;
-    return false;
-}
-
-function markDone() {
-    if (isAnswered) return; 
-    
-    if (currentTaskObj.type === 'answer') {
-        if (!validateAnswer()) {
-            ui.input.classList.add('error'); ui.err.style.display = 'block'; haptic('error'); 
-            
-            // Penalty
-            personalTimer -= 2.5;
-            ui.timer.style.color = 'var(--warm-red)'; ui.timer.style.transform = 'scale(1.3)';
-            setTimeout(() => { ui.timer.style.color='var(--card-text)'; ui.timer.style.transform='scale(1)'; }, 350);
-            
-            if (personalTimer <= 0) {
-                personalTimer = 0;
-                handleExplosion();
-            }
-            return;
-        }
-    }
-    
-    isAnswered = true; haptic('success');
-    ui.input.blur(); ui.img.classList.remove('shaking');
-    ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'none';
-    
-    ui.wrapper.classList.add('swipe-ready'); ui.hint.style.display = 'flex';
-    ui.status.innerText = T('swipeNow'); ui.status.style.color = 'var(--warm-red)';
-}
-
-document.getElementById('btn-submit-answer').onclick = markDone;
-document.getElementById('btn-submit-action').onclick = markDone;
-
-let ptrDrag = false;
-ui.container.onmousedown = () => { ptrDrag = false; };
-ui.container.onclick = () => {
-    if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
-    if (isLocked && !ptrDrag) unlockPotato();
-};
-
-function gameLoop(time) {
-    if (currentScreen !== 'GAME' || isGameOver) return;
-    if (!gameStartTime) gameStartTime = time;
-    let dt = Math.min((time - gameStartTime) / 1000, 0.15); gameStartTime = time;
-    globalTimer -= dt; personalTimer -= dt;
-
-    const isMine = currentTurnPlayerId === currentUser.id;
-    let speed = 1 + (10 - Math.max(0, personalTimer)) * 0.3;
-    pulsePhase += dt * Math.PI * 2 * speed;
-    ui.wrapper.style.transform = `scale(${1 + Math.sin(pulsePhase) * (isAnswered ? 0.04 : 0.08)})`;
-
-    let oldCy = Math.floor((pulsePhase - dt * Math.PI * 2 * speed) / (Math.PI * 2)), newCy = Math.floor(pulsePhase / (Math.PI * 2));
-    if (isMine && newCy > oldCy) haptic(personalTimer > 6 ? 'light' : personalTimer > 3 ? 'medium' : 'heavy');
-
-    const tVal = Math.max(0, personalTimer);
-    ui.timer.innerText = tVal.toFixed(1); ui.timer.classList.toggle('urgent', tVal < 3);
-
-    // Danger pulse when < 3s
-    if (tVal < 3) {
-        document.body.classList.add('danger-active');
-    } else {
-        document.body.classList.remove('danger-active');
-    }
-
-    if (personalTimer <= 0 || globalTimer <= 0) { handleExplosion(); return; }
-    gameLoopId = requestAnimationFrame(gameLoop);
-}
-
-function createExplosionParticles() {
-    // Full-screen flash
-    const flash = document.createElement('div');
-    flash.className = 'explosion-flash';
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 750);
-
-    const rect = ui.container.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const colors = ['#e86b62','#f5a87f','#ffde88','#fff9f0','#9dbdf2','#8fd5b8','#d0bcf2'];
-
-    for (let i = 0; i < 40; i++) {
-        const p = document.createElement('div');
-        const size = 8 + Math.random() * 22;
-        p.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;`
-            + `background:${colors[Math.floor(Math.random()*colors.length)]};`
-            + `border-radius:${Math.random()>0.4?'50%':'20%'};pointer-events:none;z-index:1998;`;
-        document.body.appendChild(p);
-        const ang = Math.random() * Math.PI * 2;
-        const vel = 120 + Math.random() * 320;
-        const tx = Math.cos(ang) * vel;
-        const ty = Math.sin(ang) * vel - 60; // slight upward bias
-        const rot = (Math.random() - 0.5) * 720;
-        const dur = 700 + Math.random() * 600;
-        p.animate([
-            { transform: `translate(-50%,-50%) scale(1.2) rotate(0deg)`, opacity: 1 },
-            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${rot}deg)`, opacity: 0 }
-        ], { duration: dur, easing: 'cubic-bezier(0.2, 1, 0.3, 1)', fill: 'forwards' });
-        setTimeout(() => p.remove(), dur + 50);
-    }
-}
-
-function handleExplosion() {
-    if (isExploding) return; isExploding = true;
-    document.body.classList.remove('danger-active');
-    closeChatSheet();
-    if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-    network.clearBotTimers();
-    let dead = network.players.find(p => p.id === currentTurnPlayerId);
-    if (dead) {
-        dead.lives = Math.max(0, (dead.lives ?? MAX_LIVES) - 1);
-        dead.isDead = dead.lives <= 0;
-    }
-
-    haptic('rigid');
-    createExplosionParticles();
-    ui.img.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-out';
-    ui.img.style.transform = 'scale(2.5)';
-    ui.img.style.opacity = '0';
-    ui.task.style.opacity = '0';
-    ui.timer.style.opacity = '0';
-    ui.status.innerText = "BOOM!";
-    ui.status.style.color = "var(--warm-red)";
-
-    setTimeout(() => {
-        if (!dead || (dead.id === currentUser.id && dead.isDead && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
-        else {
-            ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
-            ui.task.style.opacity = '1'; ui.task.style.color = 'var(--warm-red)'; ui.container.style.opacity = '0';
-            updatePlayersBar();
-            let alive = network.players.filter(p => !p.isDead);
-            if (alive.length <= 1) setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
-            else setTimeout(() => {
-                globalTimer = 25 + Math.random() * 20; let next = alive[Math.floor(Math.random() * alive.length)];
-                triggerCurtain(() => { passPotato(next.id); if(next.id !== currentUser.id) network.startBotTimer(next.id); });
-            }, 2600);
-        }
-    }, 1100);
-}
-
-// ── SWIPE ──
-let isDragging = false, sX=0, sY=0, cX=0, cY=0;
-function canDrag() { return currentScreen==='GAME' && !isGameOver && currentTurnPlayerId===currentUser.id && !isLocked && isAnswered; }
-function startDrag(x,y) { if(currentScreen!=='GAME' || isGameOver || currentTurnPlayerId!==currentUser.id) return;
-    isDragging=true; ptrDrag=false; sX=x; sY=y; cX=x; cY=y; if(!isLocked) ui.container.style.transition='none'; }
-function moveDrag(x,y) { if(!isDragging) return; cX=x; cY=y; const dx=cX-sX, dy=cY-sY; if(Math.hypot(dx,dy)>8) ptrDrag=true;
-    if(canDrag()) ui.container.style.transform=`translate(${dx*.6}px,${dy*.6}px)`; }
-function endDrag() { if(!isDragging) return; isDragging=false; const dx=cX-sX, dy=cY-sY;
-    if(!ptrDrag && isLocked) { unlockPotato(); return; }
-    if(canDrag() && Math.hypot(dx,dy)>80) {
-        if(isProcessingTurn) return; isProcessingTurn=true; if(gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-        ui.task.style.opacity='0'; ui.timer.style.opacity='0'; ui.status.innerText=T('flyingAway'); ui.combo.classList.remove('visible'); haptic('medium');
-        const fly=window.innerWidth*1.5; ui.container.style.transition='transform .4s ease-out, opacity .3s ease';
-        ui.container.style.transform=`translate(${Math.cos(Math.atan2(dy,dx))*fly}px,${Math.sin(Math.atan2(dy,dx))*fly}px) scale(.2)`; ui.container.style.opacity='0';
-        setTimeout(() => network.sendPotato(), 150);
-    } else if(!isLocked) { ui.container.style.transition='transform .4s cubic-bezier(.175,.885,.32,1.275)'; ui.container.style.transform='translate(0,0) scale(1)'; } }
-
-ui.container.addEventListener('touchstart', e=>{ e.stopPropagation(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-window.addEventListener('touchmove', e=>{ if(isDragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-window.addEventListener('touchend', endDrag);
-ui.container.addEventListener('mousedown', e=>startDrag(e.clientX,e.clientY));
-window.addEventListener('mousemove', e=>{ if(isDragging) moveDrag(e.clientX,e.clientY); });
-window.addEventListener('mouseup', endDrag);
-
-window.voteKick = function(b) { 
-    if(isGameOver || isExploding) return; 
-    
-    if (b.dataset.voted === 'true') return; // Prevent double vote from local player
-    b.dataset.voted = 'true';
-    b.style.pointerEvents = 'none';
-    currentVotes++;
-    
-    let check = () => {
-        if(currentVotes < requiredVotes) { 
-            b.innerText = T('votesNeeded', currentVotes, requiredVotes); 
-            b.style.transform = `scale(${1+currentVotes*.05})`; haptic('light'); 
-        } else { 
-            b.innerText = T('voteAccepted'); b.style.opacity = '.5'; haptic('heavy'); 
-            personalTimer = 0; handleExplosion(); 
-        } 
-    };
-    check();
-    
-    // Simulate bots voting if available
-    let bots = network.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId && p.id !== currentUser.id);
-    bots.forEach((bObj, idx) => {
-        setTimeout(() => {
-            if(isGameOver || isExploding) return;
-            currentVotes++; check();
-        }, 1000 + idx * 800);
-    });
-};
-
-function triggerGameOver(name) { isGameOver=true; if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;} haptic('error');
-    const alive = network.players.filter(p=>!p.isDead), go = document.getElementById('go-title'), ls = document.getElementById('loser-name');
-    if(name==="LAST_SURVIVOR" || alive.length<=1) {
-        if(isSpectating || network.players.find(p=>p.id===currentUser.id)?.isDead) {
-            go.innerText=T('gameOver'); go.style.color="var(--blue)"; ls.innerText=alive.length ? `🏆 ${alive[0].name}!` : T('winner'); document.getElementById('btn-spectate').style.display='none';
-        } else { go.innerText=T('victory'); go.style.color="var(--mint-dark)"; ls.innerText=T('survived'); document.getElementById('btn-spectate').style.display='none'; }
-    } else { go.innerText=T('boom'); go.style.color="var(--warm-red)"; ls.innerText=T('exploded', name); document.getElementById('btn-spectate').style.display=isSpectating?'none':'block'; } showScreen('GAMEOVER'); }
-
-document.getElementById('btn-spectate').onclick = () => { isGameOver=false; isSpectating=true; showScreen('GAME'); document.getElementById('btn-leave-spectate').style.display='block';
-    let alive = network.players.filter(p=>!p.isDead); if(alive.length>0) { triggerCurtain(()=>{ let n=alive[Math.floor(Math.random()*alive.length)]; passPotato(n.id); if(n.id!==currentUser.id) network.startBotTimer(n.id); }); } };
-
-function resetToMenu() {
-    if(gameLoopId){cancelAnimationFrame(gameLoopId);gameLoopId=null;}
-    network.clearBotTimers(); network=new NetworkManager();
-    gameStartTime=null; isSpectating=false;
-    document.body.classList.remove('danger-active');
-    document.getElementById('btn-leave-spectate').style.display='none';
-    closeChatSheet();
-    showScreen('START');
-}
-document.getElementById('btn-leave-spectate').onclick = resetToMenu;
-document.getElementById('btn-to-lobby').onclick = resetToMenu;
-
-// ═════ 2. EMOTES ═════
-const btnEmote = document.getElementById('btn-emote');
-const emoteFan = document.getElementById('emote-fan');
-let emoteOpen = false;
-
-btnEmote.addEventListener('click', e => {
-    e.stopPropagation();
-    emoteOpen = !emoteOpen;
-    emoteFan.classList.toggle('open', emoteOpen);
-    haptic('light');
-});
-
-document.querySelectorAll('.emote-opt').forEach(opt => {
-    opt.addEventListener('click', e => {
-        e.stopPropagation();
-        const emote = opt.dataset.emote;
-        emoteOpen = false;
-        emoteFan.classList.remove('open');
-        haptic('medium');
-        // Find current user's avatar in players bar
-        const myAvatar = ui.pBar.querySelector(`[data-pid="${currentUser.id}"]`);
-        const el = document.createElement('div');
-        el.className = 'emote-popup';
-        el.textContent = emote;
-        if (myAvatar) {
-            const rect = myAvatar.getBoundingClientRect();
-            el.style.left = (rect.left + rect.width/2 - 18) + 'px';
-            el.style.top  = (rect.top - 10) + 'px';
-        } else {
-            // Fallback: center of screen
-            el.style.left = '50%';
-            el.style.top  = '30%';
-            el.style.transform = 'translateX(-50%)';
-        }
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1600);
-    });
-});
-
-document.addEventListener('click', () => {
-    if (emoteOpen) { emoteOpen = false; emoteFan.classList.remove('open'); }
-});
-
-// Prevent touchmove on emote fan closing chat
-emoteFan && emoteFan.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
-
-// ═════ 3. CHAT ═════
-const chatSheet = document.getElementById('chat-sheet');
-const chatOverlay = document.getElementById('chat-overlay');
-const chatMessages = document.getElementById('chat-messages');
-const chatInput = document.getElementById('chat-input');
-
-function openChatSheet() {
-    chatSheet.classList.add('open');
-    chatOverlay.classList.add('open');
-    // Prevent game touchmove block from interfering
-    chatSheet.addEventListener('touchmove', e => e.stopPropagation(), {passive: false});
-}
-function closeChatSheet() {
-    chatSheet.classList.remove('open');
-    chatOverlay.classList.remove('open');
-    chatInput.blur();
-}
-
-document.getElementById('btn-chat').addEventListener('click', e => {
-    e.stopPropagation();
-    if (chatSheet.classList.contains('open')) closeChatSheet();
-    else { openChatSheet(); setTimeout(() => chatMessages.scrollTop = chatMessages.scrollHeight, 50); }
-    haptic('light');
-});
-chatOverlay.addEventListener('click', closeChatSheet);
-
-function addChatMsg(name, text, mine) {
-    const div = document.createElement('div');
-    div.className = 'chat-msg' + (mine ? ' mine' : '');
-    div.innerHTML = mine ? `<div>${text}</div>` : `<div class="chat-msg-name">${name}</div><div>${text}</div>`;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function sendChatMsg() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-    chatInput.value = '';
-    addChatMsg(currentUser.first_name, text, true);
-    haptic('light');
-    // Simulate bot reply after 1-2s
-    const bots = network.players.filter(p => p.id !== currentUser.id && !p.isDead);
-    if (bots.length && Math.random() > 0.4) {
-        const bot = bots[Math.floor(Math.random() * bots.length)];
-        const replies = ['😂', '🔥', 'ок', 'да ладно', 'хаха', '💀', 'ого', 'пфф', '👀'];
-        setTimeout(() => {
-            addChatMsg(bot.name, replies[Math.floor(Math.random()*replies.length)], false);
-        }, 800 + Math.random() * 1200);
-    }
-}
-
-document.getElementById('chat-send').addEventListener('click', sendChatMsg);
-chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMsg(); });
-chatInput.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
-
-    // ── Loader: hide after fonts + bg image ready ──
-    function hideLoader() {
-        const loader = document.getElementById('initial-loader');
-        if (!loader) return;
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 450);
-    }
-    // Minimum 400ms so loader doesn't flash away instantly
-    const loaderMinTime = Date.now();
-    function scheduleHideLoader() {
-        const elapsed = Date.now() - loaderMinTime;
-        const wait = Math.max(0, 400 - elapsed);
-        setTimeout(hideLoader, wait);
-    }
-    // Hide after fonts are ready (or after 2s timeout)
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(scheduleHideLoader);
-    } else {
-        window.addEventListener('load', scheduleHideLoader);
-    }
-    // Failsafe: always hide after 2.5s
-    setTimeout(hideLoader, 2500);
-
-    // ── Visual Viewport: shrink game area when keyboard opens ──
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            const ratio = window.visualViewport.height / window.screen.height;
-            if (ratio < 0.65) {
-                document.body.classList.add('kb-open');
+            if (currentTaskObj.type === 'action') {
+                ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'flex';
             } else {
-                document.body.classList.remove('kb-open');
+                ui.actWrap.style.display = 'none'; ui.txtWrap.style.display = 'flex';
+                ui.input.removeEventListener('input', onTyping); ui.input.addEventListener('input', onTyping);
+                setTimeout(() => ui.input.focus(), 100);
+            }
+        }
+
+        function onTyping() {
+            ui.img.classList.add('shaking'); clearTimeout(onTyping._t);
+            onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
+            ui.input.classList.remove('error'); ui.err.style.display = 'none';
+        }
+        ui.input.addEventListener('focus', () => {
+            if (currentScreen === 'GAME' && !isLocked) ui.img.classList.add('shaking');
+        });
+        ui.input.addEventListener('blur', () => {
+            clearTimeout(onTyping._t);
+            ui.img.classList.remove('shaking');
+        });
+
+        ui.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                markDone();
             }
         });
-    }
-</script>
+
+        function validateAnswer() {
+            if (currentTaskObj.type !== 'answer') return true;
+            let given = ui.input.value.toLowerCase().trim();
+
+            if (given.length < 1) return false;
+
+            let expectedList = currentTaskObj.allAnswers || [currentTaskObj.a];
+
+            for (let ans of expectedList) {
+                let expected = ans.toLowerCase().trim();
+                if (expected.includes('любо') || expected.includes('any')) return true;
+                if (given === expected) return true;
+
+                if (/^\d+$/.test(expected)) {
+                    let nums = given.match(/\d+/g);
+                    if (nums && nums.includes(expected)) return true;
+                    continue;
+                }
+
+                let expWords = expected.replace(/[.,!?()]/g, '').split(/\s+/).filter(w => w.length > 2);
+                if (expWords.length === 0) {
+                    if (given.includes(expected)) return true;
+                    continue;
+                }
+
+                let givenWords = given.split(/\s+/);
+                let match = expWords.some(ew => {
+                    return givenWords.some(gw => {
+                        if (gw.length < 3 && ew.length >= 3) return false;
+                        if (gw === ew) return true;
+                        if (gw.length >= 4 && ew.length >= 4) {
+                            return ew.includes(gw.substring(0, 4)) || gw.includes(ew.substring(0, 4));
+                        }
+                        return false;
+                    });
+                });
+
+                if (match || given.includes(expected)) return true;
+            }
+
+            return false;
+        }
+
+        function markDone() {
+            if (isAnswered) return;
+
+            if (currentTaskObj.type === 'answer') {
+                if (!validateAnswer()) {
+                    ui.input.classList.add('error'); ui.err.style.display = 'block'; haptic('error');
+
+                    personalTimer -= 2.5;
+                    ui.timer.style.color = 'var(--warm-red)'; ui.timer.style.transform = 'scale(1.3)';
+                    setTimeout(() => { ui.timer.style.color = 'var(--card-text)'; ui.timer.style.transform = 'scale(1)'; }, 350);
+
+                    if (personalTimer <= 0) {
+                        personalTimer = 0;
+                        handleExplosion();
+                    }
+                    return;
+                }
+            }
+
+            isAnswered = true; haptic('success');
+            ui.input.blur(); ui.img.classList.remove('shaking');
+            ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'none';
+
+            ui.wrapper.classList.add('swipe-ready'); ui.hint.style.display = 'flex';
+            ui.status.innerText = T('swipeNow'); ui.status.style.color = 'var(--warm-red)';
+        }
+
+        document.getElementById('btn-submit-answer').onclick = markDone;
+        document.getElementById('btn-submit-action').onclick = markDone;
+
+        let ptrDrag = false;
+        ui.container.onmousedown = () => { ptrDrag = false; };
+        ui.container.onclick = () => {
+            if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
+            if (isLocked && !ptrDrag) unlockPotato();
+        };
+
+        function gameLoop(time) {
+            if (currentScreen !== 'GAME' || isGameOver) return;
+            if (!gameStartTime) gameStartTime = time;
+            let dt = Math.min((time - gameStartTime) / 1000, 0.15); gameStartTime = time;
+            globalTimer -= dt; personalTimer -= dt;
+
+            const isMine = currentTurnPlayerId === currentUser.id;
+            let speed = 1 + Math.max(0, 10 - personalTimer) * 0.3;
+            pulsePhase += dt * Math.PI * 2 * speed;
+            ui.wrapper.style.transform = `scale(${1 + Math.sin(pulsePhase) * (isAnswered ? 0.02 : 0.04)})`;
+
+            let oldCy = Math.floor((pulsePhase - dt * Math.PI * 2 * speed) / (Math.PI * 2)), newCy = Math.floor(pulsePhase / (Math.PI * 2));
+            if (isMine && newCy > oldCy) haptic(personalTimer > 6 ? 'light' : personalTimer > 3 ? 'medium' : 'heavy');
+
+            const tVal = Math.max(0, personalTimer);
+            ui.timer.innerText = tVal.toFixed(1); ui.timer.classList.toggle('urgent', tVal < 3);
+
+            if (tVal < 3) document.body.classList.add('danger-active');
+            else document.body.classList.remove('danger-active');
+
+            if (personalTimer <= 0 || globalTimer <= 0) { handleExplosion(); return; }
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function createExplosionParticles() {
+            const flash = document.createElement('div');
+            flash.className = 'explosion-flash';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 750);
+
+            const rect = ui.container.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const colors = ['#e86b62', '#f5a87f', '#ffde88', '#fff9f0', '#9dbdf2', '#8fd5b8', '#d0bcf2'];
+
+            for (let i = 0; i < 40; i++) {
+                const p = document.createElement('div');
+                const size = 8 + Math.random() * 22;
+                p.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;`
+                    + `background:${colors[Math.floor(Math.random() * colors.length)]};`
+                    + `border-radius:${Math.random() > 0.4 ? '50%' : '20%'};pointer-events:none;z-index:1998;`;
+                document.body.appendChild(p);
+                const ang = Math.random() * Math.PI * 2;
+                const vel = 120 + Math.random() * 320;
+                const tx = Math.cos(ang) * vel;
+                const ty = Math.sin(ang) * vel - 60;
+                const rot = (Math.random() - 0.5) * 720;
+                const dur = 700 + Math.random() * 600;
+                p.animate([
+                    { transform: `translate(-50%,-50%) scale(1.2) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${rot}deg)`, opacity: 0 }
+                ], { duration: dur, easing: 'cubic-bezier(0.2, 1, 0.3, 1)', fill: 'forwards' });
+                setTimeout(() => p.remove(), dur + 50);
+            }
+        }
+
+        function handleExplosion() {
+            if (isExploding) return; isExploding = true;
+            document.body.classList.remove('danger-active');
+            closeChatSheet();
+            if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+            network.clearBotTimers();
+            let dead = network.players.find(p => p.id === currentTurnPlayerId);
+            if (dead) {
+                dead.lives = Math.max(0, (dead.lives ?? MAX_LIVES) - 1);
+                dead.isDead = dead.lives <= 0;
+            }
+
+            haptic('rigid');
+            createExplosionParticles();
+            ui.img.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-out';
+            ui.img.style.transform = 'scale(2.5)';
+            ui.img.style.opacity = '0';
+            ui.task.style.opacity = '0';
+            ui.timer.style.opacity = '0';
+            ui.status.innerText = "BOOM!";
+            ui.status.style.color = "var(--warm-red)";
+
+            setTimeout(() => {
+                if (!dead || (dead.id === currentUser.id && dead.isDead && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
+                else {
+                    ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
+                    ui.task.style.opacity = '1'; ui.task.style.color = 'var(--warm-red)'; ui.container.style.opacity = '0';
+                    updatePlayersBar();
+                    let alive = network.players.filter(p => !p.isDead);
+                    if (alive.length <= 1) setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
+                    else setTimeout(() => {
+                        globalTimer = 40 + Math.random() * 20; let next = alive[Math.floor(Math.random() * alive.length)];
+                        triggerCurtain(() => { passPotato(next.id); if (next.id !== currentUser.id) network.startBotTimer(next.id); });
+                    }, 2600);
+                }
+            }, 1100);
+        }
+
+        // ── SWIPE ──
+        let isDragging = false, sX = 0, sY = 0, cX = 0, cY = 0;
+        function canDrag() { return currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === currentUser.id && !isLocked && isAnswered; }
+        function startDrag(x, y) {
+            if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
+            isDragging = true; ptrDrag = false; sX = x; sY = y; cX = x; cY = y; if (!isLocked) ui.container.style.transition = 'none';
+        }
+        function moveDrag(x, y) {
+            if (!isDragging) return; cX = x; cY = y; const dx = cX - sX, dy = cY - sY; if (Math.hypot(dx, dy) > 8) ptrDrag = true;
+            if (canDrag()) ui.container.style.transform = `translate(${dx * .6}px,${dy * .6}px)`;
+        }
+        function endDrag() {
+            if (!isDragging) return; isDragging = false; const dx = cX - sX, dy = cY - sY;
+            if (!ptrDrag && isLocked) { unlockPotato(); return; }
+            if (canDrag() && Math.hypot(dx, dy) > 80) {
+                if (isProcessingTurn) return; isProcessingTurn = true; if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+                ui.task.style.opacity = '0'; ui.timer.style.opacity = '0'; ui.status.innerText = T('flyingAway'); ui.combo.classList.remove('visible'); haptic('medium');
+                const fly = window.innerWidth * 1.5; ui.container.style.transition = 'transform .4s ease-out, opacity .3s ease';
+                ui.container.style.transform = `translate(${Math.cos(Math.atan2(dy, dx)) * fly}px,${Math.sin(Math.atan2(dy, dx)) * fly}px) scale(.2)`; ui.container.style.opacity = '0';
+                setTimeout(() => network.sendPotato(), 150);
+            } else if (!isLocked) { ui.container.style.transition = 'transform .4s cubic-bezier(.175,.885,.32,1.275)'; ui.container.style.transform = 'translate(0,0) scale(1)'; }
+        }
+
+        ui.container.addEventListener('touchstart', e => { e.stopPropagation(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        window.addEventListener('touchmove', e => { if (isDragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        window.addEventListener('touchend', endDrag);
+        ui.container.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => { if (isDragging) moveDrag(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', endDrag);
+
+        window.voteKick = function (b) {
+            if (isGameOver || isExploding) return;
+
+            if (b.dataset.voted === 'true') return;
+            b.dataset.voted = 'true';
+            b.style.pointerEvents = 'none';
+            currentVotes++;
+
+            let check = () => {
+                if (currentVotes < requiredVotes) {
+                    b.innerText = T('votesNeeded', currentVotes, requiredVotes);
+                    b.style.transform = `scale(${1 + currentVotes * .05})`; haptic('light');
+                } else {
+                    b.innerText = T('voteAccepted'); b.style.opacity = '.5'; haptic('heavy');
+                    personalTimer = 0; handleExplosion();
+                }
+            };
+            check();
+
+            let bots = network.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId && p.id !== currentUser.id);
+            bots.forEach((bObj, idx) => {
+                setTimeout(() => {
+                    if (isGameOver || isExploding) return;
+                    currentVotes++; check();
+                }, 1000 + idx * 800);
+            });
+        };
+
+        function triggerGameOver(name) {
+            isGameOver = true; if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; } haptic('error');
+            const alive = network.players.filter(p => !p.isDead), go = document.getElementById('go-title'), ls = document.getElementById('loser-name');
+            if (name === "LAST_SURVIVOR" || alive.length <= 1) {
+                if (isSpectating || network.players.find(p => p.id === currentUser.id)?.isDead) {
+                    go.innerText = T('gameOver'); go.style.color = "var(--blue)"; ls.innerText = alive.length ? `🏆 ${alive[0].name}!` : T('winner'); document.getElementById('btn-spectate').style.display = 'none';
+                } else { go.innerText = T('victory'); go.style.color = "var(--mint-dark)"; ls.innerText = T('survived'); document.getElementById('btn-spectate').style.display = 'none'; }
+            } else { go.innerText = T('boom'); go.style.color = "var(--warm-red)"; ls.innerText = T('exploded', name); document.getElementById('btn-spectate').style.display = isSpectating ? 'none' : 'block'; } showScreen('GAMEOVER');
+        }
+
+        document.getElementById('btn-spectate').onclick = () => {
+            isGameOver = false; isSpectating = true; showScreen('GAME'); document.getElementById('btn-leave-game').style.display = 'block';
+            let alive = network.players.filter(p => !p.isDead); if (alive.length > 0) { triggerCurtain(() => { let n = alive[Math.floor(Math.random() * alive.length)]; passPotato(n.id); if (n.id !== currentUser.id) network.startBotTimer(n.id); }); }
+        };
+
+        function resetToMenu() {
+            if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+            network.clearBotTimers(); network = new NetworkManager();
+            gameStartTime = null; isSpectating = false;
+
+            ui.container.style.opacity = '0';
+            ui.container.style.transform = 'scale(0)';
+            ui.container.style.pointerEvents = 'none';
+            ui.img.style.transform = 'scale(1)';
+            ui.wrapper.style.transform = 'scale(1)';
+            ui.task.style.opacity = '0';
+
+            document.body.classList.remove('danger-active');
+            document.body.classList.remove('dark-mode');
+            isAdultMode = false;
+            const btnAdult = document.getElementById('mode-adult');
+            const btnFamily = document.getElementById('mode-family');
+            if (btnAdult) btnAdult.classList.remove('active');
+            if (btnFamily) btnFamily.classList.add('active');
+
+            document.getElementById('btn-leave-game').style.display = 'none';
+            usedQuestions.clear(); // Очищаем историю вопросов при выходе в меню
+            closeChatSheet();
+            showScreen('START');
+        }
+
+        // ═════ 2. EMOTES ═════
+        const btnEmote = document.getElementById('btn-emote');
+        const emoteFan = document.getElementById('emote-fan');
+        let emoteOpen = false;
+
+        btnEmote.addEventListener('click', e => {
+            e.stopPropagation();
+            emoteOpen = !emoteOpen;
+            emoteFan.classList.toggle('open', emoteOpen);
+            haptic('light');
+        });
+
+        document.querySelectorAll('.emote-opt').forEach(opt => {
+            opt.addEventListener('click', e => {
+                e.stopPropagation();
+                const emote = opt.dataset.emote;
+                emoteOpen = false;
+                emoteFan.classList.remove('open');
+                haptic('medium');
+                const myAvatar = ui.pBar.querySelector(`[data-pid="${currentUser.id}"]`);
+                const el = document.createElement('div');
+                el.className = 'emote-popup';
+                el.textContent = emote;
+                if (myAvatar) {
+                    const rect = myAvatar.getBoundingClientRect();
+                    el.style.left = (rect.left + rect.width / 2 - 18) + 'px';
+                    el.style.top = (rect.top - 10) + 'px';
+                } else {
+                    el.style.left = '50%';
+                    el.style.top = '30%';
+                    el.style.transform = 'translateX(-50%)';
+                }
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1600);
+            });
+        });
+
+        document.addEventListener('click', () => {
+            if (emoteOpen) { emoteOpen = false; emoteFan.classList.remove('open'); }
+        });
+        emoteFan && emoteFan.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+
+        // ═════ 3. CHAT ═════
+        const chatSheet = document.getElementById('chat-sheet');
+        const chatOverlay = document.getElementById('chat-overlay');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+
+        function openChatSheet() {
+            chatSheet.classList.add('open');
+            chatOverlay.classList.add('open');
+            chatSheet.addEventListener('touchmove', e => e.stopPropagation(), { passive: false });
+        }
+        function closeChatSheet() {
+            chatSheet.classList.remove('open');
+            chatOverlay.classList.remove('open');
+            chatInput.blur();
+        }
+
+        document.getElementById('btn-chat').addEventListener('click', e => {
+            e.stopPropagation();
+            if (chatSheet.classList.contains('open')) closeChatSheet();
+            else { openChatSheet(); setTimeout(() => chatMessages.scrollTop = chatMessages.scrollHeight, 50); }
+            haptic('light');
+        });
+        chatOverlay.addEventListener('click', closeChatSheet);
+
+        function addChatMsg(name, text, mine) {
+            const div = document.createElement('div');
+            div.className = 'chat-msg' + (mine ? ' mine' : '');
+            div.innerHTML = mine ? `<div>${text}</div>` : `<div class="chat-msg-name">${name}</div><div>${text}</div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendChatMsg() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            chatInput.value = '';
+            addChatMsg(currentUser.first_name, text, true);
+            haptic('light');
+            const bots = network.players.filter(p => p.id !== currentUser.id && !p.isDead);
+            if (bots.length && Math.random() > 0.4) {
+                const bot = bots[Math.floor(Math.random() * bots.length)];
+                const replies = ['😂', '🔥', 'ок', 'да ладно', 'хаха', '💀', 'ого', 'пфф', '👀'];
+                setTimeout(() => {
+                    addChatMsg(bot.name, replies[Math.floor(Math.random() * replies.length)], false);
+                }, 800 + Math.random() * 1200);
+            }
+        }
+
+        document.getElementById('chat-send').addEventListener('click', sendChatMsg);
+        chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMsg(); });
+        chatInput.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+
+        function hideLoader() {
+            const loader = document.getElementById('initial-loader');
+            if (!loader) return;
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 450);
+        }
+        const loaderMinTime = Date.now();
+        function scheduleHideLoader() {
+            const elapsed = Date.now() - loaderMinTime;
+            const wait = Math.max(0, 400 - elapsed);
+            setTimeout(hideLoader, wait);
+        }
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleHideLoader);
+        else window.addEventListener('load', scheduleHideLoader);
+        setTimeout(hideLoader, 2500);
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                const ratio = window.visualViewport.height / window.screen.height;
+                if (ratio < 0.65) document.body.classList.add('kb-open');
+                else document.body.classList.remove('kb-open');
+            });
+        }
+    </script>
 </body>
+
 </html>

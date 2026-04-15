@@ -409,7 +409,12 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             font-family: 'Fredoka', sans-serif;
-            transition: transform .12s ease, box-shadow .12s ease, background-color 0.5s ease, border-color 0.5s ease;
+            /* Spring-back transition: normal → pressed is fast, released bounces back */
+            transition:
+                transform .08s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow .12s ease,
+                background-color 0.5s ease,
+                border-color 0.5s ease;
             box-shadow:
                 8px 10px 20px var(--shadow-dark),
                 -5px -8px 15px var(--shadow-light),
@@ -418,6 +423,7 @@
             text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.2);
             width: 100%;
             display: block;
+            will-change: transform;
         }
 
         body.dark-mode .clay-btn {
@@ -433,13 +439,69 @@
             margin-top: 10px;
         }
 
+        /* Squish физика: кнопка сплющивается вниз (scaleY уменьшается больше) */
         .clay-btn:active {
-            transform: scale(0.95) translateY(2px);
+            transform: scale(0.95, 0.88) translateY(3px);
+            transition:
+                transform .06s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow .06s ease;
             box-shadow:
-                2px 4px 8px var(--shadow-dark),
-                -2px -3px 6px var(--shadow-light),
-                inset 4px 6px 12px rgba(110, 80, 70, 0.3),
-                inset -2px -2px 4px rgba(255, 255, 255, 0.4);
+                1px 2px 5px var(--shadow-dark),
+                -1px -1px 3px var(--shadow-light),
+                inset 5px 7px 14px rgba(110, 80, 70, 0.35),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        /* ─── Focus Mode Overlay (Dynamic Focus при ходе игрока) ─── */
+        #focus-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 48;
+            background: rgba(20, 10, 5, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            will-change: opacity;
+            border-radius: inherit;
+        }
+
+        #focus-overlay.active {
+            opacity: 1;
+        }
+
+        /* ─── Answer Input: typing pulse border ─── */
+        @keyframes inputFlash {
+            0%   { box-shadow: inset 4px 6px 12px rgba(110, 80, 70, 0.25), inset -2px -4px 6px rgba(255,255,255,0.6), 0 0 0 3px rgba(143,213,184,0.8); }
+            60%  { box-shadow: inset 4px 6px 12px rgba(110, 80, 70, 0.25), inset -2px -4px 6px rgba(255,255,255,0.6), 0 0 0 5px rgba(143,213,184,0.4); }
+            100% { box-shadow: inset 4px 6px 12px rgba(110, 80, 70, 0.25), inset -2px -4px 6px rgba(255,255,255,0.6), 0 0 0 3px rgba(143,213,184,0.6); }
+        }
+
+        @keyframes inputFlashDark {
+            0%   { box-shadow: inset 4px 6px 12px rgba(0,0,0,0.8), 0 0 0 3px rgba(212,38,63,0.9); }
+            60%  { box-shadow: inset 4px 6px 12px rgba(0,0,0,0.8), 0 0 0 6px rgba(212,38,63,0.3); }
+            100% { box-shadow: inset 4px 6px 12px rgba(0,0,0,0.8), 0 0 0 3px rgba(212,38,63,0.6); }
+        }
+
+        .answer-input.typing-flash {
+            animation: inputFlash 0.25s ease-out forwards;
+        }
+
+        body.dark-mode .answer-input.typing-flash {
+            animation: inputFlashDark 0.25s ease-out forwards;
+        }
+
+        /* ─── Potato micro-pulse on typing ─── */
+        @keyframes potatoTypePulse {
+            0%   { transform: scale(1); }
+            35%  { transform: scale(1.045) translateY(-3px); }
+            70%  { transform: scale(0.98) translateY(1px); }
+            100% { transform: scale(1); }
+        }
+
+        .potato-img.type-pulse {
+            animation: potatoTypePulse 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         /* ─── Segmented selector ─── */
@@ -800,6 +862,8 @@
             hyphens: auto;
             box-sizing: border-box;
             width: 100%;
+            position: relative;
+            z-index: 50;
         }
 
         /* Top Panel - Game screen */
@@ -1012,6 +1076,8 @@
             box-shadow: 6px 8px 16px var(--shadow-dark), -4px -6px 12px var(--shadow-light);
             border: 2px solid var(--card-rim);
             transition: background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
+            position: relative;
+            z-index: 50;
         }
 
         body.dark-mode #combo-panel {
@@ -1808,6 +1874,7 @@
 
 <body>
 
+
     <div id="initial-loader">
         <div class="loader-potato"></div>
         <div class="loader-text">WET POTATO...</div>
@@ -1816,6 +1883,8 @@
     <div class="curtain" id="curtain"></div>
 
     <div id="app">
+        <!-- Focus Mode Overlay: dims UI except potato (z-index 48 < potato-container 50) -->
+        <div id="focus-overlay"></div>
 
         <!-- ══════ START ══════ -->
         <div id="screen-start" class="screen active">
@@ -2525,12 +2594,31 @@
         function resetComboPanel() {
             ui.combo.classList.remove('visible'); ui.input.value = ''; ui.input.classList.remove('error'); ui.err.style.display = 'none';
             ui.hint.style.display = 'none'; ui.input.removeEventListener('input', onTyping);
+            // Dismiss focus overlay immediately on turn reset
+            const focusEl = document.getElementById('focus-overlay');
+            if (focusEl) {
+                clearTimeout(unlockPotato._focusTimer);
+                focusEl.classList.remove('active');
+            }
         }
 
         function unlockPotato() {
             if (!isLocked) return; isLocked = false; haptic('heavy');
             const flash = document.createElement('div'); flash.className = 'unlock-flash'; ui.container.appendChild(flash); setTimeout(() => flash.remove(), 600);
             ui.img.classList.remove('locked'); ui.lockOvr.style.opacity = '0'; ui.lockOvr.style.pointerEvents = 'none';
+
+            // ── Dynamic Focus Mode: 2-second blur overlay ──
+            const focusEl = document.getElementById('focus-overlay');
+            if (focusEl) {
+                focusEl.classList.add('active');
+                // Auto-dismiss after 2 seconds with smooth 0.6s fade-out
+                clearTimeout(unlockPotato._focusTimer);
+                unlockPotato._focusTimer = setTimeout(() => {
+                    focusEl.style.transition = 'opacity 0.65s ease';
+                    focusEl.classList.remove('active');
+                    setTimeout(() => { focusEl.style.transition = 'opacity 0.4s ease'; }, 700);
+                }, 2000);
+            }
 
             const typeCls = currentTaskObj.type === 'action' ? 'actions' : 'answers';
             ui.task.innerHTML = `<span class="mode-badge ${typeCls}">${T('modeLabels')[typeCls]}</span>
@@ -2549,6 +2637,19 @@
         }
 
         function onTyping() {
+            // Micro-reaction: border flash
+            ui.input.classList.remove('typing-flash');
+            void ui.input.offsetWidth; // force reflow to restart animation
+            ui.input.classList.add('typing-flash');
+
+            // Micro-reaction: potato micro-pulse (subtle bounce)
+            ui.img.classList.remove('type-pulse');
+            void ui.img.offsetWidth;
+            ui.img.classList.add('type-pulse');
+            clearTimeout(onTyping._pulseT);
+            onTyping._pulseT = setTimeout(() => ui.img.classList.remove('type-pulse'), 320);
+
+            // Existing shaking behavior preserved
             ui.img.classList.add('shaking'); clearTimeout(onTyping._t);
             onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
             ui.input.classList.remove('error'); ui.err.style.display = 'none';
@@ -2742,27 +2843,62 @@
             }, 1100);
         }
 
-        // ── SWIPE ──
+        // ── SWIPE (Rubber-band physics) ──
         let isDragging = false, sX = 0, sY = 0, cX = 0, cY = 0;
         function canDrag() { return currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === currentUser.id && !isLocked && isAnswered; }
         function startDrag(x, y) {
             if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
-            isDragging = true; ptrDrag = false; sX = x; sY = y; cX = x; cY = y; if (!isLocked) ui.container.style.transition = 'none';
+            isDragging = true; ptrDrag = false; sX = x; sY = y; cX = x; cY = y;
+            if (!isLocked) ui.container.style.transition = 'none';
         }
         function moveDrag(x, y) {
-            if (!isDragging) return; cX = x; cY = y; const dx = cX - sX, dy = cY - sY; if (Math.hypot(dx, dy) > 8) ptrDrag = true;
-            if (canDrag()) ui.container.style.transform = `translate(${dx * .6}px,${dy * .6}px)`;
+            if (!isDragging) return;
+            cX = x; cY = y;
+            const dx = cX - sX, dy = cY - sY;
+            const dist = Math.hypot(dx, dy);
+            if (dist > 8) ptrDrag = true;
+
+            if (canDrag()) {
+                // Rubber-band: resistance increases with distance (logarithmic damping)
+                const rubberFactor = 0.55 / (1 + dist * 0.006);
+                const rx = dx * rubberFactor;
+                const ry = dy * rubberFactor;
+
+                // Tilt: rotate toward drag direction (max ±18deg)
+                const angle = Math.atan2(dy, dx);
+                const tilt = Math.min(dist * 0.06, 18) * (dx >= 0 ? 1 : -1);
+
+                // Squash: compress perpendicular to drag direction
+                const normX = Math.abs(dx) / (dist || 1);
+                const normY = Math.abs(dy) / (dist || 1);
+                const squashAmt = Math.min(dist / 280, 0.12);
+                const scaleX = 1 + normY * squashAmt;
+                const scaleY = 1 - normX * squashAmt * 0.7;
+
+                ui.container.style.transform =
+                    `translate(${rx}px, ${ry}px) rotate(${tilt}deg) scale(${scaleX}, ${scaleY})`;
+            }
         }
         function endDrag() {
-            if (!isDragging) return; isDragging = false; const dx = cX - sX, dy = cY - sY;
+            if (!isDragging) return; isDragging = false;
+            const dx = cX - sX, dy = cY - sY;
             if (!ptrDrag && isLocked) { unlockPotato(); return; }
             if (canDrag() && Math.hypot(dx, dy) > 80) {
-                if (isProcessingTurn) return; isProcessingTurn = true; if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-                ui.task.style.opacity = '0'; ui.timer.style.opacity = '0'; ui.status.innerText = T('flyingAway'); ui.combo.classList.remove('visible'); haptic('medium');
-                const fly = window.innerWidth * 1.5; ui.container.style.transition = 'transform .4s ease-out, opacity .3s ease';
-                ui.container.style.transform = `translate(${Math.cos(Math.atan2(dy, dx)) * fly}px,${Math.sin(Math.atan2(dy, dx)) * fly}px) scale(.2)`; ui.container.style.opacity = '0';
+                if (isProcessingTurn) return; isProcessingTurn = true;
+                if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+                ui.task.style.opacity = '0'; ui.timer.style.opacity = '0';
+                ui.status.innerText = T('flyingAway'); ui.combo.classList.remove('visible'); haptic('medium');
+                const fly = window.innerWidth * 1.5;
+                ui.container.style.transition = 'transform .4s ease-out, opacity .3s ease';
+                ui.container.style.transform =
+                    `translate(${Math.cos(Math.atan2(dy, dx)) * fly}px, ${Math.sin(Math.atan2(dy, dx)) * fly}px) scale(.2)`;
+                ui.container.style.opacity = '0';
                 setTimeout(() => network.sendPotato(), 150);
-            } else if (!isLocked) { ui.container.style.transition = 'transform .4s cubic-bezier(.175,.885,.32,1.275)'; ui.container.style.transform = 'translate(0,0) scale(1)'; }
+            } else if (!isLocked) {
+                // Spring-back with overshoot bounce
+                ui.container.style.transition = 'transform .55s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                ui.container.style.transform = 'translate(0,0) rotate(0deg) scale(1,1)';
+            }
         }
 
         ui.container.addEventListener('touchstart', e => { e.stopPropagation(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });

@@ -2931,7 +2931,7 @@
         let ptrDrag = false;
         ui.container.onmousedown = () => { ptrDrag = false; };
         ui.container.onclick = () => {
-            if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
+            if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId != currentUser.id) return;
             if (isLocked && !ptrDrag) unlockPotato();
         };
 
@@ -3019,7 +3019,7 @@
             ui.status.style.color = "var(--warm-red)";
 
             setTimeout(() => {
-                if (!dead || (dead.id === currentUser.id && dead.isDead && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
+                if (!dead || (dead.id == currentUser.id && dead.isDead && !isSpectating)) triggerGameOver(dead ? dead.name : T('boom'));
                 else {
                     ui.task.innerHTML = `<span style="font-size:1.5rem; font-weight:700;">${T('burned', dead.name)}</span>`;
                     ui.task.style.opacity = '1'; ui.task.style.color = 'var(--warm-red)'; ui.container.style.opacity = '0';
@@ -3036,9 +3036,9 @@
 
         // ── SWIPE (Rubber-band physics) ──
         let isDragging = false, sX = 0, sY = 0, cX = 0, cY = 0;
-        function canDrag() { return currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === currentUser.id && !isLocked && isAnswered; }
+        function canDrag() { return currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId == currentUser.id && !isLocked && isAnswered; }
         function startDrag(x, y) {
-            if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId !== currentUser.id) return;
+            if (currentScreen !== 'GAME' || isGameOver || currentTurnPlayerId != currentUser.id) return;
             isDragging = true; ptrDrag = false; sX = x; sY = y; cX = x; cY = y;
             if (!isLocked) ui.container.style.transition = 'none';
         }
@@ -3131,7 +3131,7 @@
             isGameOver = true; if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; } haptic('error');
             const alive = network.players.filter(p => !p.isDead), go = document.getElementById('go-title'), ls = document.getElementById('loser-name');
             if (name === "LAST_SURVIVOR" || alive.length <= 1) {
-                if (isSpectating || network.players.find(p => p.id === currentUser.id)?.isDead) {
+                if (isSpectating || network.players.find(p => p.id == currentUser.id)?.isDead) {
                     go.innerText = T('gameOver'); go.style.color = "var(--blue)"; ls.innerText = alive.length ? `🏆 ${alive[0].name}!` : T('winner'); document.getElementById('btn-spectate').style.display = 'none';
                 } else { go.innerText = T('victory'); go.style.color = "var(--mint-dark)"; ls.innerText = T('survived'); document.getElementById('btn-spectate').style.display = 'none'; }
             } else { go.innerText = T('boom'); go.style.color = "var(--warm-red)"; ls.innerText = T('exploded', name); document.getElementById('btn-spectate').style.display = isSpectating ? 'none' : 'block'; } showScreen('GAMEOVER');

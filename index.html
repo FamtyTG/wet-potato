@@ -2399,25 +2399,44 @@
         // ═════ NETWORK ═════
         const MAX_LIVES = 2; // УМЕНЬШЕНО ДО 2Х ЖИЗНЕЙ
         class NetworkManager {
-            constructor() { this.lobbyId = null; this.players = []; this.isHost = false; this.botTimers = []; this.botPassBack = null; }
+            constructor() { this.lobbyId = null; this.players = []; this.isHost = false; this.botTimers = []; this.botPassBack = null; this.pollInterval = null; }
             connect(lobbyId, isHost = false) {
                 this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
                 
-                // Add current user only if not already present in the list (synced from DB)
                 const exists = this.players.find(p => p.id.toString() === currentUser.id.toString());
                 if (!exists) {
                     this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost, isDead: false, lives: MAX_LIVES });
                 }
                 
                 updateLobbyUI();
-                
-                // Automatic bot spawning removed: Now handled manually via spawnBot from the UI
-                if (!isHost) {
-                    this.players.push({ id: 'host_placeholder', name: "Host", initials: "HO", isHost: true, isDead: false, lives: MAX_LIVES });
-                    updateLobbyUI();
-                    this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 6000));
-                }
+                this.startPolling();
             }
+            async syncLobby() {
+                if (!this.lobbyId || currentScreen !== 'LOBBY') return;
+                try {
+                    const response = await fetch(`/api/get-lobby?code=${this.lobbyId}`);
+                    if (response.ok) {
+                        const lobbyData = await response.json();
+                        
+                        // Если статус 'playing' — начинаем игру у всех
+                        if (lobbyData.status === 'playing' && currentScreen === 'LOBBY') {
+                            startRound(); return;
+                        }
+
+                        this.players = lobbyData.players.map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            initials: (p.name || "??").substring(0, 2).toUpperCase(),
+                            isHost: p.id.toString() === lobbyData.hostId.toString(),
+                            isDead: false,
+                            lives: MAX_LIVES
+                        }));
+                        updateLobbyUI();
+                    }
+                } catch (e) { console.error("Poll error:", e); }
+            }
+            startPolling() { this.stopPolling(); this.pollInterval = setInterval(() => this.syncLobby(), 3000); }
+            stopPolling() { if (this.pollInterval) clearInterval(this.pollInterval); }
             startBotTimer(botId) {
                 const diffObj = currentTaskObj || { time: 10 };
                 const delay = (diffObj.time * 0.45 + Math.random() * diffObj.time * 0.35) * 1000;
@@ -2596,7 +2615,15 @@
 
         // ═════ GAME LOGIC ═════
 
-        function startRound() {
+        async function startRound() {
+            if (network.isHost) {
+                await fetch('/api/start-game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lobbyCode: network.lobbyId, hostId: currentUser.id })
+                });
+            }
+            network.stopPolling();
             isGameOver = false; isSpectating = false;
             globalTimer = 45 + Math.random() * 30;
             network.players.forEach(p => { p.isDead = false; p.lives = MAX_LIVES; });

@@ -2402,7 +2402,13 @@
             constructor() { this.lobbyId = null; this.players = []; this.isHost = false; this.botTimers = []; this.botPassBack = null; }
             connect(lobbyId, isHost = false) {
                 this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
-                this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost, isDead: false, lives: MAX_LIVES });
+                
+                // Add current user only if not already present in the list (synced from DB)
+                const exists = this.players.find(p => p.id.toString() === currentUser.id.toString());
+                if (!exists) {
+                    this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost, isDead: false, lives: MAX_LIVES });
+                }
+                
                 updateLobbyUI();
                 
                 // Automatic bot spawning removed: Now handled manually via spawnBot from the UI
@@ -2474,8 +2480,9 @@
             }, dur + 20);
         }
 
+        const cdInp = document.getElementById('join-code-input');
         document.getElementById('btn-create-lobby').onclick = () => { applyNickname(); joinLobby(generateCode(), true); };
-        document.getElementById('btn-join-code').onclick = () => { if (cdInp.value.trim().length) { applyNickname(); joinLobby(cdInp.value.trim(), false); } };
+        document.getElementById('btn-join-code').onclick = () => { if (cdInp && cdInp.value.trim().length) { applyNickname(); joinLobby(cdInp.value.trim(), false); } };
 
         async function joinLobby(id, host = false) {
             const code = id.toUpperCase();
@@ -2492,10 +2499,25 @@
                 });
 
                 if (response.ok) {
+                    const lobbyData = await response.json();
                     showScreen('LOBBY');
                     document.getElementById('lobby-id-display').innerText = code;
                     document.getElementById('host-settings').style.display = host ? 'block' : 'none';
                     document.getElementById('wait-host-msg').style.display = host ? 'none' : 'block';
+                    
+                    // Синхронизируем список игроков из базы
+                    network.lobbyId = code;
+                    network.isHost = host;
+                    network.players = lobbyData.players.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        initials: p.name.substring(0, 2).toUpperCase(),
+                        isHost: p.id.toString() === lobbyData.hostId.toString(),
+                        isDead: false,
+                        lives: MAX_LIVES
+                    }));
+                    
+                    updateLobbyUI();
                     network.connect(code, host);
                 } else {
                     const err = await response.json();
@@ -2503,7 +2525,7 @@
                 }
             } catch (e) {
                 console.error("Lobby error:", e);
-                alert("Ошибка подключения к серверу");
+                alert("Ошибка подключения к серверу. Убедитесь, что эндпоинты настроены.");
             }
         }
 

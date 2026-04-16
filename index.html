@@ -2412,41 +2412,73 @@
                 this.startPolling();
             }
             async syncLobby() {
-                if (!this.lobbyId || currentScreen !== 'LOBBY') return;
+                if (!this.lobbyId) return;
                 try {
                     const response = await fetch(`/api/get-lobby?code=${this.lobbyId}`);
                     if (response.ok) {
                         const lobbyData = await response.json();
                         
-                        // Если статус 'playing' — начинаем игру у всех
-                        if (lobbyData.status === 'playing' && currentScreen === 'LOBBY') {
-                            startRound(); return;
+                        // Если мы в лобби
+                        if (currentScreen === 'LOBBY') {
+                            if (lobbyData.status === 'playing') {
+                                const tId = lobbyData.gameState?.targetId || lobbyData.players[0].id;
+                                startRound(tId.toString(), true); 
+                                return;
+                            }
+                            this.players = lobbyData.players.map(p => ({
+                                id: p.id,
+                                name: p.name,
+                                initials: (p.name || "??").substring(0, 2).toUpperCase(),
+                                isHost: p.id.toString() === lobbyData.hostId.toString(),
+                                isDead: false,
+                                lives: MAX_LIVES
+                            }));
+                            updateLobbyUI();
+                        } else if (currentScreen === 'GAME' && lobbyData.gameState) {
+                            // Если мы в игре, синхронизуем действия
+                            if (lobbyData.gameState.timestamp > lastGameStateTimestamp) {
+                                lastGameStateTimestamp = lobbyData.gameState.timestamp;
+                                if (lobbyData.gameState.action === 'pass') {
+                                    if (lobbyData.gameState.targetId.toString() !== currentTurnPlayerId.toString()) {
+                                        triggerCurtain(() => { isProcessingTurn = false; passPotato(lobbyData.gameState.targetId, true); });
+                                    }
+                                } else if (lobbyData.gameState.action === 'explode') {
+                                    handleExplosion(lobbyData.gameState.targetId, true);
+                                }
+                            }
                         }
-
-                        this.players = lobbyData.players.map(p => ({
-                            id: p.id,
-                            name: p.name,
-                            initials: (p.name || "??").substring(0, 2).toUpperCase(),
-                            isHost: p.id.toString() === lobbyData.hostId.toString(),
-                            isDead: false,
-                            lives: MAX_LIVES
-                        }));
-                        updateLobbyUI();
                     }
                 } catch (e) { console.error("Poll error:", e); }
             }
-            startPolling() { this.stopPolling(); this.pollInterval = setInterval(() => this.syncLobby(), 3000); }
+            startPolling() { 
+                this.stopPolling(); 
+                const interval = currentScreen === 'GAME' ? 1500 : 3000;
+                this.pollInterval = setInterval(() => this.syncLobby(), interval); 
+            }
             stopPolling() { if (this.pollInterval) clearInterval(this.pollInterval); }
+            
+            async sendGameAction(action, targetId) {
+                if (!this.lobbyId) return;
+                try {
+                    await fetch('/api/game-action', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lobbyCode: this.lobbyId, action, targetId: targetId.toString(), timestamp: Date.now() })
+                    });
+                } catch(e) { console.error(e); }
+            }
+
             startBotTimer(botId) {
                 const diffObj = currentTaskObj || { time: 10 };
                 const delay = (diffObj.time * 0.45 + Math.random() * diffObj.time * 0.35) * 1000;
-                this.botPassBack = setTimeout(() => { if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === botId) this.sendPotato(); }, delay);
+                this.botPassBack = setTimeout(() => { if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === botId.toString()) this.sendPotato(); }, delay);
             }
             sendPotato() {
-                let alive = this.players.filter(p => !p.isDead && p.id !== currentTurnPlayerId);
+                let alive = this.players.filter(p => !p.isDead && p.id.toString() !== currentTurnPlayerId.toString());
                 if (!alive.length) return;
                 let target = alive[Math.floor(Math.random() * alive.length)];
-                triggerCurtain(() => { isProcessingTurn = false; passPotato(target.id); });
+                this.sendGameAction('pass', target.id.toString());
+                triggerCurtain(() => { isProcessingTurn = false; passPotato(target.id.toString(), true); });
             }
             clearBotTimers() { this.botTimers.forEach(clearTimeout); clearTimeout(this.botPassBack); }
         }
@@ -2459,6 +2491,7 @@
         let pulsePhase = 0, gameLoopId = null;
         let isLocked = true, isAnswered = false, isProcessingTurn = false, isExploding = false;
         let currentVotes = 0, requiredVotes = 1;
+        let lastGameStateTimestamp = 0; // Для синхронизации геймплея
         let usedQuestions = new Set(); // Строгий трекинг вопросов
 
         const ui = {
@@ -2615,15 +2648,19 @@
 
         // ═════ GAME LOGIC ═════
 
-        async function startRound() {
-            if (network.isHost) {
+        async function startRound(targetId = null, fromRemote = false) {
+            if (network.isHost && !fromRemote) {
+                targetId = network.players[Math.floor(Math.random() * network.players.length)].id.toString();
                 await fetch('/api/start-game', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ lobbyCode: network.lobbyId, hostId: currentUser.id })
                 });
+                await network.sendGameAction('start', targetId);
             }
-            network.stopPolling();
+            
+            network.startPolling(); // Ускоряем пулинг до 1.5 сек во время игры
+
             isGameOver = false; isSpectating = false;
             globalTimer = 45 + Math.random() * 30;
             network.players.forEach(p => { p.isDead = false; p.lives = MAX_LIVES; });
@@ -2631,13 +2668,19 @@
             // Очищаем чат для нового раунда
             document.getElementById('chat-messages').innerHTML = '';
 
-            showScreen('GAME'); passPotato(currentUser.id);
+            showScreen('GAME'); 
+            
+            if (targetId) passPotato(targetId, true);
         }
 
-        function passPotato(playerId) {
+        function passPotato(playerId, fromRemote = false) {
             isExploding = false; isAnswered = false; isProcessingTurn = false; currentVotes = 0;
             requiredVotes = Math.max(2, network.players.filter(p => !p.isDead).length - 1);
-            currentTurnPlayerId = playerId;
+            currentTurnPlayerId = playerId.toString();
+
+            if (!fromRemote && currentScreen === 'GAME') {
+                network.sendGameAction('pass', currentTurnPlayerId);
+            }
 
             if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
             gameStartTime = null;
@@ -2919,13 +2962,18 @@
             }
         }
 
-        function handleExplosion() {
-            if (isExploding) return; isExploding = true;
+        function handleExplosion(targetId = currentTurnPlayerId, fromRemote = false) {
+            if (isExploding) return; 
+            isExploding = true;
+            
+            if (!fromRemote) network.sendGameAction('explode', targetId.toString());
+
             document.body.classList.remove('danger-active');
             closeChatSheet();
             if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
             network.clearBotTimers();
-            let dead = network.players.find(p => p.id === currentTurnPlayerId);
+            
+            let dead = network.players.find(p => p.id.toString() === targetId.toString());
             if (dead) {
                 dead.lives = Math.max(0, (dead.lives ?? MAX_LIVES) - 1);
                 dead.isDead = dead.lives <= 0;

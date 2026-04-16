@@ -2533,8 +2533,28 @@
         }
 
         const cdInp = document.getElementById('join-code-input');
-        document.getElementById('btn-create-lobby').onclick = () => { applyNickname(); joinLobby(generateCode(), true); };
-        document.getElementById('btn-join-code').onclick = () => { if (cdInp && cdInp.value.trim().length) { applyNickname(); joinLobby(cdInp.value.trim(), false); } };
+        document.getElementById('btn-create-lobby').onclick = function() { 
+            const btn = this;
+            btn.innerText = "СОЗДАНИЕ...";
+            btn.style.pointerEvents = 'none';
+            applyNickname(); 
+            joinLobby(generateCode(), true).finally(() => {
+                btn.innerText = "СОЗДАТЬ ЛОББИ";
+                btn.style.pointerEvents = 'auto';
+            }); 
+        };
+        document.getElementById('btn-join-code').onclick = function() { 
+            if (cdInp && cdInp.value.trim().length) { 
+                const btn = this;
+                btn.innerText = "ПОДКЛЮЧЕНИЕ...";
+                btn.style.pointerEvents = 'none';
+                applyNickname(); 
+                joinLobby(cdInp.value.trim(), false).finally(() => {
+                    btn.innerText = "ВОЙТИ ПО КОДУ";
+                    btn.style.pointerEvents = 'auto';
+                }); 
+            } 
+        };
 
         async function joinLobby(id, host = false) {
             const code = id.toUpperCase();
@@ -2708,7 +2728,7 @@
             ui.img.style.transition = 'filter .4s ease'; ui.img.style.transform = 'scale(1)'; ui.img.style.opacity = '1';
             ui.container.style.pointerEvents = 'auto';
 
-            if (playerId === currentUser.id) {
+            if (playerId.toString() === currentUser.id.toString()) {
                 closeChatSheet();
                 isLocked = true; resetComboPanel();
                 ui.task.innerHTML = '';
@@ -3258,7 +3278,7 @@
         }
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleHideLoader);
         else window.addEventListener('load', scheduleHideLoader);
-        setTimeout(hideLoader, 2500);
+        setTimeout(hideLoader, 1500); // Снижен таймаут с 2.5 сек до 1.5 сек
 
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {

@@ -2477,11 +2477,34 @@
         document.getElementById('btn-create-lobby').onclick = () => { applyNickname(); joinLobby(generateCode(), true); };
         document.getElementById('btn-join-code').onclick = () => { if (cdInp.value.trim().length) { applyNickname(); joinLobby(cdInp.value.trim(), false); } };
 
-        function joinLobby(id, host = false) {
-            showScreen('LOBBY'); document.getElementById('lobby-id-display').innerText = id;
-            document.getElementById('host-settings').style.display = host ? 'block' : 'none';
-            document.getElementById('wait-host-msg').style.display = host ? 'none' : 'block';
-            network.connect(id, host);
+        async function joinLobby(id, host = false) {
+            const code = id.toUpperCase();
+            const endpoint = host ? '/api/create-lobby' : '/api/join-lobby';
+            const payload = host 
+                ? { lobbyCode: code, hostId: currentUser.id, hostName: currentUser.first_name }
+                : { lobbyCode: code, player: { id: currentUser.id, name: currentUser.first_name } };
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    showScreen('LOBBY');
+                    document.getElementById('lobby-id-display').innerText = code;
+                    document.getElementById('host-settings').style.display = host ? 'block' : 'none';
+                    document.getElementById('wait-host-msg').style.display = host ? 'none' : 'block';
+                    network.connect(code, host);
+                } else {
+                    const err = await response.json();
+                    alert("Ошибка: " + (err.error || "Лобби не найдено"));
+                }
+            } catch (e) {
+                console.error("Lobby error:", e);
+                alert("Ошибка подключения к серверу");
+            }
         }
 
         function updateLobbyUI() {
@@ -2495,8 +2518,16 @@
         }
 
         document.getElementById('btn-invite').onclick = () => {
-            if (tg.switchInlineQuery) tg.switchInlineQuery(network.lobbyId, ["users", "groups"]);
-            else alert("Link: https://t.me/your_bot?startapp=" + network.lobbyId);
+            const lobbyCode = network.lobbyId;
+            const botUsername = "WetPotatoBot"; // ЗАМЕНИ НА ЮЗЕРНЕЙМ СВОЕГО БОТА БЕЗ @
+            const shareUrl = `https://t.me/${botUsername}/wet_potato?startapp=${lobbyCode}`;
+            const shareText = `🥔 Быстрей, заходи в Wet Potato! Мой код лобби: ${lobbyCode}`;
+            
+            if (tg.openTelegramLink) {
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
+            } else {
+                alert("Invite via: " + shareUrl);
+            }
         };
         document.getElementById('btn-start-game').onclick = () => startRound();
         document.getElementById('btn-add-bot-ui').onclick = () => {
@@ -3118,7 +3149,15 @@
         function scheduleHideLoader() {
             const elapsed = Date.now() - loaderMinTime;
             const wait = Math.max(0, 400 - elapsed);
-            setTimeout(hideLoader, wait);
+            setTimeout(() => {
+                hideLoader();
+                // Check for invitation start_param
+                const startParam = tg.initDataUnsafe?.start_param;
+                if (startParam && currentScreen === 'START') {
+                    applyNickname();
+                    joinLobby(startParam, false);
+                }
+            }, wait);
         }
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleHideLoader);
         else window.addEventListener('load', scheduleHideLoader);

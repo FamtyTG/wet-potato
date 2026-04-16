@@ -1993,10 +1993,15 @@
                             <button class="seg-btn" data-diff="story" id="diff-story">📖 Story (1 мин)</button>
                         </div>
 
-                        <button class="clay-btn" id="btn-start-game"
-                            style="background:var(--mint); width:100%; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);">
-                            Начать игру
-                        </button>
+                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                            <button class="clay-btn" id="btn-start-game"
+                                style="background:var(--mint); flex: 1; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);">
+                                Начать игру
+                            </button>
+                            <button class="clay-btn" id="btn-add-bot-ui" 
+                                style="background:var(--blue); width: 60px; color: white; font-size: 1.5rem;" 
+                                title="Добавить бота">+</button>
+                        </div>
                     </div>
 
                     <div id="wait-host-msg"
@@ -2399,15 +2404,12 @@
                 this.lobbyId = lobbyId.toUpperCase(); this.isHost = isHost;
                 this.players.push({ id: currentUser.id, name: currentUser.first_name, initials: currentUser.shortInit, isHost, isDead: false, lives: MAX_LIVES });
                 updateLobbyUI();
-                if (isHost) {
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 2, name: "Иван", initials: "ИВ", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 1200));
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 3, name: "Оля", initials: "ОЛ", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 2800));
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 4, name: "Макс", initials: "МА", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 4200));
-                    this.botTimers.push(setTimeout(() => { this.players.push({ id: 5, name: "Азалия", initials: "АЗ", isHost: false, isDead: false, lives: MAX_LIVES }); updateLobbyUI(); haptic('light'); }, 5800));
-                } else {
-                    this.players.push({ id: 999, name: "Host", initials: "HO", isHost: true, isDead: false, lives: MAX_LIVES });
+                
+                // Automatic bot spawning removed: Now handled manually via spawnBot from the UI
+                if (!isHost) {
+                    this.players.push({ id: 'host_placeholder', name: "Host", initials: "HO", isHost: true, isDead: false, lives: MAX_LIVES });
                     updateLobbyUI();
-                    this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 4000));
+                    this.botTimers.push(setTimeout(() => { if (currentScreen === 'LOBBY') startRound(); }, 6000));
                 }
             }
             startBotTimer(botId) {
@@ -2497,6 +2499,38 @@
             else alert("Link: https://t.me/your_bot?startapp=" + network.lobbyId);
         };
         document.getElementById('btn-start-game').onclick = () => startRound();
+        document.getElementById('btn-add-bot-ui').onclick = () => {
+            if (network.isHost) spawnBot(network.lobbyId, currentUser.id);
+        };
+
+        async function spawnBot(lobbyCode, hostId) {
+            try {
+                const response = await fetch('/api/add-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lobbyCode, hostId })
+                });
+                if (response.ok) {
+                    const botData = await response.json();
+                    // Locally sync the bot to the current player list
+                    network.players.push({ 
+                        id: botData.id, 
+                        name: botData.name, 
+                        initials: botData.name.substring(0,2).toUpperCase(), 
+                        isHost: false, 
+                        isDead: false, 
+                        lives: MAX_LIVES 
+                    });
+                    updateLobbyUI();
+                    haptic('light');
+                } else {
+                    const err = await response.json();
+                    console.error('Bot spawn failed:', err.error);
+                }
+            } catch (e) {
+                console.error('Failed to spawn bot:', e);
+            }
+        }
 
         function updatePlayersBar() {
             ui.pBar.innerHTML = network.players.map(p =>

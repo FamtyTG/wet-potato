@@ -22,13 +22,15 @@ const LobbySchema = new mongoose.Schema({
     action: String,
     targetId: String,
     timestamp: Number
-  }
+  },
+  chatState: { senderName: String, text: String, timestamp: Number },
+  emoteState: { senderId: String, emote: String, timestamp: Number }
 });
 const Lobby = mongoose.models.Lobby || mongoose.model('Lobby', LobbySchema);
 
 export default async function (req, res) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-  const { lobbyCode, action, targetId, timestamp } = req.body;
+  const { lobbyCode, action, targetId, timestamp, senderName, text, senderId, emote } = req.body;
 
   try {
     await connectToDatabase();
@@ -36,10 +38,21 @@ export default async function (req, res) {
     
     if (!lobby) return res.status(404).json({ error: 'Not found' });
     
-    // Check if timestamp is newer
-    if (!lobby.gameState || timestamp > (lobby.gameState.timestamp || 0)) {
-       lobby.gameState = { action, targetId, timestamp };
-       await lobby.save();
+    if (action === 'chat') {
+       if (!lobby.chatState || timestamp > (lobby.chatState.timestamp || 0)) {
+           lobby.chatState = { senderName, text, timestamp };
+           await lobby.save();
+       }
+    } else if (action === 'emote') {
+       if (!lobby.emoteState || timestamp > (lobby.emoteState.timestamp || 0)) {
+           lobby.emoteState = { senderId, emote, timestamp };
+           await lobby.save();
+       }
+    } else {
+       if (!lobby.gameState || timestamp > (lobby.gameState.timestamp || 0)) {
+           lobby.gameState = { action, targetId, timestamp };
+           await lobby.save();
+       }
     }
     
     res.status(200).json({ success: true });

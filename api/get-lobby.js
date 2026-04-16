@@ -18,7 +18,7 @@ const LobbySchema = new mongoose.Schema({
   hostId: String,
   players: [{ id: String, name: String, isBot: { type: Boolean, default: false } }],
   status: { type: String, default: 'waiting' }
-});
+}, { strict: false });
 
 const Lobby = mongoose.models.Lobby || mongoose.model('Lobby', LobbySchema);
 

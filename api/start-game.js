@@ -32,6 +32,7 @@ export default async function (req, res) {
 
     if (!lobby) return res.status(404).json({ error: 'Lobby not found' });
     if (lobby.hostId !== hostId.toString()) return res.status(403).json({ error: 'Only host can start the game' });
+    if (lobby.players.length < 2) return res.status(400).json({ error: 'Need at least 2 players to start' });
 
     lobby.status = 'playing';
     await lobby.save();

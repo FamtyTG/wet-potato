@@ -2222,7 +2222,8 @@
                 nickname: "Ваш ник", nickPh: "Введите ник...", content: "Контент", confirmLeave: "Точно выйти?", yes: "Да", no: "Нет",
                 supportBtn: "☕ Поддержать разраба", donateTitle: "Поддержать разраба ❤️",
                 donateText: "На сервера, энергетики и новые режимы!", close: "Закрыть",
-                copied: "✅ Скопировано!", copyHint: "📋 Нажми, чтобы скопировать"
+                copied: "✅ Скопировано!", copyHint: "📋 Нажми, чтобы скопировать",
+                errMinPlayers: "Нужно минимум 2 игрока!"
             },
             en: {
                 createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
@@ -2239,7 +2240,8 @@
                 nickname: "Your nick", nickPh: "Enter nickname...", content: "Content", confirmLeave: "Are you sure?", yes: "Yes", no: "No",
                 supportBtn: "☕ Support Dev", donateTitle: "Support Developer ❤️",
                 donateText: "For servers, energy drinks, and new modes!", close: "Close",
-                copied: "✅ Copied!", copyHint: "📋 Click to copy"
+                copied: "✅ Copied!", copyHint: "📋 Click to copy",
+                errMinPlayers: "At least 2 players required!"
             }
         };
 
@@ -2623,7 +2625,14 @@
                 alert("Invite via: " + shareUrl);
             }
         };
-        document.getElementById('btn-start-game').onclick = () => startRound();
+        document.getElementById('btn-start-game').onclick = () => {
+            if (network.players.length < 2) {
+                haptic('error');
+                tg.showPopup ? tg.showPopup({ message: T('errMinPlayers') || "Need at least 2 players" }) : alert(T('errMinPlayers') || "Need at least 2 players");
+                return;
+            }
+            startRound();
+        };
         document.getElementById('btn-add-bot-ui').onclick = () => {
             if (network.isHost) spawnBot(network.lobbyId, currentUser.id);
         };
@@ -3137,6 +3146,7 @@
 
         function resetToMenu() {
             if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+            if (network) network.stopPolling();
             network.clearBotTimers(); network = new NetworkManager();
             gameStartTime = null; isSpectating = false;
 
@@ -3144,6 +3154,7 @@
             ui.container.style.transform = 'scale(0)';
             ui.container.style.pointerEvents = 'none';
             ui.img.style.transform = 'scale(1)';
+            ui.img.style.opacity = '1';
             ui.wrapper.style.transform = 'scale(1)';
             ui.task.style.opacity = '0';
 

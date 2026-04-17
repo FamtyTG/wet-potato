@@ -1936,11 +1936,11 @@
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <button class="clay-btn" id="btn-open-leaderboard"
                             style="flex: 1; font-size: 0.9rem; background: #ebd5b3; color: var(--card-text); border-color: var(--card-base);">
-                            🏆 Топ
+                            🏆 <span id="lbl-top-btn">Топ</span>
                         </button>
                         <button class="clay-btn" id="btn-open-donate"
-                            style="flex: 2; font-size: 0.9rem; background: var(--card-rim); color: var(--card-muted); border-color: var(--card-base);">
-                            ☕ Поддержать
+                            style="flex: 1; font-size: 0.9rem; background: var(--card-rim); color: var(--card-muted); border-color: var(--card-base);">
+                            ☕ <span id="lbl-support-btn">Поддержать</span>
                         </button>
                     </div>
                 </div>
@@ -2126,9 +2126,9 @@
         <!-- ══════ LEADERBOARD MODAL ══════ -->
         <div id="leaderboard-modal" class="modal-overlay">
             <div class="clay-card modal-card" style="width: 320px; max-height: 80vh; overflow-y: auto;">
-                <h2 style="color:var(--card-text); margin-bottom:15px; font-size: 1.5rem;">🏆 Таблица лидеров</h2>
+                <h2 id="lbl-top-title" style="color:var(--card-text); margin-bottom:15px; font-size: 1.5rem;">🏆 Таблица лидеров</h2>
                 <div id="leaderboard-content" style="text-align: left; margin-bottom: 15px; font-size: 0.95rem; color: var(--card-text); display: flex; flex-direction: column; gap: 8px;">
-                    Загрузка...
+                    ...
                 </div>
                 <button class="clay-btn" id="btn-close-leaderboard" style="margin-top:10px;">Закрыть</button>
             </div>
@@ -2237,10 +2237,12 @@
                 menuBack: "← Выйти", burned: n => `💥 ${n} СГОРЕЛ!`, timer: "ВРЕМЯ", actWarn: "Выполни действие вживую, затем жми!",
                 errTxt: "Неверно! Подумай еще.", modeLabels: { answers: "Ответы", actions: "Действия" },
                 nickname: "Ваш ник", nickPh: "Введите ник...", content: "Контент", confirmLeave: "Точно выйти?", yes: "Да", no: "Нет",
-                supportBtn: "☕ Поддержать разраба", donateTitle: "Поддержать разраба ❤️",
-                donateText: "На сервера, энергетики и новые режимы!", close: "Закрыть",
+                supportBtn: "Поддержать", donateTitle: "Поддержать разраба ❤️",
+                donateText: "Твоя поддержка помогает картошке оставаться мокрой! 🌊 Каждая капля помогает серверу не высохнуть.", close: "Закрыть",
                 copied: "✅ Скопировано!", copyHint: "📋 Нажми, чтобы скопировать",
-                errMinPlayers: "Нужно минимум 2 игрока!"
+                errMinPlayers: "Нужно минимум 2 игрока!",
+                topTitle: "Таблица лидеров", topLoading: "Загрузка...", topEmpty: "Пока пусто.", topBtn: "Топ",
+                topError: "Ошибка загрузки", topNetError: "Ошибка сети"
             },
             en: {
                 createLobby: "Create Lobby", orEnterCode: "Or enter room code", joinByCode: "Join by code", lobbyCode: "Lobby Code",
@@ -2255,10 +2257,12 @@
                 menuBack: "← Exit", burned: n => `💥 ${n} IS OUT!`, timer: "TIMER", actWarn: "Do the action in real life, then tap!",
                 errTxt: "Wrong answer! Try again.", modeLabels: { answers: "Answers", actions: "Actions" },
                 nickname: "Your nick", nickPh: "Enter nickname...", content: "Content", confirmLeave: "Are you sure?", yes: "Yes", no: "No",
-                supportBtn: "☕ Support Dev", donateTitle: "Support Developer ❤️",
-                donateText: "For servers, energy drinks, and new modes!", close: "Close",
+                supportBtn: "Support", donateTitle: "Support Developer ❤️",
+                donateText: "Your support keeps the potato wet! 🌊 Every drop helps the server stay hydrated.", close: "Close",
                 copied: "✅ Copied!", copyHint: "📋 Click to copy",
-                errMinPlayers: "At least 2 players required!"
+                errMinPlayers: "At least 2 players required!",
+                topTitle: "Leaderboard", topLoading: "Loading...", topEmpty: "Empty yet.", topBtn: "Top",
+                topError: "Load error", topNetError: "Net error"
             }
         };
 
@@ -2307,11 +2311,14 @@
             document.getElementById('btn-confirm-yes').innerText = T('yes');
             document.getElementById('btn-confirm-no').innerText = T('no');
 
-            const _supBtn = document.getElementById('btn-open-donate'); if (_supBtn) _supBtn.innerText = T('supportBtn');
+            const _supBtn = document.getElementById('lbl-support-btn'); if (_supBtn) _supBtn.innerText = T('supportBtn');
+            const _topBtn = document.getElementById('lbl-top-btn'); if (_topBtn) _topBtn.innerText = T('topBtn');
             const _donTitle = document.getElementById('donate-title'); if (_donTitle) _donTitle.innerText = T('donateTitle');
             const _donText = document.getElementById('donate-text'); if (_donText) _donText.innerText = T('donateText');
             const _donClose = document.getElementById('btn-close-donate'); if (_donClose) _donClose.innerText = T('close');
             const _donWallet = document.getElementById('btn-copy-wallet'); if (_donWallet) _donWallet.setAttribute('data-hint', T('copyHint'));
+            const _topTitle = document.getElementById('lbl-top-title'); if (_topTitle) _topTitle.innerText = '🏆 ' + T('topTitle');
+            const _topClose = document.getElementById('btn-close-leaderboard'); if (_topClose) _topClose.innerText = T('close');
         }
 
         // ═════ CONFIRM MODAL ═════
@@ -2368,13 +2375,13 @@
         if(btnOpenLeaderboard) btnOpenLeaderboard.onclick = async () => { 
             leaderboardModal.classList.add('open'); 
             haptic('light');
-            leaderboardContent.innerHTML = 'Загрузка...';
+            leaderboardContent.innerHTML = T('topLoading');
             try {
                 const res = await fetch('/api/leaderboard');
                 if (res.ok) {
                     const data = await res.json();
                     if (data.length === 0) {
-                        leaderboardContent.innerHTML = 'Пока пусто.';
+                        leaderboardContent.innerHTML = T('topEmpty');
                     } else {
                         leaderboardContent.innerHTML = data.map((u, i) => 
                             `<div style="display:flex; justify-content:space-between; background:var(--bg-color); padding:8px 12px; border-radius:12px; border:1px solid var(--card-rim);">
@@ -2384,10 +2391,10 @@
                         ).join('');
                     }
                 } else {
-                    leaderboardContent.innerHTML = 'Ошибка загрузки';
+                    leaderboardContent.innerHTML = T('topError');
                 }
             } catch (e) {
-                leaderboardContent.innerHTML = 'Ошибка сети';
+                leaderboardContent.innerHTML = T('topNetError');
             }
         };
         if(btnCloseLeaderboard) btnCloseLeaderboard.onclick = () => { leaderboardModal.classList.remove('open'); haptic('light'); };

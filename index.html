@@ -2541,6 +2541,10 @@
                                     }
                                 } else if (lobbyData.gameState.action === 'explode') {
                                     handleExplosion(lobbyData.gameState.targetId, true);
+                                } else if (lobbyData.gameState.action === 'typing') {
+                                    if (lobbyData.gameState.targetId === currentTurnPlayerId) {
+                                        updateObserverInput(lobbyData.gameState.input);
+                                    }
                                 }
                             }
                         }
@@ -2554,15 +2558,22 @@
             }
             stopPolling() { if (this.pollInterval) clearInterval(this.pollInterval); }
             
-            async sendGameAction(action, targetId) {
+            async sendGameAction(action, targetId, input = '') {
                 if (!this.lobbyId) return;
                 try {
                     await fetch('/api/game-action', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ lobbyCode: this.lobbyId, action, targetId: targetId.toString(), timestamp: Date.now() })
+                        body: JSON.stringify({ lobbyCode: this.lobbyId, action, targetId: targetId ? targetId.toString() : null, timestamp: Date.now(), input })
                     });
                 } catch(e) { console.error(e); }
+            }
+            sendTyping(input) {
+                // Throttle typing updates to once every 700ms to save server resources
+                const now = Date.now();
+                if (this._lastType && (now - this._lastType < 700)) return;
+                this._lastType = now;
+                this.sendGameAction('typing', currentTurnPlayerId, input);
             }
 
             startBotTimer(botId) {
@@ -2882,6 +2893,9 @@
                 ui.container.style.opacity = '0'; void ui.container.offsetWidth;
                 ui.container.style.transition = 'transform .52s cubic-bezier(.175,.885,.32,1.275), opacity .32s ease';
                 ui.container.style.transform = 'translate(0,0) scale(1)'; ui.container.style.opacity = '1';
+                
+                // СРАЗУ открываем вопрос, без лишнего клика "Tap to unlock"
+                setTimeout(() => unlockPotato(), 100);
             } else {
                 isLocked = false; resetComboPanel();
                 let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
@@ -2892,8 +2906,8 @@
             ${badge}
             <span style="font-size:.85rem; color:var(--card-muted); display:block; margin-bottom:6px; text-transform:uppercase;">${T('solves')} ${pName}:</span>
             <span style="font-size: clamp(15px, 5vw, 22px); line-height:1.2; font-weight:700;">${currentTaskObj.q}</span>
-            <div style="margin-top:10px; font-size:.9rem; color:var(--card-text); background:rgba(255,255,255,.2); border-radius:14px; padding:10px; border: 1px solid var(--card-rim);">
-                ${currentTaskObj.type === 'answer' ? T('answer') + ': ' : 'Действие: '}<span style="font-weight:700;">${currentTaskObj.a}</span>
+            <div id="observer-input-display" style="margin-top:10px; font-size:.95rem; color:var(--blue); background:rgba(255,255,255,.3); border-radius:14px; padding:12px; border: 2px dashed var(--blue); min-height: 44px; display: flex; align-items: center; justify-content: center; font-style: italic;">
+                ...
             </div>
             <button class="votekick-btn" onclick="voteKick(this)">${T('voteKick')}</button>`;
                 ui.task.style.opacity = '1';
@@ -2904,6 +2918,15 @@
                 ui.container.style.transform = 'scale(0.65)'; ui.container.style.opacity = '0.6';
             }
             gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateObserverInput(text) {
+            const display = document.getElementById('observer-input-display');
+            if (display) {
+                display.innerText = text || '...';
+                display.style.transform = 'scale(1.05)';
+                setTimeout(() => { display.style.transform = 'scale(1)'; }, 100);
+            }
         }
 
         function resetComboPanel() {
@@ -2968,6 +2991,9 @@
             ui.img.classList.add('shaking'); clearTimeout(onTyping._t);
             onTyping._t = setTimeout(() => ui.img.classList.remove('shaking'), 600);
             ui.input.classList.remove('error'); ui.err.style.display = 'none';
+            
+            // Send current input to observers
+            network.sendTyping(ui.input.value);
         }
         ui.input.addEventListener('focus', () => {
             if (currentScreen === 'GAME' && !isLocked) ui.img.classList.add('shaking');
@@ -3050,8 +3076,23 @@
             ui.input.blur(); ui.img.classList.remove('shaking');
             ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'none';
 
-            ui.wrapper.classList.add('swipe-ready'); ui.hint.style.display = 'flex';
-            ui.status.innerText = T('swipeNow'); ui.status.style.color = 'var(--warm-red)';
+            ui.status.innerText = "ВЕРНО! 🚀"; ui.status.style.color = 'var(--mint-dark)';
+            
+            // АВТОМАТИЧЕСКАЯ передача карточки для скорости и плавности (через 0.7с)
+            setTimeout(() => {
+                if (isProcessingTurn || isGameOver) return;
+                isProcessingTurn = true;
+                if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
+                ui.task.style.opacity = '0'; ui.timer.style.opacity = '0';
+                ui.status.innerText = T('flyingAway'); haptic('medium');
+                
+                const fly = window.innerWidth * 1.5;
+                ui.container.style.transition = 'transform .45s cubic-bezier(0.4, 0, 0.2, 1), opacity .3s ease';
+                ui.container.style.transform = `translate(${fly}px, -100px) scale(.2)`;
+                ui.container.style.opacity = '0';
+                
+                setTimeout(() => network.sendPotato(), 150);
+            }, 700);
         }
 
         document.getElementById('btn-submit-answer').onclick = markDone;

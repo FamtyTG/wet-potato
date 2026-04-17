@@ -21,7 +21,8 @@ const LobbySchema = new mongoose.Schema({
   gameState: {
     action: String,
     targetId: String,
-    timestamp: Number
+    timestamp: Number,
+    input: String
   },
   chatState: { senderName: String, text: String, timestamp: Number },
   emoteState: { senderId: String, emote: String, timestamp: Number }
@@ -30,7 +31,7 @@ const Lobby = mongoose.models.Lobby || mongoose.model('Lobby', LobbySchema);
 
 export default async function (req, res) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-  const { lobbyCode, action, targetId, timestamp, senderName, text, senderId, emote } = req.body;
+  const { lobbyCode, action, targetId, timestamp, senderName, text, senderId, emote, input } = req.body;
 
   try {
     await connectToDatabase();
@@ -49,8 +50,9 @@ export default async function (req, res) {
            await lobby.save();
        }
     } else {
-       if (!lobby.gameState || timestamp > (lobby.gameState.timestamp || 0)) {
-           lobby.gameState = { action, targetId, timestamp };
+       // Allow 'typing' action to update even if timestamps are close, to keep it fluid
+       if (!lobby.gameState || timestamp >= (lobby.gameState.timestamp || 0)) {
+           lobby.gameState = { action, targetId, timestamp, input };
            await lobby.save();
        }
     }

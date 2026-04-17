@@ -3264,7 +3264,7 @@
         }
 
         document.getElementById('btn-spectate').onclick = () => {
-            isGameOver = false; isSpectating = true; showScreen('GAME'); document.getElementById('btn-leave-game').style.display = 'block';
+            isGameOver = false; isSpectating = true; showScreen('GAME');
             let alive = network.players.filter(p => !p.isDead); if (alive.length > 0) { triggerCurtain(() => { let n = alive[Math.floor(Math.random() * alive.length)]; passPotato(n.id); if (n.id !== currentUser.id) network.startBotTimer(n.id); }); }
         };
 
@@ -3292,7 +3292,7 @@
             if (btnAdult) btnAdult.classList.remove('active');
             if (btnFamily) btnFamily.classList.add('active');
 
-            document.getElementById('btn-leave-game').style.display = 'none';
+            // DO NOT HIDE btn-leave-game, players should always be able to leave!
             usedQuestions.clear(); // Очищаем историю вопросов при выходе в меню
             closeChatSheet();
             showScreen('START');
@@ -3420,10 +3420,22 @@
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {
                 const ratio = window.visualViewport.height / window.screen.height;
-                if (ratio < 0.65) document.body.classList.add('kb-open');
-                else document.body.classList.remove('kb-open');
+                const isInputFocus = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+                // Only trigger aggressive kb-open layout if ratio is small AND an input is actively focused
+                if (ratio < 0.75 && isInputFocus) {
+                    document.body.classList.add('kb-open');
+                } else {
+                    document.body.classList.remove('kb-open');
+                }
             });
         }
+        
+        // Failsafe: if inputs lose focus, definitely remove kb-open
+        document.body.addEventListener('focusout', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                setTimeout(() => document.body.classList.remove('kb-open'), 100);
+            }
+        });
     </script>
 </body>
 

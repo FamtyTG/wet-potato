@@ -1933,10 +1933,16 @@
                         Войти по коду
                     </button>
 
-                    <button class="clay-btn" id="btn-open-donate"
-                        style="margin-top: 8px; font-size: 0.9rem; background: var(--card-rim); color: var(--card-muted); border-color: var(--card-base);">
-                        ☕ Поддержать разраба
-                    </button>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="clay-btn" id="btn-open-leaderboard"
+                            style="flex: 1; font-size: 0.9rem; background: #ebd5b3; color: var(--card-text); border-color: var(--card-base);">
+                            🏆 Топ
+                        </button>
+                        <button class="clay-btn" id="btn-open-donate"
+                            style="flex: 2; font-size: 0.9rem; background: var(--card-rim); color: var(--card-muted); border-color: var(--card-base);">
+                            ☕ Поддержать
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1999,7 +2005,7 @@
                                 Начать игру
                             </button>
                             <button class="clay-btn" id="btn-add-bot-ui" 
-                                style="background:var(--blue); width: 60px; color: white; font-size: 1.5rem;" 
+                                style="background:var(--blue); width: 60px; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; padding: 0;" 
                                 title="Добавить бота">+</button>
                         </div>
                     </div>
@@ -2114,6 +2120,17 @@
                     UQDEjFlF7_2RUthpz3enA-T5bJloO5RIeRPVQflsjaL23aTs
                 </div>
                 <button class="clay-btn" id="btn-close-donate" style="margin-top:15px;">Закрыть</button>
+            </div>
+        </div>
+
+        <!-- ══════ LEADERBOARD MODAL ══════ -->
+        <div id="leaderboard-modal" class="modal-overlay">
+            <div class="clay-card modal-card" style="width: 320px; max-height: 80vh; overflow-y: auto;">
+                <h2 style="color:var(--card-text); margin-bottom:15px; font-size: 1.5rem;">🏆 Таблица лидеров</h2>
+                <div id="leaderboard-content" style="text-align: left; margin-bottom: 15px; font-size: 0.95rem; color: var(--card-text); display: flex; flex-direction: column; gap: 8px;">
+                    Загрузка...
+                </div>
+                <button class="clay-btn" id="btn-close-leaderboard" style="margin-top:10px;">Закрыть</button>
             </div>
         </div>
 
@@ -2322,9 +2339,9 @@
         const donateModal = document.getElementById('donate-modal');
         const btnCopyWallet = document.getElementById('btn-copy-wallet');
 
-        btnOpenDonate.onclick = () => { donateModal.classList.add('open'); haptic('light'); };
-        btnCloseDonate.onclick = () => { donateModal.classList.remove('open'); haptic('light'); };
-        btnCopyWallet.onclick = () => {
+        if(btnOpenDonate) btnOpenDonate.onclick = () => { donateModal.classList.add('open'); haptic('light'); };
+        if(btnCloseDonate) btnCloseDonate.onclick = () => { donateModal.classList.remove('open'); haptic('light'); };
+        if(btnCopyWallet) btnCopyWallet.onclick = () => {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText("UQDEjFlF7_2RUthpz3enA-T5bJloO5RIeRPVQflsjaL23aTs");
             } else {
@@ -2341,6 +2358,39 @@
             haptic('success');
             setTimeout(() => { btnCopyWallet.innerHTML = originalText; }, 2000);
         };
+
+        // Leaderboard Modal Logic
+        const btnOpenLeaderboard = document.getElementById('btn-open-leaderboard');
+        const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
+        const leaderboardModal = document.getElementById('leaderboard-modal');
+        const leaderboardContent = document.getElementById('leaderboard-content');
+
+        if(btnOpenLeaderboard) btnOpenLeaderboard.onclick = async () => { 
+            leaderboardModal.classList.add('open'); 
+            haptic('light');
+            leaderboardContent.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch('/api/leaderboard');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.length === 0) {
+                        leaderboardContent.innerHTML = 'Пока пусто.';
+                    } else {
+                        leaderboardContent.innerHTML = data.map((u, i) => 
+                            `<div style="display:flex; justify-content:space-between; background:var(--bg-color); padding:8px 12px; border-radius:12px; border:1px solid var(--card-rim);">
+                                <span style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">${i+1}. ${u.name}</span>
+                                <span style="color:var(--mint-dark); font-weight:700;">${u.wins} 🏆</span>
+                            </div>`
+                        ).join('');
+                    }
+                } else {
+                    leaderboardContent.innerHTML = 'Ошибка загрузки';
+                }
+            } catch (e) {
+                leaderboardContent.innerHTML = 'Ошибка сети';
+            }
+        };
+        if(btnCloseLeaderboard) btnCloseLeaderboard.onclick = () => { leaderboardModal.classList.remove('open'); haptic('light'); };
 
         function createEmojiRain() {
             const container = document.createElement('div');
@@ -3157,7 +3207,15 @@
             if (name === "LAST_SURVIVOR" || alive.length <= 1) {
                 if (isSpectating || network.players.find(p => p.id == currentUser.id)?.isDead) {
                     go.innerText = T('gameOver'); go.style.color = "var(--blue)"; ls.innerText = alive.length ? `🏆 ${alive[0].name}!` : T('winner'); document.getElementById('btn-spectate').style.display = 'none';
-                } else { go.innerText = T('victory'); go.style.color = "var(--mint-dark)"; ls.innerText = T('survived'); document.getElementById('btn-spectate').style.display = 'none'; }
+                } else { 
+                    go.innerText = T('victory'); go.style.color = "var(--mint-dark)"; ls.innerText = T('survived'); document.getElementById('btn-spectate').style.display = 'none'; 
+                    // Track Win
+                    fetch('/api/add-win', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: currentUser.id, name: currentUser.first_name })
+                    }).catch(()=>console.log("Leaderboard error"));
+                }
             } else { go.innerText = T('boom'); go.style.color = "var(--warm-red)"; ls.innerText = T('exploded', name); document.getElementById('btn-spectate').style.display = isSpectating ? 'none' : 'block'; } showScreen('GAMEOVER');
         }
 

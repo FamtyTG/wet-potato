@@ -129,12 +129,12 @@ bot.help(checkGroup, (ctx) => {
 // Donate Command
 bot.command('donate', checkGroup, (ctx) => {
   ctx.replyWithHTML(
-    `<b>Твоя поддержка помогает картошке не остывать! 🥔💎</b>\n\n` +
-    `Это инди-проект, и каждый дон греет душу разработчика. \n\n` +
+    `<b>Твоя поддержка помогает картошке оставаться мокрой! 🌊🥔</b>\n\n` +
+    `Это инди-проект, и каждая капля помогает серверу не высохнуть. \n\n` +
     `Поддержать проект через TON (кликни на адрес, чтобы скопировать):\n` +
     `<code>${TON_WALLET}</code>`,
     Markup.inlineKeyboard([
-      [Markup.button.webApp("🥔 Вернуться в игру", WEB_APP_URL)]
+      [Markup.button.webApp("🌊 Вернуться в игру", WEB_APP_URL)]
     ])
   );
 });

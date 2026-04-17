@@ -92,19 +92,22 @@
             transition: background-color 0.8s ease, color 0.8s ease;
         }
 
-        /* Плавное затемнение фона через псевдоэлемент (максимальная оптимизация без лагов) */
+        /* Плавное затемнение и блюр фона через псевдоэлемент */
         body::before {
             content: '';
             position: fixed;
-            inset: 0;
-            background: rgba(15, 5, 10, 0.95);
-            opacity: 0;
+            inset: -20px;
+            background: rgba(255, 248, 240, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 1;
             z-index: -2;
             pointer-events: none;
-            transition: opacity 0.8s ease;
+            transition: background 0.8s ease, opacity 0.8s ease;
         }
 
         body.dark-mode::before {
+            background: rgba(15, 5, 10, 0.75);
             opacity: 1;
         }
 
@@ -333,6 +336,40 @@
 
         body.dark-mode .btn-save-nick.saved {
             background: var(--mint-dark) !important;
+        }
+
+        /* ─── Web Potato Title ─── */
+        .logo-title {
+            font-size: 3.4rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            /* 3D clay style */
+            text-shadow: 
+                0px 4px 0px var(--peach-dark),
+                0px 10px 20px rgba(110, 80, 70, 0.5),
+                0px -2px 0px rgba(255, 255, 255, 0.5);
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
+            /* Gradient fill */
+            background: linear-gradient(180deg, #ffffff 0%, #ffeadb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.5s ease;
+        }
+
+        body.dark-mode .logo-title {
+            text-shadow: 
+                0px 4px 0px #5c2c43,
+                0px 10px 20px rgba(0, 0, 0, 0.9),
+                0px -2px 0px rgba(255, 255, 255, 0.1);
+            background: linear-gradient(180deg, #ffccd5 0%, #d4263f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .clay-card {

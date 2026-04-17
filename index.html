@@ -2625,16 +2625,40 @@
                 alert("Invite via: " + shareUrl);
             }
         };
-        document.getElementById('btn-start-game').onclick = () => {
+        document.getElementById('btn-start-game').onclick = async () => {
             if (network.players.length < 2) {
                 haptic('error');
                 tg.showPopup ? tg.showPopup({ message: T('errMinPlayers') || "Need at least 2 players" }) : alert(T('errMinPlayers') || "Need at least 2 players");
                 return;
             }
-            startRound();
+            const btn = document.getElementById('btn-start-game');
+            const originalText = btn.innerText;
+            btn.innerText = "ЗАГРУЗКА...";
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.7';
+
+            try {
+                await startRound();
+            } finally {
+                // In case startRound fails or takes time, but showScreen usually happens
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                }, 1000);
+            }
         };
-        document.getElementById('btn-add-bot-ui').onclick = () => {
-            if (network.isHost) spawnBot(network.lobbyId, currentUser.id);
+        document.getElementById('btn-add-bot-ui').onclick = function() {
+            if (network.isHost) {
+                const btn = this;
+                const originalText = btn.innerText;
+                btn.innerText = "⏳";
+                btn.style.pointerEvents = 'none';
+                spawnBot(network.lobbyId, currentUser.id).finally(() => {
+                    btn.innerText = originalText;
+                    btn.style.pointerEvents = 'auto';
+                });
+            }
         };
 
         async function spawnBot(lobbyCode, hostId) {

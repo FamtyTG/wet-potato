@@ -2893,9 +2893,6 @@
                 ui.container.style.opacity = '0'; void ui.container.offsetWidth;
                 ui.container.style.transition = 'transform .52s cubic-bezier(.175,.885,.32,1.275), opacity .32s ease';
                 ui.container.style.transform = 'translate(0,0) scale(1)'; ui.container.style.opacity = '1';
-                
-                // СРАЗУ открываем вопрос, без лишнего клика "Tap to unlock"
-                setTimeout(() => unlockPotato(), 100);
             } else {
                 isLocked = false; resetComboPanel();
                 let pName = network.players.find(p => p.id === playerId)?.name || 'Player';
@@ -3076,23 +3073,8 @@
             ui.input.blur(); ui.img.classList.remove('shaking');
             ui.txtWrap.style.display = 'none'; ui.actWrap.style.display = 'none';
 
-            ui.status.innerText = "ВЕРНО! 🚀"; ui.status.style.color = 'var(--mint-dark)';
-            
-            // АВТОМАТИЧЕСКАЯ передача карточки для скорости и плавности (через 0.7с)
-            setTimeout(() => {
-                if (isProcessingTurn || isGameOver) return;
-                isProcessingTurn = true;
-                if (gameLoopId) { cancelAnimationFrame(gameLoopId); gameLoopId = null; }
-                ui.task.style.opacity = '0'; ui.timer.style.opacity = '0';
-                ui.status.innerText = T('flyingAway'); haptic('medium');
-                
-                const fly = window.innerWidth * 1.5;
-                ui.container.style.transition = 'transform .45s cubic-bezier(0.4, 0, 0.2, 1), opacity .3s ease';
-                ui.container.style.transform = `translate(${fly}px, -100px) scale(.2)`;
-                ui.container.style.opacity = '0';
-                
-                setTimeout(() => network.sendPotato(), 150);
-            }, 700);
+            ui.wrapper.classList.add('swipe-ready'); ui.hint.style.display = 'flex';
+            ui.status.innerText = T('swipeNow'); ui.status.style.color = 'var(--warm-red)';
         }
 
         document.getElementById('btn-submit-answer').onclick = markDone;

@@ -2526,6 +2526,7 @@
                                 name: p.name,
                                 initials: (p.name || "??").substring(0, 2).toUpperCase(),
                                 isHost: p.id.toString() === lobbyData.hostId.toString(),
+                                isBot: !!p.isBot,
                                 isDead: false,
                                 lives: MAX_LIVES
                             }));
@@ -2565,6 +2566,7 @@
             }
 
             startBotTimer(botId) {
+                clearTimeout(this.botPassBack);
                 const diffObj = currentTaskObj || { time: 10 };
                 const delay = (diffObj.time * 0.45 + Math.random() * diffObj.time * 0.35) * 1000;
                 this.botPassBack = setTimeout(() => { if (currentScreen === 'GAME' && !isGameOver && currentTurnPlayerId === botId.toString()) this.sendPotato(); }, delay);
@@ -2681,6 +2683,7 @@
                         name: p.name,
                         initials: p.name.substring(0, 2).toUpperCase(),
                         isHost: p.id.toString() === lobbyData.hostId.toString(),
+                        isBot: !!p.isBot,
                         isDead: false,
                         lives: MAX_LIVES
                     }));
@@ -2770,6 +2773,7 @@
                         name: botData.name, 
                         initials: botData.name.substring(0,2).toUpperCase(), 
                         isHost: false, 
+                        isBot: true,
                         isDead: false, 
                         lives: MAX_LIVES 
                     });
@@ -2849,6 +2853,13 @@
             // Даем дополнительные 5 секунд на чтение
             personalTimer = (currentTaskObj.time || 10) + 5;
             pulsePhase = 0;
+
+            if (network.isHost) {
+                const turnPlayer = network.players.find(p => p.id.toString() === playerId.toString());
+                if (turnPlayer && turnPlayer.isBot) {
+                    network.startBotTimer(playerId);
+                }
+            }
 
             updatePlayersBar();
 
@@ -3146,7 +3157,7 @@
                     if (alive.length <= 1) setTimeout(() => triggerGameOver("LAST_SURVIVOR"), 2200);
                     else setTimeout(() => {
                         globalTimer = 40 + Math.random() * 20; let next = alive[Math.floor(Math.random() * alive.length)];
-                        triggerCurtain(() => { passPotato(next.id); if (next.id !== currentUser.id) network.startBotTimer(next.id); });
+                        triggerCurtain(() => { passPotato(next.id); });
                     }, 2600);
                 }
             }, 1100);
@@ -3265,7 +3276,7 @@
 
         document.getElementById('btn-spectate').onclick = () => {
             isGameOver = false; isSpectating = true; showScreen('GAME');
-            let alive = network.players.filter(p => !p.isDead); if (alive.length > 0) { triggerCurtain(() => { let n = alive[Math.floor(Math.random() * alive.length)]; passPotato(n.id); if (n.id !== currentUser.id) network.startBotTimer(n.id); }); }
+            let alive = network.players.filter(p => !p.isDead); if (alive.length > 0) { triggerCurtain(() => { let n = alive[Math.floor(Math.random() * alive.length)]; passPotato(n.id); }); }
         };
 
         document.getElementById('btn-to-lobby').onclick = resetToMenu;
